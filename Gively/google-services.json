@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "479338294390",
+    "firebase_url": "https://gively-1c014-default-rtdb.firebaseio.com",
+    "project_id": "gively-1c014",
+    "storage_bucket": "gively-1c014.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:479338294390:android:b012da20371f3b3b184357",
+        "android_client_info": {
+          "package_name": "com.GivelyFoundation.Gively"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDopQGhr2Ah6-Y_sZ3ywcWMqKOhbZHj1co"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
