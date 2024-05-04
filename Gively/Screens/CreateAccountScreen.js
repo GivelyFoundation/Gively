@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button } from 'react-native';
-
-
+import styles from '../Styles.js/Styles';
+import { CommonActions } from '@react-navigation/native';
 
 export default function CreateAccountScreen({ navigation }) {
      const [email, setEmail] = useState('');
@@ -11,10 +11,18 @@ export default function CreateAccountScreen({ navigation }) {
       navigation.navigate('Splash');
     };
     const handleSignUp = () => {
-      navigation.navigate('Home');
-    };
+     // After login success
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          { name: 'Home' },  // 'Home' is the name of the screen you want to navigate to
+        ],
+      })
+    );
+  };
   return (
-    <View>
+    <View style={styles.container}>
       <Text>CreateAccount</Text>
       <TextInput
         placeholder="Email"
@@ -35,7 +43,7 @@ export default function CreateAccountScreen({ navigation }) {
         value={confirmPassword}
         secureTextEntry
       />
-      <Button title="Login" onPress={handleSignUp} />
+      <Button title="Create Account" onPress={handleSignUp} />
       <Button title="Back" onPress={handleBack} />
     </View>
   );

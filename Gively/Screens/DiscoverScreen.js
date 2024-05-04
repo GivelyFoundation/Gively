@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { View, Text, TextInput, Button, StyleSheet} from 'react-native';
+import { View, Text} from 'react-native';
 import styles from '../Styles.js/Styles';
 
 export default function DiscoverScreen({ navigation }) {
