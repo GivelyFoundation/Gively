@@ -1,5 +1,7 @@
 import 'react-native-gesture-handler';
 import React from 'react';
+import { View, Text, TextInput, Button, StyleSheet} from 'react-native';
+
 import CreateAccountScreen from './Screens/CreateAccountScreen'
 import HomeScreen from './Screens/HomeScreen'
 import LoginScreen from './Screens/LoginScreen'
@@ -10,21 +12,33 @@ import ProfileScreen from './Screens/ProfileScreen'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import styles from './Styles.js/Styles';
+
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+const Drawer = createDrawerNavigator();
+
 
 function MainApp() {
   return (
-  <Tab.Navigator initialRouteName= "HomePage" screenOptions={{headerShown: false}}>
-      <Tab.Screen name="HomePage" component={HomeScreen} />
+    <Tab.Navigator initialRouteName="HomePage" screenOptions={{headerShown: false}}>
+      <Tab.Screen name="HomePage" component={HomeScreenDrawer} />
       <Tab.Screen name="Discover" component={DiscoverScreen} />
       <Tab.Screen name="Friends" component={FriendsListScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
-</Tab.Navigator>
+    </Tab.Navigator>
   );
 }
 
+function HomeScreenDrawer() {
+  return (
+    <Drawer.Navigator initialRouteName="Home">
+      <Drawer.Screen name="Home" component={HomeScreen} />
+    </Drawer.Navigator>
+  );
+}
 
 function App() {
   return (

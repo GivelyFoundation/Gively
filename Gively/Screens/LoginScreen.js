@@ -2,12 +2,21 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet} from 'react-native';
 import styles from '../Styles.js/Styles';
+import { CommonActions } from '@react-navigation/native';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const handleLogin = () => {
-    navigation.replace('Home');
+   // After login success
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          { name: 'Home' },  // 'Home' is the name of the screen you want to navigate to
+        ],
+      })
+    );
   };
   const handleBack = () => {
     navigation.navigate('Splash');
