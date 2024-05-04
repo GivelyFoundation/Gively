@@ -1,58 +1,17 @@
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import firebase from '@react-native-firebase/app';
+import { View, Text, TextInput, Button, StyleSheet} from 'react-native';
 
-
-
-
-// Initialize Firebase
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
-
-export default function LoginScreen({navigation  }) {
-    // Initialize Firebase
-const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
-  
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
-    <View>
-        <Text>
-            Hiiiiiiiiiii
-        </Text>
-    </View>
+export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
   const handleLogin = () => {
-    firebase.auth().signInWithEmailAndPassword(email, password)
-      .then(() => {
-        // Login successful, navigate to the next screen
-        console.log('Login successful');
-      })
-      .catch(error => {
-        Alert.alert('Error', error.message);
-      });
+    navigation.navigate('Home');
   };
-
+  const handleBack = () => {
+    navigation.navigate('Splash');
+  };
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
@@ -72,6 +31,7 @@ const firebaseConfig = {
         secureTextEntry
       />
       <Button title="Login" onPress={handleLogin} />
+      <Button title="Back" onPress={handleBack} />
     </View>
   );
 };

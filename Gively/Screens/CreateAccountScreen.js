@@ -1,37 +1,43 @@
-// screens/SignUpScreen.js
-
 import React, { useState } from 'react';
-import { View, TextInput, Button } from 'react-native';
-// import firebase from 'firebase';
+import { View, Text, TextInput, Button } from 'react-native';
+
+
 
 export default function CreateAccountScreen({ navigation }) {
-//   const [email, setEmail] = useState('');
-//   const [password, setPassword] = useState('');
-
-//   const handleSignUp = () => {
-//     firebase.auth().createUserWithEmailAndPassword(email, password)
-//       .then(() => {
-//         navigation.navigate('Home');
-//       })
-//       .catch(error => {
-//         console.log(error);
-//       });
-//   };
-
+     const [email, setEmail] = useState('');
+     const [password, setPassword] = useState('');
+     const [confirmPassword, setConfirmPassword] = useState('');
+     const handleBack = () => {
+      navigation.navigate('Splash');
+    };
+    const handleSignUp = () => {
+      navigation.navigate('Home');
+    };
   return (
     <View>
+      <Text>CreateAccount</Text>
       <TextInput
         placeholder="Email"
-        value={email}
         onChangeText={setEmail}
+        value={email}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
       <TextInput
         placeholder="Password"
-        value={password}
         onChangeText={setPassword}
+        value={password}
         secureTextEntry
       />
-      {/* <Button title="Sign Up" onPress={handleSignUp} /> */}
+      <TextInput
+        placeholder="Confirm Password"
+        onChangeText={setConfirmPassword}
+        value={confirmPassword}
+        secureTextEntry
+      />
+      <Button title="Login" onPress={handleSignUp} />
+      <Button title="Back" onPress={handleBack} />
     </View>
   );
+
 }
