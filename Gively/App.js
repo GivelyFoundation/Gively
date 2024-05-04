@@ -28,12 +28,12 @@ const Drawer = createDrawerNavigator();
 //Core App Pages Tab Navigator
 function MainApp() {
   return (
-    <Tab.Navigator initialRouteName="HomePage" screenOptions={({ route }) => ({
+    <Tab.Navigator initialRouteName="Home " screenOptions={({ route }) => ({
       headerShown: false,
       tabBarStyle: { display: shouldShowTabBar(route) ? 'flex' : 'none' }
     })}
     >
-      <Tab.Screen name="HomePage" component={HomeScreenDrawer}/>
+      <Tab.Screen name="Home " component={HomeScreenDrawer}/>
       <Tab.Screen name="Discover" component={DiscoverScreen} />
       <Tab.Screen name="Friends" component={FriendsListScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
@@ -41,9 +41,11 @@ function MainApp() {
   );
 }
 
+
+//TO DO: Currently have "Home" and  "Home "(with a space) as 2 different page titles, need to find work around
 function shouldShowTabBar(route) {
   // Get the current route name
-  const routeName = getFocusedRouteNameFromRoute(route) ?? 'Home';
+  const routeName = getFocusedRouteNameFromRoute(route) ?? 'Home ';
 
   // List of screens where you want to hide the tab bar
   const hideTabBarScreens = ['About Us', 'Contact Us', 'Help & FAQs']; // Add more screen names as needed
@@ -69,10 +71,9 @@ function CustomDrawerContent(props) {
   );
 }
 
-// Main Drawer for homepage and its suboptions
 function HomeScreenDrawer() {
   return (
-    <Drawer.Navigator initialRouteName="Home" drawerContent={(props) => <CustomDrawerContent {...props} />}>
+    <Drawer.Navigator initialRouteName="Home " drawerContent={(props) => <CustomDrawerContent {...props} />}>
       <Drawer.Screen name="Home" component={HomeScreen} />
       <Drawer.Screen name="About Us" component={AboutUsScreen} />
       <Drawer.Screen name="Contact Us" component={ContactUsScreen} />
