@@ -6,7 +6,7 @@ export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const handleLogin = () => {
-    navigation.navigate('Home');
+    navigation.replace('Home');
   };
   const handleBack = () => {
     navigation.navigate('Splash');
