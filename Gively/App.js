@@ -85,6 +85,7 @@ function HomeScreenDrawer() {
 
 //Login Flow Navigation into the Main App
 function App() {
+  // add condition to change initial route name if logged in or not
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName='Splash' screenOptions={{headerShown: false}}>
