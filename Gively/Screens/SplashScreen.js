@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Button } from 'react-native';
-
+import styles from '../Styles.js/Styles';
 
 export default function SplashScreen({ navigation }) {
   const handleLogin = () => {
@@ -10,7 +10,7 @@ export default function SplashScreen({ navigation }) {
     navigation.navigate('CreateAccount');
   };
   return (
-    <View>
+    <View style={styles.container}>
       <Button title="Login" onPress={handleLogin} />
       <Button title="CreateAccount" onPress={handleCreateAccount} />
     </View>
