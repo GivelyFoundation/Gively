@@ -11,7 +11,6 @@ const ForYouFeed = () => {
     </View>
   );
 };
-
 const FriendsFeed = () => {
   return (
     <View style={styles.container}>
@@ -29,7 +28,7 @@ export default function HomeFeedScreen({ navigation }) {
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <SwitchSelector
         initial={0}
         onPress={value => handleTabPress(value)}
@@ -42,6 +41,7 @@ export default function HomeFeedScreen({ navigation }) {
         accessibilityLabel="feed-switch-selector"
       />
       {activeTab === 'For You' ? < ForYouFeed /> : <FriendsFeed />}
+      
     </View>
   );
 }
