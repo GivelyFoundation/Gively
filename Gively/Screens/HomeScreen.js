@@ -29,7 +29,7 @@ export default function HomeFeedScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View>
       <SwitchSelector
         initial={0}
         onPress={value => handleTabPress(value)}
