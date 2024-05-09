@@ -5,6 +5,14 @@ import { useFonts } from 'expo-font';
 
 const profilePicture = require('../assets/Images/profileDefault.png');
 
+const user = {
+  username: "Andy Abebaw",
+  following: 150,
+  followers: 2000,
+  bioHeader: "Dog Lover, Engineer, Human",
+  mainBioText: "If you can't feed a hundred people, then just feed one"
+}
+
 export default function ProfileScreen({ navigation }) {
   let [fontsLoaded] = useFonts({
     'Montserrat-Regular': require('../assets/Fonts/Montserrat/static/Montserrat-Regular.ttf'),
@@ -35,7 +43,7 @@ export default function ProfileScreen({ navigation }) {
 
         <View style={[profileStyles.column]}>
 
-          <Text style={[profileStyles.userNameText, { fontFamily: 'Montserrat-Medium' }]}> Andy Abebaw</Text>
+          <Text style={[profileStyles.userNameText, { fontFamily: 'Montserrat-Medium' }]}> {user.username}</Text>
 
           <View style={[profileStyles.followRow]}>
 
@@ -43,7 +51,7 @@ export default function ProfileScreen({ navigation }) {
 
               <TouchableOpacity>
 
-                <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>43 </Text>
+                <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>{user.followers} </Text>
 
               </TouchableOpacity>
 
@@ -58,7 +66,7 @@ export default function ProfileScreen({ navigation }) {
 
               <TouchableOpacity>
 
-                <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>43 </Text>
+                <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>{user.following} </Text>
 
               </TouchableOpacity>
 
@@ -76,10 +84,9 @@ export default function ProfileScreen({ navigation }) {
 
       </View>
 
-      <Text style={[profileStyles.bioHeader, { fontFamily: 'Montserrat-Medium' }]}> Dog Lover, Engineer, Human </Text>
+      <Text style={[profileStyles.bioHeader, { fontFamily: 'Montserrat-Medium' }]}> {user.bioHeader} </Text>
 
-      <Text style={[profileStyles.bioMainText, { fontFamily: 'Montserrat-Medium' }]}>"If you can't feed a hundred people, then
-        just feed one".</Text>
+      <Text style={[profileStyles.bioMainText, { fontFamily: 'Montserrat-Medium' }]}> {user.mainBioText}</Text>
 
       <View style={profileStyles.horizontalLine} />
 
