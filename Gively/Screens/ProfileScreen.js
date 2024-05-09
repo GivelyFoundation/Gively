@@ -146,7 +146,7 @@ const profileStyles = StyleSheet.create({
     height: '70%', // Adjust height to control the line's length relative to the row height
     alignContent: 'center',
     width: 1, // The thickness of the line
-    backgroundColor: '#cccccc', // Line color
+    backgroundColor: '#DDDDDD', // Line color
     marginHorizontal: 20, // Space around the line
   },
   horizontalLine: {
