@@ -1,25 +1,41 @@
 
 import React from 'react';
-import { View, Text, StyleSheet, Button, Image, TouchableOpacity } from 'react-native';
-import { useFonts } from 'expo-font';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+
 
 const profilePicture = require('../assets/Images/profileDefault.png');
+
+
+
 
 const user = {
   username: "Andy Abebaw",
   following: 150,
   followers: 2000,
   bioHeader: "Dog Lover, Engineer, Human",
-  mainBioText: "If you can't feed a hundred people, then just feed one"
+  mainBioText: "If you can't feed a hundred people, then just feed one",
+ interests : ['Health', 'Education', 'Environment', 'Animal Welfare', 'Arts & Culture']
 }
 
-export default function ProfileScreen({ navigation }) {
-  let [fontsLoaded] = useFonts({
-    'Montserrat-Regular': require('../assets/Fonts/Montserrat/static/Montserrat-Regular.ttf'),
-    'Montserrat-Medium': require('../assets/Fonts/Montserrat/static/Montserrat-Medium.ttf'),
-    'Montserrat-Bold': require('../assets/Fonts/Montserrat/static/Montserrat-Bold.ttf'),
-  });
 
+const CategoryScroll = () => {
+  return (
+      <ScrollView
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={profileStyles.interestContainer}
+      >
+          {user.interests.map((category, index) => (
+              <TouchableOpacity key={index} style={profileStyles.interestButton}>
+                  <Text style={[profileStyles.interestButtonText, {fontFamily: 'Montserrat-Medium'}]}>{category}</Text>
+              </TouchableOpacity>
+          ))}
+      </ScrollView>
+  );
+};
+
+export default function ProfileScreen({ navigation }) {
+ 
 
   return (
     <View>
@@ -88,6 +104,8 @@ export default function ProfileScreen({ navigation }) {
 
       <Text style={[profileStyles.bioMainText, { fontFamily: 'Montserrat-Medium' }]}> {user.mainBioText}</Text>
 
+      <CategoryScroll></CategoryScroll>
+      
       <View style={profileStyles.horizontalLine} />
 
     </View>
@@ -176,5 +194,22 @@ const profileStyles = StyleSheet.create({
     paddingHorizontal: 30,
     lineHeight: 25,
     color: '#747688'
-  }
+  },
+  interestContainer: {
+    alignItems: 'center',
+    padding: 10,
+    paddingHorizontal: 30
+},
+  interestButton: {
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 20,
+    marginRight: 10,
+    backgroundColor: 'rgba(28, 90, 163, 0.1)',
+},
+interestButtonText: {
+    color: '#1C5AA3',
+    fontSize: 16,
+    opacity: .9
+}
 });
