@@ -1,12 +1,25 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
-
+import SwitchSelector from "react-native-switch-selector";
 
 const profilePicture = require('../assets/Images/profileDefault.png');
 
 
-
+const Portfolio = () => {
+  return (
+    <View style={profileStyles.contentContainer}>
+      <Text style={[profileStyles.contentText, { fontFamily: 'Montserrat-Medium' }]}>Portfolio</Text>
+    </View>
+  );
+};
+const Favorites = () => {
+  return (
+    <View style={profileStyles.contentContainer} >
+      <Text style={[profileStyles.contentText, { fontFamily: 'Montserrat-Medium' }]}>Favorites</Text>
+    </View>
+  );
+};
 
 const user = {
   username: "Andy Abebaw",
@@ -14,28 +27,34 @@ const user = {
   followers: 2000,
   bioHeader: "Dog Lover, Engineer, Human",
   mainBioText: "If you can't feed a hundred people, then just feed one",
- interests : ['Health', 'Education', 'Environment', 'Animal Welfare', 'Arts & Culture']
+  interests: ['Health', 'Education', 'Environment', 'Animal Welfare', 'Arts & Culture']
 }
 
 
 const CategoryScroll = () => {
+
   return (
-      <ScrollView
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={profileStyles.interestContainer}
-      >
-          {user.interests.map((category, index) => (
-              <TouchableOpacity key={index} style={profileStyles.interestButton}>
-                  <Text style={[profileStyles.interestButtonText, {fontFamily: 'Montserrat-Medium'}]}>{category}</Text>
-              </TouchableOpacity>
-          ))}
-      </ScrollView>
+    <ScrollView
+      horizontal={true}
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={profileStyles.interestContainer}
+    >
+      {user.interests.map((category, index) => (
+        <TouchableOpacity key={index} style={profileStyles.interestButton}>
+          <Text style={[profileStyles.interestButtonText, { fontFamily: 'Montserrat-Medium' }]}>{category}</Text>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
   );
 };
 
 export default function ProfileScreen({ navigation }) {
- 
+  const [activeTab, setActiveTab] = useState('Portfolio');
+
+  // Update activeTab based on the selected value from SwitchSelector
+  const handleTabPress = (tab) => {
+    setActiveTab(tab);
+  };
 
   return (
     <View>
@@ -48,9 +67,9 @@ export default function ProfileScreen({ navigation }) {
         <TouchableOpacity>
 
           <Text style={[profileStyles.editProfile, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>Edit Profile </Text>
-        
+
         </TouchableOpacity>
-        
+
       </View>
 
       <View style={[profileStyles.row, profileStyles.profileInfo]}>
@@ -105,8 +124,27 @@ export default function ProfileScreen({ navigation }) {
       <Text style={[profileStyles.bioMainText, { fontFamily: 'Montserrat-Medium' }]}> {user.mainBioText}</Text>
 
       <CategoryScroll></CategoryScroll>
-      
+
       <View style={profileStyles.horizontalLine} />
+
+      <SwitchSelector
+        initial={0}
+        onPress={value => handleTabPress(value)}
+        hasPadding
+        options={[
+          { label: "Portfolio", value: "Portfolio" },
+          { label: "Favorites", value: "Favprotes" }
+        ]}
+        testID="feed-switch-selector"
+        accessibilityLabel="feed-switch-selector"
+        style={[profileStyles.switchStyle]}
+        selectedColor={'#1C5AA3'}
+        buttonColor={'rgba(28, 90, 163, 0.1)'}
+        borderColor={'#1C5AA3'}
+        fontSize ={16}
+        buttonPadding = {5}
+      />
+      {activeTab === 'Portfolio' ? < Portfolio /> : <Favorites />}
 
     </View>
   );
@@ -180,7 +218,7 @@ const profileStyles = StyleSheet.create({
   },
   buttonText: {
     color: '#1C5AA3',
-   fontFamily:''
+    fontFamily: ''
   },
   bioHeader: {
     fontSize: 15,
@@ -199,17 +237,29 @@ const profileStyles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     paddingHorizontal: 30
-},
+  },
   interestButton: {
     borderRadius: 20,
     paddingVertical: 5,
     paddingHorizontal: 20,
     marginRight: 10,
     backgroundColor: 'rgba(28, 90, 163, 0.1)',
-},
-interestButtonText: {
+  },
+  interestButtonText: {
     color: '#1C5AA3',
     fontSize: 16,
     opacity: .9
-}
+  },
+  switchStyle: {
+    paddingTop: 10,
+    paddingHorizontal: 30,
+  },
+  contentContainer: {
+    alignContent: 'center',
+    paddingTop: 10
+  },
+  contentText: {
+    fontSize: 16, // Set font size
+    textAlign: 'center'
+  }
 });
