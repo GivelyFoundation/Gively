@@ -88,7 +88,7 @@ function App() {
   // add condition to change initial route name if logged in or not
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName='Splash' screenOptions={{headerShown: false}}>
+      <Stack.Navigator initialRouteName='Profile' screenOptions={{headerShown: false}}>
         <Stack.Screen name="Home" component={MainApp} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
