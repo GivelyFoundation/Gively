@@ -1,23 +1,35 @@
-
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button} from 'react-native';
+import { View, Text, TextInput, Button, Alert } from 'react-native';
 import styles from '../Styles.js/Styles';
 import { CommonActions } from '@react-navigation/native';
+import { auth } from '../services/firebaseConfig'; // Import auth from your Firebase config
+import { signInWithEmailAndPassword } from 'firebase/auth'; // Import the method directly from Firebase auth
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
   const handleLogin = () => {
-   // After login success
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [
-          { name: 'Home' },  // 'Home' is the name of the screen you want to navigate to
-        ],
+    // Attempt to sign in with email and password using Firebase Auth
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in successfully, navigate to the Home screen
+        console.log("User logged in:", userCredential.user);
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+          })
+        );
       })
-    );
+      .catch((error) => {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // Show error message if login fails
+        Alert.alert("Login Failed", errorMessage);
+      });
   };
+
   const handleBack = () => {
     navigation.navigate('Splash');
   };
