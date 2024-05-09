@@ -18,7 +18,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList} from '@react-navigation/drawer';
-
+import { useFonts } from 'expo-font';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -86,6 +86,12 @@ function HomeScreenDrawer() {
 //Login Flow Navigation into the Main App
 function App() {
   // add condition to change initial route name if logged in or not
+  let [fontsLoaded] = useFonts({
+    'Montserrat-Regular': require('./assets/Fonts/Montserrat/static/Montserrat-Regular.ttf'),
+    'Montserrat-Medium': require('./assets/Fonts/Montserrat/static/Montserrat-Medium.ttf'),
+    'Montserrat-Bold': require('./assets/Fonts/Montserrat/static/Montserrat-Bold.ttf'),
+  });
+
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName='Profile' screenOptions={{headerShown: false}}>
