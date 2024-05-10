@@ -31,19 +31,21 @@ export default function FriendsListScreen({ navigation }) {
 
 
 
+       
+        <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Medium' }]}>People You May Know</Text>
+       
+        <ScrollView>
+          {fakeFriends.map(friend => (
+            <FriendCard key={friend.id} friend={friend} areFollow={friend.areFollowing} />
+          ))}
+        </ScrollView>
+
         <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Medium' }]}>Following</Text>
         
         <ScrollView>
           {fakeFriendReccomendations.map(friend => (
 
             <FriendCard key={friend.id} friend={friend} areFollowing={friend.areFollowing} />
-          ))}
-        </ScrollView>
-        <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Medium' }]}>People You May Know</Text>
-       
-        <ScrollView>
-          {fakeFriends.map(friend => (
-            <FriendCard key={friend.id} friend={friend} areFollow={friend.areFollowing} />
           ))}
         </ScrollView>
       </ScrollView>
