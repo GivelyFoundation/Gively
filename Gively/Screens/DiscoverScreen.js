@@ -5,7 +5,7 @@ import styles from '../Styles.js/Styles';
 
 export default function DiscoverScreen({ navigation }) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, styles.page]}>
         <Text>Welcome to the Discover Screen!</Text>
       </View>
     );

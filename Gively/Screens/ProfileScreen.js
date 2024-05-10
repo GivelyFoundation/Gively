@@ -2,33 +2,41 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import SwitchSelector from "react-native-switch-selector";
+import CharityCard from '../Components/CharityCard';
+import { charities, user } from '../MockData';
+import styles from '../Styles.js/Styles';
 
 const profilePicture = require('../assets/Images/profileDefault.png');
 
 
+
 const Portfolio = () => {
   return (
-    <View style={profileStyles.contentContainer}>
+    <View style={[profileStyles.contentContainer, styles.page]}>
       <Text style={[profileStyles.contentText, { fontFamily: 'Montserrat-Medium' }]}>Portfolio</Text>
     </View>
   );
 };
 const Favorites = () => {
   return (
-    <View style={profileStyles.contentContainer} >
-      <Text style={[profileStyles.contentText, { fontFamily: 'Montserrat-Medium' }]}>Favorites</Text>
+    <View style={[profileStyles.contentContainer, styles.page]} >
+      <ScrollView
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={[profileStyles.scrollView]} >
+        {charities.map((charity, index) => (
+
+          <CharityCard key={index} charity={charity} />
+
+
+        ))}
+      </ScrollView>
+
     </View>
   );
 };
 
-const user = {
-  username: "Andy Abebaw",
-  following: 150,
-  followers: 2000,
-  bioHeader: "Dog Lover, Engineer, Human",
-  mainBioText: "If you can't feed a hundred people, then just feed one",
-  interests: ['Health', 'Education', 'Environment', 'Animal Welfare', 'Arts & Culture']
-}
+
 
 
 const CategoryScroll = () => {
@@ -51,13 +59,14 @@ const CategoryScroll = () => {
 export default function ProfileScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Portfolio');
 
+
   // Update activeTab based on the selected value from SwitchSelector
   const handleTabPress = (tab) => {
     setActiveTab(tab);
   };
 
   return (
-    <View>
+    <View style={styles.page}>
 
       <View style={[profileStyles.header]}>
 
@@ -123,7 +132,7 @@ export default function ProfileScreen({ navigation }) {
 
       <Text style={[profileStyles.bioMainText, { fontFamily: 'Montserrat-Medium' }]}> {user.mainBioText}</Text>
 
-      <CategoryScroll></CategoryScroll>
+      <CategoryScroll />
 
       <View style={profileStyles.horizontalLine} />
 
@@ -133,7 +142,7 @@ export default function ProfileScreen({ navigation }) {
         hasPadding
         options={[
           { label: "Portfolio", value: "Portfolio" },
-          { label: "Favorites", value: "Favprotes" }
+          { label: "Favorites", value: "Favorites" }
         ]}
         testID="feed-switch-selector"
         accessibilityLabel="feed-switch-selector"
@@ -141,8 +150,8 @@ export default function ProfileScreen({ navigation }) {
         selectedColor={'#1C5AA3'}
         buttonColor={'rgba(28, 90, 163, 0.1)'}
         borderColor={'#1C5AA3'}
-        fontSize ={16}
-        buttonPadding = {5}
+        fontSize={16}
+        height={30}
       />
       {activeTab === 'Portfolio' ? < Portfolio /> : <Favorites />}
 
@@ -256,10 +265,18 @@ const profileStyles = StyleSheet.create({
   },
   contentContainer: {
     alignContent: 'center',
-    paddingTop: 10
+    paddingTop: 10,
+    backgroundColor: '#fff',
+    height: 1000
   },
   contentText: {
     fontSize: 16, // Set font size
     textAlign: 'center'
-  }
+  },
+  scrollView: {
+    flexGrow: 1,
+    flexDirection: 'row',
+    paddingVertical: 16,
+    paddingHorizontal: 30,
+  },
 });
