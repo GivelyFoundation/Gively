@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { View, Alert, Button, Image} from 'react-native';
+import { View, Alert, Button, Image } from 'react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 import CreateAccountScreen from './Screens/CreateAccountScreen'
@@ -17,7 +17,7 @@ import SettingScreen from './Screens/SettingScreen'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList} from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { useFonts } from 'expo-font';
 import homeIcon from './assets/Icons/Home.png'
 import discoverIcon from './assets/Icons/Discover.png'
@@ -31,20 +31,23 @@ const Drawer = createDrawerNavigator();
 //Core App Pages Tab Navigator
 function MainApp() {
   return (
-    <Tab.Navigator 
-      initialRouteName="Home" 
+    <Tab.Navigator
+      initialRouteName="Home"
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarStyle: { display: shouldShowTabBar(route) ? 'flex' : 'none' }
+        tabBarStyle: {
+          display: shouldShowTabBar(route) ? 'flex' : 'none',
+          borderTopWidth: 0
+        }
       })}
       tabBarOptions={{
         activeTintColor: '#3FC032',
       }}
     >
-      <Tab.Screen 
-        name="Home" 
-        component={HomeScreenDrawer} 
-        options={{ 
+      <Tab.Screen
+        name="Home"
+        component={HomeScreenDrawer}
+        options={{
           tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
           tabBarIcon: ({ size, focused }) => {
             return (
@@ -56,47 +59,47 @@ function MainApp() {
           }
         }}
       />
-      <Tab.Screen 
-      name="Discover" 
-      component={DiscoverScreen} 
-      options={{ 
-        tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
-        tabBarIcon: ({ size, focused}) => {
-          return (
-            <Image
-              style={{ width: size, height: size, tintColor: focused ? '#3FC032' : '#8484A9' }}
-              source={discoverIcon}
-            />
-          );
-        }
-      }}/>
-      <Tab.Screen name="Friends" 
-      component={FriendsListScreen} 
-      options={{ 
-        tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
-        tabBarIcon: ({ size, focused }) => {
-          return (
-            <Image
-              style={{ width: size, height: size, tintColor: focused ? '#3FC032' : '#8484A9' }}
-              source={friendsIcon}
-            />
-          );
-        }
-      }}/>
-      <Tab.Screen 
-      name="Profile"
-      component={ProfileScreen} 
-      options={{ 
-        tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
-        tabBarIcon: ({ size, focused }) => {
-          return (
-            <Image
-              style={{ width: size, height: size, tintColor: focused ? '#3FC032' : '#8484A9' }}
-              source={profileIcon}
-            />
-          );
-        }
-      }} />
+      <Tab.Screen
+        name="Discover"
+        component={DiscoverScreen}
+        options={{
+          tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
+          tabBarIcon: ({ size, focused }) => {
+            return (
+              <Image
+                style={{ width: size, height: size, tintColor: focused ? '#3FC032' : '#8484A9' }}
+                source={discoverIcon}
+              />
+            );
+          }
+        }} />
+      <Tab.Screen name="Friends"
+        component={FriendsListScreen}
+        options={{
+          tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
+          tabBarIcon: ({ size, focused }) => {
+            return (
+              <Image
+                style={{ width: size, height: size, tintColor: focused ? '#3FC032' : '#8484A9' }}
+                source={friendsIcon}
+              />
+            );
+          }
+        }} />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
+          tabBarIcon: ({ size, focused }) => {
+            return (
+              <Image
+                style={{ width: size, height: size, tintColor: focused ? '#3FC032' : '#8484A9' }}
+                source={profileIcon}
+              />
+            );
+          }
+        }} />
     </Tab.Navigator>
   );
 }
@@ -124,7 +127,7 @@ function CustomDrawerContent(props) {
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
-      <View style={{padding: 20}}>
+      <View style={{ padding: 20 }}>
         <Button title="Sign Out" onPress={signOut} />
       </View>
     </DrawerContentScrollView>
@@ -154,7 +157,7 @@ function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName='Profile' screenOptions={{headerShown: false}}>
+      <Stack.Navigator initialRouteName='Profile' screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Home" component={MainApp} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />

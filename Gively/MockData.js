@@ -66,3 +66,21 @@ export const charities = [
     { id: 19, name: 'Joseph Green', areFollowing: false },
     { id: 20, name: 'Nancy Evans' , areFollowing:false}
   ];
+
+  export const charityCategories = [
+    { id: 1, name: 'Education' },
+    { id: 2, name: 'Health' },
+    { id: 3, name: 'Environment' },
+    { id: 4, name: 'Animal Welfare' },
+    { id: 5, name: 'Poverty Alleviation' },
+    { id: 6, name: 'Arts & Culture' },
+    { id: 7, name: 'Disaster Relief' },
+    { id: 8, name: 'Community Development' },
+    { id: 9, name: 'Human Rights' },
+    { id: 10, name: 'International Aid' },
+    { id: 11, name: 'Social Services' },
+    { id: 12, name: 'Youth Development' },
+    { id: 13, name: 'Gender Equality' },
+    { id: 14, name: 'Hunger Relief' },
+    { id: 15, name: 'Refugee Support' }
+  ];
