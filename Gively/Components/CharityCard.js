@@ -34,7 +34,7 @@ const CharityCard = ({ charity }) => {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 20,
     padding: 16,
     margin: 8,
     shadowColor: '#000',
