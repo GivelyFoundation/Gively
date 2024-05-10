@@ -39,9 +39,22 @@ export default function HomeFeedScreen({ navigation }) {
         ]}
         testID="feed-switch-selector"
         accessibilityLabel="feed-switch-selector"
+        style={[homeStyles.switchStyle]}
+        selectedColor={'#1C5AA3'}
+        buttonColor={'rgba(28, 90, 163, 0.1)'}
+        borderColor={'#1C5AA3'}
+        fontSize={16}
+        height={30}
       />
       {activeTab === 'For You' ? < ForYouFeed /> : <FriendsFeed />}
       
     </View>
   );
 }
+
+const homeStyles = StyleSheet.create({
+  switchStyle: {
+    paddingTop: 10,
+    paddingHorizontal: 30,
+  },
+})
