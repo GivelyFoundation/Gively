@@ -5,7 +5,7 @@ import { CommonActions } from '@react-navigation/native';
 import { auth } from '../services/firebaseConfig'; // Import auth from your Firebase config
 import { signInWithEmailAndPassword } from 'firebase/auth'; // Import the method directly from Firebase auth
 
-export default function LoginScreen({ navigation }) {
+export default function LoginScreen({ navigation }){
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 

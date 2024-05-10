@@ -24,7 +24,6 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 
-
 //Core App Pages Tab Navigator
 function MainApp() {
   return (

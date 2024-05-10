@@ -6,14 +6,14 @@ import styles from '../Styles.js/Styles';
 
 const ForYouFeed = () => {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, styles.page]}>
       <Text>{`For You Feed`}</Text>
     </View>
   );
 };
 const FriendsFeed = () => {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, styles.page]}>
       <Text>{`Friends Feed`}</Text>
     </View>
   );
