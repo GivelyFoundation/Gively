@@ -38,6 +38,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 10,
         paddingHorizontal: 20,
+
+    shadowColor: '#ccc',
+    shadowOpacity: 1,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 4 },
     },
     profilePicture: {
         width: 50,
@@ -50,7 +55,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderBottomWidth: 1,
+        borderBottomWidth: .5,
         borderBottomColor: '#ccc',
         paddingBottom: 10,
     },

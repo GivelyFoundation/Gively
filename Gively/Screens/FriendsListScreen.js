@@ -9,13 +9,7 @@ export default function FriendsListScreen({ navigation }) {
   return (
     <View style={[styles.page, friendStyles.container]}>
        <ScrollView>
-      <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Bold' }]}>People You May Know</Text>
-      <View style={friendStyles.horizontalLine} />
-      <ScrollView>
-        {fakeFriends.map(friend => (
-          <FriendCard key={friend.id} friend={friend} areFollow={friend.areFollowing} />
-        ))}
-      </ScrollView>
+     
 
 
       <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Bold' }]}>Following</Text>
@@ -24,6 +18,13 @@ export default function FriendsListScreen({ navigation }) {
         {fakeFriendReccomendations.map(friend => (
 
           <FriendCard key={friend.id} friend={friend} areFollowing={friend.areFollowing} />
+        ))}
+      </ScrollView>
+      <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Bold' }]}>People You May Know</Text>
+      <View style={friendStyles.horizontalLine} />
+      <ScrollView>
+        {fakeFriends.map(friend => (
+          <FriendCard key={friend.id} friend={friend} areFollow={friend.areFollowing} />
         ))}
       </ScrollView>
       </ScrollView>
