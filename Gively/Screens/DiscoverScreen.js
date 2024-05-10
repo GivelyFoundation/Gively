@@ -57,17 +57,18 @@ export default function DiscoverScreen({ navigation }) {
       </View>
       {console.log(charityCategories)}
       <View style={discoverStyles.sectionContainer}>
+        <View style = {[discoverStyles.browseByCategorySection]}>
         <Text style={[discoverStyles.subheadingText, { fontFamily: 'Montserrat-Medium' }]}>BROWSE BY CATEGORY</Text>
-
+        <TouchableOpacity>
+          <Text style={[discoverStyles.seeAllButton, { fontFamily: 'Montserrat-Medium' }]}>SEE ALL </Text>
+        </TouchableOpacity>
+        </View>
         <View style={discoverStyles.categoryButtonContainer}>
           {charityCategories.map((category, index) => (
             <TouchableOpacity key={index} style={discoverStyles.categoryButton}>
               <Text style={[discoverStyles.categoryButtonText, { fontFamily: 'Montserrat-Medium' }]}>{category.name}</Text>
             </TouchableOpacity>
           ))}
-          <TouchableOpacity style ={ discoverStyles.viewMoreButton}>
-              <Text style={[discoverStyles.viewMoreButtonText, { fontFamily: 'Montserrat-Medium' }]}> View More</Text>
-          </TouchableOpacity>
         </View>
       </View>
 
@@ -131,14 +132,19 @@ const discoverStyles = StyleSheet.create({
     textAlign: 'center', // Align text in the center
     flexWrap: 'wrap', // Allow text to wrap to the next line
   },
-  viewMoreButton:{
-    width: '100%',
-    textAlign: 'center'
-  },
-  viewMoreButtonText:{
+  seeAllButton: {
     textAlign: 'center',
     color: '#1C5AA3',
     fontSize: 16,
-    opacity: .9
+    opacity: .9,
+  },
+  browseByCategorySection:{
+    paddingTop: 10,
+    flexDirection: 'row', // Align children horizontally
+    alignItems: 'center', // Align children vertically in the center
+    width: '100%', // Ensure the row takes full width of the screen
+    justifyContent: 'space-between',
+    paddingRight: 20,
+    paddingBottom: 10
   }
 })
