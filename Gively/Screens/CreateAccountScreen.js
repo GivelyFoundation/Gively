@@ -31,7 +31,7 @@ export default function CreateAccountScreen({ navigation }) {
         <Pressable className="bg-green-500 w-full py-3 rounded-full items-center mb-4" onPress={() => handleSignUp}>
           <Text className="text-white text-lg">Sign Up</Text>
         </Pressable>
-        <Pressable className="bg-transparent w-full py-3 rounded-full border border-white items-center" onPress={() => navigation.goBack()}>
+        <Pressable className="bg-transparent w-full py-3 rounded-full border border-white items-center" onPress={() => navigation.navigate('Splash')}>
           <Text className="text-white text-lg">Back</Text>
         </Pressable>
       </View>

@@ -13,7 +13,7 @@ export default function SplashScreen({ navigation }) {
         <View className="pt-20">
           <Image
             source={require('../assets/Images/logo-1.png')} 
-            style={{ width: 100, height: 100, alignSelf: 'center' }} // Customize size as needed
+            style={{ width: 100, height: 100, alignSelf: 'center' }} 
             resizeMode="contain"
           />
           <Text className="text-white text-3xl font-bold mb-2 text-center mt-4">Welcome!</Text>
