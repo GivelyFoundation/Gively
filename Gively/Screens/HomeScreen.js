@@ -4,7 +4,7 @@ import SwitchSelector from "react-native-switch-selector";
 import styles from '../Styles.js/Styles';
 import DonationCard from '../Components/DonationCard'; // Assuming DonationCard component is in a separate file
 import { postsData } from '../MockData';
-
+import WelcomeCard from '../Components/WelcomeCard';
 
 const ForYouFeed = () => {
   return (
@@ -43,6 +43,8 @@ export default function HomeFeedScreen({ navigation }) {
 
   return (
     <View style={[styles.container, styles.page]}>
+       <WelcomeCard username="Andy" donationAmount={2515} charityCount={25} />
+    
       <SwitchSelector
         initial={0}
         onPress={value => handleTabPress(value)}

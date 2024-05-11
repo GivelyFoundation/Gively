@@ -49,7 +49,7 @@ const DonationCard = ({ data }) => {
           <Text style={[styles.likes, { fontFamily: 'Montserrat-Medium' , color: data.isLiked ? '#EB5757' : '#8484A9'}]}>{data.likes}</Text>
         </View>
         <TouchableOpacity style={styles.button}>
-          <Text style={[styles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>Donate</Text>
+          <Text style={[styles.buttonText, { fontFamily: 'Montserrat-Bold' }]}>Donate</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -63,11 +63,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 15,
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
+    shadowColor: '#5A5A5A',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
   },
   header: {
     flexDirection: 'row',
@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
   postText: {
     fontSize: 14,
     marginBottom: 10,
+    lineHeight: 24
   },
   footer: {
     flexDirection: 'row',
