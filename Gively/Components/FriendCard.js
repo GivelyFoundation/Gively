@@ -4,8 +4,8 @@ const profilePicture = require('../assets/Images/profileDefault.png');
 
 const Following = () => {
     return (
-        <TouchableOpacity style={[styles.alreadyFollowingbutton,{ fontFamily: 'Montserrat-Medium' }]}>
-            <Text style={[styles.buttonText , { fontFamily: 'Montserrat-Medium' }]}>Following</Text>
+        <TouchableOpacity style={[styles.alreadyFollowingbutton, { fontFamily: 'Montserrat-Medium' }]}>
+            <Text style={[styles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>Following</Text>
         </TouchableOpacity>
     )
 
@@ -14,13 +14,13 @@ const Following = () => {
 const PotentialFriend = () => {
     return (
         <TouchableOpacity style={styles.followButton}>
-            <Text style={[styles.buttonText , { fontFamily: 'Montserrat-Medium' }]}>Follow</Text>
+            <Text style={[styles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>Follow</Text>
         </TouchableOpacity>
     )
 
 }
 
-export const FriendCard = ({ friend}) => {
+export const FriendCard = ({ friend }) => {
     return (
         <View style={styles.cardContainer}>
             <Image source={profilePicture} style={styles.profilePicture} />
@@ -38,11 +38,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 10,
         paddingHorizontal: 20,
-
-    shadowColor: '#ccc',
-    shadowOpacity: 1,
-    shadowRadius: 2,
-    shadowOffset: { width: 0, height: 4 },
+        shadowColor: '#ccc',
+        shadowOpacity: 1,
+        shadowRadius: 2,
+        shadowOffset: { width: 0, height: 4 },
     },
     profilePicture: {
         width: 50,
