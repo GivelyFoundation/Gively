@@ -84,3 +84,117 @@ export const charities = [
     { id: 14, name: 'Hunger Relief' },
     { id: 15, name: 'Refugee Support' }
   ];
+
+  export const postsData = [
+    {
+      id: 1,
+      originalDonationPoster: "John Doe",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "I've been supporting this charity for years. Their work in education is truly inspiring!",
+      likes: 102,
+      otherDonationUsers: [],
+      date: "Wed, Apr 28 • 5:30 PM",
+      charityName: "Education for All Foundation",
+      isLiked: true
+    },
+    {
+      id: 2,
+      originalDonationPoster: "Alice Smith",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "This charity does amazing work for animal welfare. I'm proud to be a supporter!",
+      likes: 75,
+      otherDonationUsers: ["John"],
+      date: "Thu, Apr 29 • 8:45 AM",
+      charityName: "Animal Rescue League",
+      isLiked: false
+    },
+    {
+      id: 3,
+      originalDonationPoster: "Emily Johnson",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "I donated to this charity to support their environmental conservation efforts. Every little bit helps!",
+      likes: 62,
+      otherDonationUsers: ["Alice", "John", "David"],
+      date: "Fri, Apr 30 • 3:15 PM",
+      charityName: "Green Earth Initiative",
+      isLiked: true
+    },
+    {
+      id: 4,
+      originalDonationPoster: "Michael Brown",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "I'm happy to support this charity's mission of providing clean water to communities in need.",
+      likes: 48,
+      otherDonationUsers: ["Alice", "Bob", "Charlie"],
+      date: "Sat, May 1 • 10:00 AM",
+      charityName: "Clean Water Initiative",
+      isLiked: false
+    },
+    {
+      id: 5,
+      originalDonationPoster: "Emma Wilson",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "This charity's work in healthcare is vital, especially during these challenging times.",
+      likes: 91,
+      otherDonationUsers: ["John", "David", "Emma"],
+      date: "Sun, May 2 • 1:30 PM",
+      charityName: "Healthcare for All",
+      isLiked: false
+    },
+    {
+      id: 6,
+      originalDonationPoster: "Daniel Martinez",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "I support this charity because of their dedication to fighting poverty and hunger.",
+      likes: 55,
+      otherDonationUsers: ["Alice", "Charlie", "Emma"],
+      date: "Mon, May 3 • 6:20 PM",
+      charityName: "Fight Against Poverty",
+      isLiked: true
+    },
+    {
+      id: 7,
+      originalDonationPoster: "Olivia Taylor",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "I donated to this charity to help them continue their important work in disaster relief efforts.",
+      likes: 42,
+      otherDonationUsers: ["John", "Bob", "David"],
+      date: "Tue, May 4 • 9:10 AM",
+      charityName: "Disaster Relief Fund",
+      isLiked: true
+    },
+    {
+      id: 8,
+      originalDonationPoster: "William Anderson",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "This charity's focus on community development is making a real difference in people's lives.",
+      likes: 67,
+      otherDonationUsers: ["Alice"],
+      date: "Wed, May 5 • 4:45 PM",
+      charityName: "Community Development Association",
+      isLiked: false
+    },
+    {
+      id: 9,
+      originalDonationPoster: "Sophia Garcia",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "I support this charity because of their commitment to promoting human rights and equality.",
+      likes: 83,
+      otherDonationUsers: ["John", "David", "Sophia"],
+      date: "Thu, May 6 • 11:55 AM",
+      charityName: "Human Rights Advocates",
+      isLiked: true
+    },
+    {
+      id: 10,
+      originalDonationPoster: "James Martinez",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "I donated to this charity to help provide international aid to those in need around the world.",
+      likes: 59,
+      otherDonationUsers: ["Alice"],
+      date: "Fri, May 7 • 7:30 PM",
+      charityName: "International Aid Foundation",
+      isLiked: false
+    }
+  ];
+  
