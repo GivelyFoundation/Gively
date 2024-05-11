@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
+import { View, Text, TextInput, Pressable, ImageBackground } from 'react-native';
 import styles from '../Styles.js/Styles';
 import { CommonActions } from '@react-navigation/native';
 import { auth } from '../services/firebaseConfig'; // Import auth from your Firebase config
@@ -35,25 +35,18 @@ export default function LoginScreen({ navigation }){
   };
   
   return (
-    <View style={styles.container} >
-      <Text style={styles.title}>Login</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        onChangeText={setEmail}
-        value={email}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        onChangeText={setPassword}
-        value={password}
-        secureTextEntry
-      />
-      <Button title="Login" onPress={handleLogin} />
-      <Button title="Back" onPress={handleBack} />
-    </View>
+    <ImageBackground source={require('../assets/Images/auth-background.png')} resizeMode="cover" className="flex-1">
+      <View className="flex-1 justify-center p-4 bg-opacity-50 bg-black">
+        <Text className="text-white text-2xl font-bold mb-2">Sign In</Text>
+        <TextInput className="bg-white bg-opacity-90 rounded-full px-4 py-2 mb-4 text-lg" placeholder="Email" value={email} onChangeText={setEmail} />
+        <TextInput className="bg-white bg-opacity-90 rounded-full px-4 py-2 mb-4 text-lg" placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
+        <Pressable className="bg-green-500 w-full py-3 rounded-full items-center mb-4" onPress={() => {/* Handle login */}}>
+          <Text className="text-white text-lg">Login</Text>
+        </Pressable>
+        <Pressable className="bg-transparent w-full py-3 rounded-full border border-white items-center" onPress={() => navigation.goBack()}>
+          <Text className="text-white text-lg">Back</Text>
+        </Pressable>
+      </View>
+    </ImageBackground>
   );
 };

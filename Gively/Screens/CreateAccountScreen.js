@@ -1,70 +1,40 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
-import styles from '../Styles.js/Styles';
-import { CommonActions } from '@react-navigation/native';
-import { auth } from '../services/firebaseConfig'; // Import auth from your Firebase config
-import { createUserWithEmailAndPassword } from 'firebase/auth'; // Import the method directly from Firebase auth
+import { View, Text, TextInput, Pressable, ImageBackground } from 'react-native';
+import { auth } from '../services/firebaseConfig';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 export default function CreateAccountScreen({ navigation }) {
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleBack = () => {
-    navigation.navigate('Splash');
-  };
-
-  const handleSignUp = () => {
-    if (password !== confirmPassword) {
-      Alert.alert("Passwords do not match");
+  const handleSignUp = async () => {
+    if (!email || !password || !fullName) {
+      Alert.alert('Error', 'Please fill all fields');
       return;
     }
-    // Create a new user account using Firebase Auth
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in 
-        var user = userCredential.user;
-        // Navigate to the Home screen after successful signup
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: 'Home' }],
-          })
-        );
-        console.log("User registered successfully!", user);
-      })
-      .catch((error) => {
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // Display error message
-        Alert.alert(errorMessage);
-      });
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      // Handle navigation or state updates post sign-up
+    } catch (error) {
+      Alert.alert('Signup Failed', error.message);
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text>Create Account</Text>
-      <TextInput
-        placeholder="Email"
-        onChangeText={setEmail}
-        value={email}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        placeholder="Password"
-        onChangeText={setPassword}
-        value={password}
-        secureTextEntry
-      />
-      <TextInput
-        placeholder="Confirm Password"
-        onChangeText={setConfirmPassword}
-        value={confirmPassword}
-        secureTextEntry
-      />
-      <Button title="Create Account" onPress={handleSignUp} />
-      <Button title="Back" onPress={handleBack} />
-    </View>
+    <ImageBackground source={require('../assets/Images/auth-background.png')} resizeMode="cover" className="flex-1">
+      <View className="flex-1 justify-center p-4 bg-opacity-50 bg-black">
+        <Text className="text-white text-2xl font-bold mb-2">Create Account</Text>
+        <TextInput className="bg-white bg-opacity-90 rounded-full px-4 py-2 mb-4 text-lg" placeholder="Full Name" value={fullName} onChangeText={setFullName} />
+        <TextInput className="bg-white bg-opacity-90 rounded-full px-4 py-2 mb-4 text-lg" placeholder="Email" value={email} onChangeText={setEmail} />
+        <TextInput className="bg-white bg-opacity-90 rounded-full px-4 py-2 mb-4 text-lg" placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
+        <Pressable className="bg-green-500 w-full py-3 rounded-full items-center mb-4" onPress={() => handleSignUp}>
+          <Text className="text-white text-lg">Sign Up</Text>
+        </Pressable>
+        <Pressable className="bg-transparent w-full py-3 rounded-full border border-white items-center" onPress={() => navigation.goBack()}>
+          <Text className="text-white text-lg">Back</Text>
+        </Pressable>
+      </View>
+    </ImageBackground>
   );
 }

@@ -1,6 +1,7 @@
 // Import the necessary functions and features from the Firebase SDKs
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth'; // Import this if you need authentication
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getFirestore } from 'firebase/firestore'; // Import this if you need Firestore
 
 // Your web app's Firebase configuration
@@ -19,7 +20,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize services
-const auth = getAuth(app);
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage)
+});
 const firestore = getFirestore(app);
 
 // Export the Firebase app and services

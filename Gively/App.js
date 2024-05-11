@@ -20,6 +20,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList} from '@react-navigation/drawer';
 import { useFonts } from 'expo-font';
 
+import { AuthProvider, useAuth } from './services/AuthContext';
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -83,23 +85,45 @@ function HomeScreenDrawer() {
 }
 
 //Login Flow Navigation into the Main App
+function RootNavigator() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return null; // Or a loading spinner if you prefer
+  }
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {user ? (
+        <Stack.Screen name="Home" component={MainApp} />
+      ) : (
+        <>
+          <Stack.Screen name="Splash" component={SplashScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
+        </>
+      )}
+    </Stack.Navigator>
+  );
+}
+
 function App() {
-  // add condition to change initial route name if logged in or not
   let [fontsLoaded] = useFonts({
     'Montserrat-Regular': require('./assets/Fonts/Montserrat/static/Montserrat-Regular.ttf'),
     'Montserrat-Medium': require('./assets/Fonts/Montserrat/static/Montserrat-Medium.ttf'),
     'Montserrat-Bold': require('./assets/Fonts/Montserrat/static/Montserrat-Bold.ttf'),
   });
 
+  if (!fontsLoaded) {
+    return null; // Or a loading screen/spinner until the fonts are loaded
+  }
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName='Profile' screenOptions={{headerShown: false}}>
-        <Stack.Screen name="Home" component={MainApp} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
-        <Stack.Screen name="Splash" component={SplashScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <RootNavigator />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
 
