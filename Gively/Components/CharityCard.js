@@ -6,7 +6,7 @@ const CharityCard = ({ charity }) => {
   const screenWidth = Dimensions.get('window').width;
   return (
     <View style={[styles.card, { width: screenWidth - 60, height: 300 }]}>
-      <Text style={[styles.name, { fontFamily: 'Montserrat-Bold' }]}>{charity.charityName}</Text>
+      <Text style={[styles.name, { fontFamily: 'Montserrat-Medium' }]}>{charity.charityName}</Text>
       <Text style={[styles.description, { fontFamily: 'Montserrat-Medium' }]}>{charity.charityDescription}</Text>
       
       <View style={styles.categoriesContainer}>
@@ -46,19 +46,18 @@ const styles = StyleSheet.create({
     borderWidth:.2
   },
   name: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 24,
     marginBottom: 8,
     textAlign: 'center'
   },
   description: {
     fontSize: 16,
-    marginBottom: 8,
   },
   categoriesContainer: {
     flexDirection: 'row',
     flex: 1,
     flexWrap: 'wrap',
+    alignContent:'flex-end'
   },
   interestButton: {
     borderRadius: 20,
@@ -82,22 +81,19 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     height: 50,
     width: '80%',
-    flex: 1,
     justifyContent: 'center', // Center items horizontally
     alignItems: 'center', // Center items vertically
   },
   donateButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 24,
     opacity: .9,
 
   },
   learnMoreButton: {
     borderRadius: 20,
-    paddingVertical: 5,
     paddingHorizontal: 20,
     marginRight: 10,
-    marginVertical: 5
   },
   learnMoreButtonText: {
     color: '#1C5AA3',
