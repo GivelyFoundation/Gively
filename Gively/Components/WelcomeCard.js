@@ -18,9 +18,9 @@ const WelcomeCard = ({ username, donationAmount, charityCount }) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
-    padding: 10,
+    padding: 20,
     borderRadius: 10,
-    marginHorizontal: 20,
+    marginHorizontal: 10,
     marginTop: 20,
     shadowColor: '#5A5A5A',
     shadowOffset: { width: 0, height: 20 },

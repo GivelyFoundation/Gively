@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { View, Alert, Button, Image } from 'react-native';
+import { View, Alert, Button, Image, TouchableOpacity, Text } from 'react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 import CreateAccountScreen from './Screens/CreateAccountScreen'
@@ -23,6 +23,9 @@ import homeIcon from './assets/Icons/Home.png'
 import discoverIcon from './assets/Icons/Discover.png'
 import friendsIcon from './assets/Icons/Friends.png'
 import profileIcon from './assets/Icons/Profile.png'
+
+import notificationIcon from './assets/Icons/notificationIcon.png'
+
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -146,9 +149,7 @@ function HomeScreenDrawer() {
   );
 }
 
-//Login Flow Navigation into the Main App
 function App() {
-  // add condition to change initial route name if logged in or not
   let [fontsLoaded] = useFonts({
     'Montserrat-Regular': require('./assets/Fonts/Montserrat/static/Montserrat-Regular.ttf'),
     'Montserrat-Medium': require('./assets/Fonts/Montserrat/static/Montserrat-Medium.ttf'),
@@ -166,5 +167,4 @@ function App() {
     </NavigationContainer>
   );
 }
-
 export default App;
