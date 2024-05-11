@@ -51,13 +51,13 @@ export default function LoginScreen({ navigation }) {
           </Pressable>
           {/* Placeholder for social login buttons */}
           <Pressable className="bg-blue-600 w-full py-3 rounded-full items-center mb-2">
-            <Text className="text-white text-lg">Sign up with Google</Text>
+            <Text className="text-white text-lg">Sign in with Google</Text>
           </Pressable>
           <Pressable className="bg-black w-full py-3 rounded-full items-center mb-2">
-            <Text className="text-white text-lg">Sign up with Apple</Text>
+            <Text className="text-white text-lg">Sign in with Apple</Text>
           </Pressable>
           <Pressable className="bg-blue-800 w-full py-3 rounded-full items-center mb-4">
-            <Text className="text-white text-lg">Sign up with Facebook</Text>
+            <Text className="text-white text-lg">Sign in with Facebook</Text>
           </Pressable>
           <Text onPress={() => navigation.navigate('CreateAccount')} className="text-sm underline">
             Don't have an account? Sign Up
