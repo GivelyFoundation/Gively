@@ -57,8 +57,10 @@ export default function HomeFeedScreen({ navigation }) {
         accessibilityLabel="feed-switch-selector"
         style={[homeStyles.switchStyle]}
         selectedColor={'#1C5AA3'}
-        buttonColor={'rgba(28, 90, 163, 0.1)'}
-        borderColor={'#1C5AA3'}
+        buttonColor={'#fff'}
+        backgroundColor={'#F5F5F5'}
+        textColor = {"#AFB1B3"}
+        borderColor={'#6B6E76'}
         fontSize={16}
         height={30}
       />
@@ -72,5 +74,6 @@ const homeStyles = StyleSheet.create({
   switchStyle: {
     paddingTop: 10,
     paddingHorizontal: 30,
+    paddingBottom:20
   },
 })

@@ -5,18 +5,10 @@ const CharityCard = ({ charity }) => {
 
   const screenWidth = Dimensions.get('window').width;
   return (
-    <View style={[styles.card, { width: screenWidth - 60, height: 300 }]}>
+    <View style={[styles.card, { width: screenWidth - 80, height: 300 }]}>
       <Text style={[styles.name, { fontFamily: 'Montserrat-Medium' }]}>{charity.charityName}</Text>
       <Text style={[styles.description, { fontFamily: 'Montserrat-Medium' }]}>{charity.charityDescription}</Text>
-      
       <View style={styles.categoriesContainer}>
-        {/* <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-        {charity.charityCategories.map((category, index) => (
-          <TouchableOpacity key={index} style={styles.interestButton}>
-            <Text style={[styles.interestButtonText, { fontFamily: 'Montserrat-Medium' }]}>{category}</Text>
-          </TouchableOpacity>
-        ))}
-        </ScrollView> */}
         <View style={[styles.column, styles.actionButtons]}>
         <TouchableOpacity style={styles.learnMoreButton}>
         <Text style={[styles.learnMoreButtonText, { fontFamily: 'Montserrat-Medium' }]}>Learn More</Text>
@@ -37,13 +29,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 16,
     margin: 8,
-    shadowColor: '#000',
+    shadowColor: '#5A5A5A',
+    shadowOffset: { width: 0, height: 20 },
     shadowOpacity: 0.2,
-    shadowRadius: 2,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    shadowRadius: 20,
+    elevation: 5,
     borderColor:'#000',
-    borderWidth:.2
+    borderWidth:.1
   },
   name: {
     fontSize: 24,
@@ -73,13 +65,12 @@ const styles = StyleSheet.create({
     opacity: .9
   },
   donateButton: {
-    borderRadius: 20,
-    paddingVertical: 5,
+    borderRadius: 12,
     paddingHorizontal: 20,
     marginRight: 10,
     backgroundColor: '#3FC032',
     marginVertical: 10,
-    height: 50,
+    height: 40,
     width: '80%',
     justifyContent: 'center', // Center items horizontally
     alignItems: 'center', // Center items vertically
@@ -88,6 +79,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 24,
     opacity: .9,
+    textTransform:'uppercase'
 
   },
   learnMoreButton: {
@@ -106,7 +98,7 @@ const styles = StyleSheet.create({
     width: '100%'
   },
   actionButtons: {
-   paddingVertical: 10,
+   paddingVertical: 0,
    alignSelf: 'flex-end',
   },
 });

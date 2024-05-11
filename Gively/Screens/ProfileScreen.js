@@ -148,8 +148,10 @@ export default function ProfileScreen({ navigation }) {
         accessibilityLabel="feed-switch-selector"
         style={[profileStyles.switchStyle]}
         selectedColor={'#1C5AA3'}
-        buttonColor={'rgba(28, 90, 163, 0.1)'}
-        borderColor={'#1C5AA3'}
+        buttonColor={'#fff'}
+        backgroundColor={'#F5F5F5'}
+        borderColor={'#6B6E76'}
+        textColor = {"#AFB1B3"}
         fontSize={16}
         height={30}
       />
