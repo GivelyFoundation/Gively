@@ -1,20 +1,34 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView  } from 'react-native';
 import SwitchSelector from "react-native-switch-selector";
 import styles from '../Styles.js/Styles';
+import DonationCard from '../Components/DonationCard'; // Assuming DonationCard component is in a separate file
+import { postsData } from '../MockData';
 
 
 const ForYouFeed = () => {
   return (
     <View style={[styles.container, styles.page]}>
-      <Text>{`For You Feed`}</Text>
+       <ScrollView>
+      <View style={{ padding: 10 }}>
+        {postsData.map((item, index) => (
+          <DonationCard key={index} data={item} />
+        ))}
+      </View>
+    </ScrollView>
     </View>
   );
 };
 const FriendsFeed = () => {
   return (
     <View style={[styles.container, styles.page]}>
-      <Text>{`Friends Feed`}</Text>
+     <ScrollView>
+      <View style={{ padding: 10 }}>
+        {postsData.map((item, index) => (
+          <DonationCard key={index} data={item} />
+        ))}
+      </View>
+    </ScrollView>
     </View>
   );
 };
