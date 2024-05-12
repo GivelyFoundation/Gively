@@ -26,7 +26,6 @@ import profileIcon from './assets/Icons/Profile.png'
 
 import notificationIcon from './assets/Icons/notificationIcon.png'
 
-
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -138,6 +137,7 @@ function CustomDrawerContent(props) {
 }
 
 function HomeScreenDrawer() {
+  
   return (
     <Drawer.Navigator initialRouteName="Home " drawerContent={(props) => <CustomDrawerContent {...props} />}>
       <Drawer.Screen name="Home" component={HomeScreen} />
