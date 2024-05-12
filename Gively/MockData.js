@@ -198,3 +198,29 @@ export const charities = [
     }
   ];
   
+  export const charityData = [
+    {
+      id: 1,
+      charityName: 'Global Relief',
+      color: '#553766', 
+      percentage: 50
+    },
+    {
+      id: 2,
+      charityName: 'Health for All',
+      color: '#E7357D', 
+      percentage: 20
+    },
+    {
+      id: 3,
+      charityName: 'Education Bridge',
+      color: '#F7A931', 
+      percentage: 20
+    },
+    {
+      id: 4,
+      charityName: 'Wildlife Rescue',
+      color: '#EC6929', 
+      percentage: 10
+    }
+  ]

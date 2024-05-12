@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 5,
     borderColor:'#000',
-    borderWidth:.1
+    borderWidth:.1,
   },
   name: {
     fontSize: 24,
@@ -50,19 +50,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexWrap: 'wrap',
     alignContent:'flex-end'
-  },
-  interestButton: {
-    borderRadius: 20,
-    paddingVertical: 5,
-    paddingHorizontal: 20,
-    marginRight: 10,
-    backgroundColor: 'rgba(28, 90, 163, 0.1)',
-    marginVertical: 10
-  },
-  interestButtonText: {
-    color: '#1C5AA3',
-    fontSize: 12,
-    opacity: .9
   },
   donateButton: {
     borderRadius: 12,

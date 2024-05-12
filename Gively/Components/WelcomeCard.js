@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 const WelcomeCard = ({ username, donationAmount, charityCount }) => {
     return (
       <View style={styles.container}>
-        <Text style={[styles.welcomeText, { fontFamily: 'Montserrat-Medium'}]}>Welcome back {username}!</Text>
+        <Text style={[styles.welcomeText, { fontFamily: 'Montserrat-Medium'}]}>Welcome back, {username}!</Text>
         <Text style={[styles.infoText, { fontFamily: 'Montserrat-Medium'}]}>
           This week your network has donated <Text style={{ fontFamily: 'Montserrat-Bold'}}>${donationAmount}</Text> to <Text style={{ fontFamily: 'Montserrat-Bold'}}>{charityCount}</Text> charities.
         </Text>

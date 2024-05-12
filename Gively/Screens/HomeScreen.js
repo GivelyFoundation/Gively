@@ -60,7 +60,7 @@ export default function HomeFeedScreen({ navigation }) {
         buttonColor={'#fff'}
         backgroundColor={'#F5F5F5'}
         textColor = {"#AFB1B3"}
-        borderColor={'#6B6E76'}
+        borderColor={"#AFB1B3"}
         fontSize={16}
         height={30}
       />
