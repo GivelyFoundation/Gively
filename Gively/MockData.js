@@ -36,7 +36,7 @@ export const charities = [
     following: 150,
     followers: 2000,
     bioHeader: "Dog Lover, Engineer, Human",
-    mainBioText: "If you can't feed a hundred people, then just feed one",
+    mainBioText: "If you can't feed a hundred people, then just feed one.",
     interests: ['Health', 'Education', 'Environment', 'Animal Welfare', 'Arts & Culture']
   }
 
