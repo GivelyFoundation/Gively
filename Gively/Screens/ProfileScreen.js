@@ -210,7 +210,7 @@ const profileStyles = StyleSheet.create({
   },
   profileInfo: {
     width: '100%',
-    paddingTop: 30,
+    paddingTop: 20,
     paddingLeft: 30,
     paddingRight: 30,
     justifyContent: 'space-between'
@@ -267,7 +267,7 @@ const profileStyles = StyleSheet.create({
   interestContainer: {
     alignItems: 'center',
     padding: 10,
-    paddingBottom:20,
+    paddingBottom:14,
     paddingHorizontal: 30
   },
   interestButton: {
