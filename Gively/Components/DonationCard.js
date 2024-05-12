@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 const likeIcon= require('../assets/Icons/heart.png');
+const profilePicture = require('../assets/Images/profileDefault.png');
 
 const DonationCard = ({ data }) => {
 
@@ -12,15 +13,21 @@ const DonationCard = ({ data }) => {
       case 1:
         const parts = firstDonor.split(' ');
         return (
+        <View style = {styles.row}>
+          <Image source={profilePicture} style={styles.profilePicture} />
           <Text style={{ fontFamily: 'Montserrat-Medium' }}>
             <Text style={{ fontFamily: 'Montserrat-Bold' }}>{parts[0]}</Text> {parts.slice(1).join(' ')}Donated too!
           </Text>
+          </View>
         );
       default:
         return (
+          <View style = {styles.row}>
+          <Image source={profilePicture} style={styles.profilePicture} />
           <Text style={{ fontFamily: 'Montserrat-Medium' }}>
             <Text style={{ fontFamily: 'Montserrat-Bold' }}>{firstDonor}</Text> and {data.otherDonationUsers.length - 1} others Donated!
           </Text>
+          </View>
         );
     }
   };
@@ -119,7 +126,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#3FC032',
     borderRadius: 7,
     padding: 10,
-    paddingHorizontal:30
+    paddingHorizontal:20
   },
   buttonText: {
     color: '#fff',
@@ -127,6 +134,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textTransform: 'uppercase'
   },
+  profilePicture: {
+    width: 20,
+    height: 20,
+    borderRadius: 25,
+    marginRight: 4,
+},
+row:{
+  flexDirection: 'row',
+  alignItems: 'center'
+}
 });
 
 export default DonationCard;

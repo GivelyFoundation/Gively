@@ -267,6 +267,7 @@ const profileStyles = StyleSheet.create({
   interestContainer: {
     alignItems: 'center',
     padding: 10,
+    paddingBottom:20,
     paddingHorizontal: 30
   },
   interestButton: {
