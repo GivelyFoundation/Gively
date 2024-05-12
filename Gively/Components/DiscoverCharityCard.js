@@ -18,8 +18,8 @@ const DiscoverCharityCard = (image) => {
 
 const styles = StyleSheet.create({
   card: {
-    width: 95,
-    height: 95,
+    width: 75,
+    height: 75,
     backgroundColor: '#fff', // You can customize the background color
     borderColor: '#E4DFDF',
     borderWidth: 1,
