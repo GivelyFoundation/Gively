@@ -3,18 +3,33 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import SwitchSelector from "react-native-switch-selector";
 import CharityCard from '../Components/CharityCard';
-import { charities, user } from '../MockData';
+import { charities, user, charityData } from '../MockData';
 import styles from '../Styles.js/Styles';
+import PinnedCharityCard from '../Components/PinnedCharityCard';
 
 const profilePicture = require('../assets/Images/profileDefault.png');
+const pieChartPlaceHolder = require('../assets/Images/pieChartPlaceHolder.png')
 
+const CharityInfoComponent = ({ charityName, color, percentage }) => {
+  return (
+    <View style={profileStyles.charityCardInfoContainer}>
+      <Text style={[profileStyles.charityName, { color: color }, {fontFamily: 'Montserrat-Medium'}]}>{charityName}</Text>
+      <Text style={[profileStyles.percentage, {fontFamily: 'Montserrat-Medium'}]}>{percentage}%</Text>
+    </View>
+  );
+};
 
 
 const Portfolio = () => {
   return (
-    <View style={[profileStyles.contentContainer, styles.page]}>
-      <Text style={[profileStyles.contentText, { fontFamily: 'Montserrat-Medium' }]}>Portfolio</Text>
-    </View>
+    <View style={[profileStyles.portfolioContainer, styles.page]}>
+      <Image source={pieChartPlaceHolder} style={profileStyles.pieChartPlaceHolder} />
+      <ScrollView>
+      {charityData.map((charity, index) => (
+          <CharityInfoComponent key={index} charityName = {charity.charityName} color = {charity.color} percentage={charity.percentage}/>
+        ))}
+      </ScrollView>
+     </View>
   );
 };
 const Favorites = () => {
@@ -25,13 +40,9 @@ const Favorites = () => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[profileStyles.scrollView]} >
         {charities.map((charity, index) => (
-
           <CharityCard key={index} charity={charity} />
-
-
         ))}
       </ScrollView>
-
     </View>
   );
 };
@@ -134,7 +145,9 @@ export default function ProfileScreen({ navigation }) {
 
       <CategoryScroll />
 
-      <View style={profileStyles.horizontalLine} />
+     {/* < View style={profileStyles.horizontalLine} /> */}
+     <PinnedCharityCard username= {user.username.split(" ")[0]} charity={"Nami"} reason= {"Help me raise money for mental health awareness!"}/>
+    
 
       <SwitchSelector
         initial={0}
@@ -150,14 +163,14 @@ export default function ProfileScreen({ navigation }) {
         selectedColor={'#1C5AA3'}
         buttonColor={'#fff'}
         backgroundColor={'#F5F5F5'}
-        borderColor={'#6B6E76'}
+        borderColor={"#AFB1B3"}
         textColor = {"#AFB1B3"}
         fontSize={16}
         height={30}
       />
       {activeTab === 'Portfolio' ? < Portfolio /> : <Favorites />}
-
     </View>
+    
   );
 }
 
@@ -227,6 +240,12 @@ const profileStyles = StyleSheet.create({
     width: 100, // Set the width as needed
     height: 100, // Set the height as needed
   },
+  pieChartPlaceHolder:{
+    width: 150, // Set the width as needed
+    height: 150, // Set the height as needed
+    alignItems: 'center', // Center items horizontally
+    alignSelf: 'center',
+  },
   buttonText: {
     color: '#1C5AA3',
     fontFamily: ''
@@ -234,6 +253,7 @@ const profileStyles = StyleSheet.create({
   bioHeader: {
     fontSize: 15,
     padding: 30,
+    paddingVertical:10,
     paddingBottom: 10,
     textTransform: 'uppercase',
     color: '#1E1E1E'
@@ -271,14 +291,30 @@ const profileStyles = StyleSheet.create({
     backgroundColor: '#fff',
     height: 1000
   },
-  contentText: {
-    fontSize: 16, // Set font size
-    textAlign: 'center'
-  },
   scrollView: {
     flexGrow: 1,
     flexDirection: 'row',
-    paddingVertical: 16,
+    paddingVertical: 4,
     paddingHorizontal: 30,
   },
+  portfolioContainer:{
+    alignContent: 'center',
+    paddingTop: 20,
+    backgroundColor: '#fff',
+    height: 1000
+  },
+  charityCardInfoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal:30,
+    marginTop: 10,
+  },
+  charityName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  percentage: {
+    fontSize: 16,
+    fontWeight: '500',
+  }
 });
