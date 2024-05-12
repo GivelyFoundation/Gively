@@ -142,7 +142,7 @@ function HomeScreenDrawer() {
   return (
     <Drawer.Navigator initialRouteName="Home " drawerContent={(props) => <CustomDrawerContent {...props} />}>
       <Drawer.Screen name="Home" component={HomeScreen} />
-      <Drawer.Screen name="Donation History" component={DonationHistoryScreen} />
+      <Drawer.Screen name="Donation History & Tax Form" component={DonationHistoryScreen} />
       <Drawer.Screen name="About Us" component={AboutUsScreen} />
       <Drawer.Screen name="Contact Us" component={ContactUsScreen} />
       <Drawer.Screen name="Settings" component={SettingScreen} />
