@@ -55,8 +55,11 @@ export default function DiscoverScreen({ navigation }) {
           </View>
         </ScrollView>
       </View>
-      <TouchableOpacity style={discoverStyles.donateButton}>
-        <Text style={[discoverStyles.donateButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A GoFundMe</Text>
+      <TouchableOpacity style={discoverStyles.petitionButton}>
+        <Text style={[discoverStyles.petitionButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A Change.Org Petition</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={discoverStyles.goFundMeButton}>
+        <Text style={[discoverStyles.goFundMeButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A GoFundMe</Text>
       </TouchableOpacity>
       <View style={discoverStyles.sectionContainer}>
         <View style = {[discoverStyles.browseByCategorySection]}>
@@ -148,19 +151,34 @@ const discoverStyles = StyleSheet.create({
     paddingRight: 20,
     paddingBottom: 10
   },
-  donateButton: {
+  petitionButton: {
     borderRadius: 12,
-    borderColor:'#3FC032',
+    borderColor:'#1C5AA3',
     borderWidth:1,
-    marginVertical: 4,
     height: 36,
-    width: '90%',
+    width: '94%',
     justifyContent: 'center', // Center items horizontally
     alignItems: 'center', // Center items vertically
     alignSelf: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
   },
-  donateButtonText: {
+  petitionButtonText: {
+    color: '#1C5AA3',
+    fontSize: 16,
+    opacity: 0.9,
+  },
+  goFundMeButton: {
+    borderRadius: 12,
+    borderColor:'#3FC032',
+    borderWidth:1,
+    height: 36,
+    width: '94%',
+    justifyContent: 'center', // Center items horizontally
+    alignItems: 'center', // Center items vertically
+    alignSelf: 'center',
+    marginBottom: 10,
+  },
+  goFundMeButtonText: {
     color: '#3FC032',
     fontSize: 16,
     opacity: 0.9,
