@@ -55,7 +55,9 @@ export default function DiscoverScreen({ navigation }) {
           </View>
         </ScrollView>
       </View>
-      {console.log(charityCategories)}
+      <TouchableOpacity style={discoverStyles.donateButton}>
+        <Text style={[discoverStyles.donateButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A GoFundMe</Text>
+      </TouchableOpacity>
       <View style={discoverStyles.sectionContainer}>
         <View style = {[discoverStyles.browseByCategorySection]}>
         <Text style={[discoverStyles.subheadingText, { fontFamily: 'Montserrat-Medium' }]}>BROWSE BY CATEGORY</Text>
@@ -107,7 +109,7 @@ const discoverStyles = StyleSheet.create({
   },
   sectionContainer: {
     flexGrow: 0, // Prevents the section from growing to fill available space
-    marginBottom: 20, // Adds spacing between sections
+    marginBottom: 10, // Adds spacing between sections
   },
   categoryButtonContainer: {
     flexDirection: 'row',
@@ -139,12 +141,28 @@ const discoverStyles = StyleSheet.create({
     opacity: .9,
   },
   browseByCategorySection:{
-    paddingTop: 10,
     flexDirection: 'row', // Align children horizontally
     alignItems: 'center', // Align children vertically in the center
     width: '100%', // Ensure the row takes full width of the screen
     justifyContent: 'space-between',
     paddingRight: 20,
     paddingBottom: 10
-  }
+  },
+  donateButton: {
+    borderRadius: 12,
+    borderColor:'#3FC032',
+    borderWidth:1,
+    marginVertical: 4,
+    height: 36,
+    width: '90%',
+    justifyContent: 'center', // Center items horizontally
+    alignItems: 'center', // Center items vertically
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  donateButtonText: {
+    color: '#3FC032',
+    fontSize: 16,
+    opacity: 0.9,
+  },
 })
