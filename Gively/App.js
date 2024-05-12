@@ -14,6 +14,7 @@ import AboutUsScreen from './Screens/AboutUsScreen'
 import ContactUsScreen from './Screens/ContactUsScreen'
 import FAQScreen from './Screens/FAQScreen'
 import SettingScreen from './Screens/SettingScreen'
+import DonationHistoryScreen from './Screens/DonationHistoryScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -141,6 +142,7 @@ function HomeScreenDrawer() {
   return (
     <Drawer.Navigator initialRouteName="Home " drawerContent={(props) => <CustomDrawerContent {...props} />}>
       <Drawer.Screen name="Home" component={HomeScreen} />
+      <Drawer.Screen name="Donation History" component={DonationHistoryScreen} />
       <Drawer.Screen name="About Us" component={AboutUsScreen} />
       <Drawer.Screen name="Contact Us" component={ContactUsScreen} />
       <Drawer.Screen name="Settings" component={SettingScreen} />
