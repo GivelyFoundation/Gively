@@ -1,28 +1,87 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, ImageBackground, Image, StyleSheet } from 'react-native';
-import { auth } from '../services/firebaseConfig';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { View, SafeAreaView, ImageBackground, Image, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import StepIndicator from 'react-native-step-indicator';
+import SignUpForm from '../Components/SignUpForm';
+import ProfileDetailsForm from '../Components/ProfileDetailsForm';
+import PhotoUploadForm from '../Components/PhotoUploadForm';
 
-export default function CreateAccountScreen({ navigation }) {
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+const labels = ["Sign Up","Profile Details","Photo Upload"];
 
-  const handleSignUp = async () => {
-    if (!email || !password || !fullName) {
-      Alert.alert('Error', 'Please fill all fields');
-      return;
+const customStyles = {
+  stepIndicatorSize: 25,
+  currentStepIndicatorSize:30,
+  separatorStrokeWidth: 2,
+  currentStepStrokeWidth: 3,
+  stepStrokeCurrentColor: '#fe7013',
+  stepStrokeWidth: 3,
+  stepStrokeFinishedColor: '#fe7013',
+  stepStrokeUnFinishedColor: '#aaaaaa',
+  separatorFinishedColor: '#fe7013',
+  separatorUnFinishedColor: '#aaaaaa',
+  stepIndicatorFinishedColor: '#fe7013',
+  stepIndicatorUnFinishedColor: '#ffffff',
+  stepIndicatorCurrentColor: '#ffffff',
+  stepIndicatorLabelFontSize: 13,
+  currentStepIndicatorLabelFontSize: 13,
+  stepIndicatorLabelCurrentColor: '#fe7013',
+  stepIndicatorLabelFinishedColor: '#ffffff',
+  stepIndicatorLabelUnFinishedColor: '#aaaaaa',
+  labelColor: '#999999',
+  labelSize: 13,
+  currentStepLabelColor: '#fe7013'
+}
+
+const CreateAccountPage = ({ navigation }) => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [pageMessage, setPageMessage] = useState("Create Account\nSign in and start giving!");
+  const [image, setImage] = useState(require('../assets/Images/auth-background.png'));
+  const [userData, setUserData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    displayName: '',
+    bio: '',
+    profilePicture: null,
+  });
+
+  const nextStep = () => {
+    setCurrentStep((prevStep) => (prevStep < 2 ? prevStep + 1 : prevStep));
+  };
+
+  const prevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep((prevStep) => prevStep - 1);
+    } else {
+      confirmBackToSplash();
     }
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Please make sure your passwords match');
-      return;
-    }
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Home' }], }));
-    } catch (error) {
-      Alert.alert('Signup Failed', error.message);
+  };
+
+  const confirmBackToSplash = () => {
+    Alert.alert(
+      "Confirm Exit",
+      "Are you sure you want to go back to the main menu? Any unsaved changes will be lost.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Confirm", onPress: () => navigation.navigate('Splash') },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const handleChange = (name, value) => {
+    setUserData({ ...userData, [name]: value });
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 0:
+        return <SignUpForm userData={userData} handleChange={handleChange} />;
+      case 1:
+        return <ProfileDetailsForm userData={userData} handleChange={handleChange} />;
+      case 2:
+        return <PhotoUploadForm userData={userData} handleChange={handleChange} />;
+      default:
+        return null;
     }
   };
 
@@ -30,11 +89,10 @@ export default function CreateAccountScreen({ navigation }) {
     <View className="flex-1">
       <View style={styles.backgroundContainer}>
         <ImageBackground 
-          source={require('../assets/Images/auth-background.png')} 
+          source={image} 
           resizeMode="contain"
           style={styles.backgroundImage}
         >
-          {/* Adding a semi-transparent overlay to enhance text visibility */}
           <View style={styles.imageOverlay} />
         </ImageBackground>
       </View>
@@ -46,37 +104,19 @@ export default function CreateAccountScreen({ navigation }) {
           resizeMode="contain" 
         />
 
-        <Pressable onPress={() => navigation.navigate('Splash')} style={styles.backButton}>
+        <Pressable onPress={() => prevStep()} style={styles.backButton}>
           <Text className="text-white text-lg">Back</Text>
         </Pressable>
-
-        <View className="bg-white rounded-t-3xl px-6 items-center justify-center" style={styles.loginForm}>
-          <View className="items-center justify-center">
-            <Text className="text-2xl font-bold mb-2">Create an Account</Text>
-            <Text className="text-lg mb-4">Sign Up and start giving!</Text>
-          </View>
-          <TextInput className="bg-gray-200 w-full rounded-full px-4 py-2 mb-4" placeholder="Full Name" value={fullName} onChangeText={setFullName} />
-          <TextInput className="bg-gray-200 w-full rounded-full px-4 py-2 mb-4" placeholder="Email" value={email} onChangeText={setEmail} />
-          <TextInput className="bg-gray-200 w-full rounded-full px-4 py-2 mb-4" placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
-          <TextInput className="bg-gray-200 w-full rounded-full px-4 py-2 mb-4" placeholder="Confirm Password" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry />
-          <Pressable className="bg-green-500 w-full py-3 rounded-full items-center mb-4" onPress={handleSignUp}>
-            <Text className="text-white text-lg">Sign Up</Text>
-          </Pressable>
-          <Pressable className="bg-blue-600 w-full py-3 rounded-full items-center mb-2">
-            <Text className="text-white text-lg">Sign up with Google</Text>
-          </Pressable>
-          <Pressable className="bg-black w-full py-3 rounded-full items-center mb-2">
-            <Text className="text-white text-lg">Sign up with Apple</Text>
-          </Pressable>
-          <Pressable className="bg-blue-800 w-full py-3 rounded-full items-center mb-4">
-            <Text className="text-white text-lg">Sign up with Facebook</Text>
-          </Pressable>
-          {/* Placeholder for social login buttons */}
-          <Text onPress={() => navigation.navigate('Login')} className="text-sm underline">
-            Already have an account? Sign In
-          </Text>
-        </View>
       </View>
+      <View className="mt-32">
+        <StepIndicator
+          customStyles={customStyles}
+          currentPosition={currentStep}
+          labels={labels}
+          stepCount={3}
+        />
+      </View>
+      {/* {renderStep()} */}
     </View>
   );
 };
@@ -111,13 +151,8 @@ const styles = StyleSheet.create({
     // backgroundColor: 'rgba(0, 0, 0, 0.5)', // Adding background to enhance visibility
     padding: 8, // Slight padding around the text
     borderRadius: 10, // Rounded corners for the button
-  },
-  loginForm: {
-    minHeight: '70%',
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 30, // Increased padding at the top for better spacing
-    paddingBottom: 30, // Increased padding at the bottom
+    zIndex: 20,
   }
 });
+
+export default CreateAccountPage;
