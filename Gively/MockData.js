@@ -80,9 +80,7 @@ export const charities = [
     { id: 10, name: 'International Aid' },
     { id: 11, name: 'Social Services' },
     { id: 12, name: 'Youth Development' },
-    { id: 13, name: 'Gender Equality' },
-    { id: 14, name: 'Hunger Relief' },
-    { id: 15, name: 'Refugee Support' }
+    { id: 13, name: 'Gender Equality' }
   ];
 
   export const postsData = [
