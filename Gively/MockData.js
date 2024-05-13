@@ -222,3 +222,23 @@ export const charities = [
       percentage: 10
     }
   ]
+
+
+  export const petitionData = {
+    userName: 'Andy',
+    postDate: 'Wed, Apr 28 • 5:30 PM',
+    postText: 'Help Me Raise Awareness',
+    petitionUrl: 'https://www.change.org/p/nfl-have-sweet-victory-performed-at-the-super-bowl',
+    isLiked: true,
+    likesCount: 24,
+  };
+
+
+  export const GoFundMeData = {
+    userName: 'Andy',
+    postDate: 'Wed, Apr 28 • 5:30 PM',
+    postText: 'Help Me Raise Awareness',
+    goFundMeUrl: 'https://www.gofundme.com/f/honoring-our-hero-and-dad-matthew-mar?qid=582f036013a533538a67930a44a30995',
+    isLiked: true,
+    likesCount: 24,
+  };

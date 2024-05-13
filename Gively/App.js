@@ -15,6 +15,8 @@ import ContactUsScreen from './Screens/ContactUsScreen'
 import FAQScreen from './Screens/FAQScreen'
 import SettingScreen from './Screens/SettingScreen'
 import DonationHistoryScreen from './Screens/DonationHistoryScreen';
+import PetitionScreen from './Screens/PetitionScreen';
+import GoFundMeScreen from './Screens/GoFundMeScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -165,6 +167,8 @@ function App() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
         <Stack.Screen name="Splash" component={SplashScreen} />
+        <Stack.Screen name="Petition" component={PetitionScreen} /> 
+        <Stack.Screen name="GoFundMe" component={GoFundMeScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

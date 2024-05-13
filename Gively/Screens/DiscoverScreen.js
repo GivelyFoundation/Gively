@@ -55,18 +55,23 @@ export default function DiscoverScreen({ navigation }) {
           </View>
         </ScrollView>
       </View>
-      <TouchableOpacity style={discoverStyles.petitionButton}>
+      <TouchableOpacity
+        style={discoverStyles.petitionButton}
+        onPress={() => navigation.navigate('Petition')} // Navigate to PetitionScreen
+      >
         <Text style={[discoverStyles.petitionButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A Change.Org Petition</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={discoverStyles.goFundMeButton}>
+      <TouchableOpacity
+        style={discoverStyles.goFundMeButton}
+        onPress={() => navigation.navigate('GoFundMe')}>
         <Text style={[discoverStyles.goFundMeButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A GoFundMe</Text>
       </TouchableOpacity>
       <View style={discoverStyles.sectionContainer}>
-        <View style = {[discoverStyles.browseByCategorySection]}>
-        <Text style={[discoverStyles.subheadingText, { fontFamily: 'Montserrat-Medium' }]}>BROWSE BY CATEGORY</Text>
-        <TouchableOpacity>
-          <Text style={[discoverStyles.seeAllButton, { fontFamily: 'Montserrat-Medium' }]}>SEE ALL </Text>
-        </TouchableOpacity>
+        <View style={[discoverStyles.browseByCategorySection]}>
+          <Text style={[discoverStyles.subheadingText, { fontFamily: 'Montserrat-Medium' }]}>BROWSE BY CATEGORY</Text>
+          <TouchableOpacity>
+            <Text style={[discoverStyles.seeAllButton, { fontFamily: 'Montserrat-Medium' }]}>SEE ALL </Text>
+          </TouchableOpacity>
         </View>
         <View style={discoverStyles.categoryButtonContainer}>
           {charityCategories.map((category, index) => (
@@ -143,7 +148,7 @@ const discoverStyles = StyleSheet.create({
     fontSize: 16,
     opacity: .9,
   },
-  browseByCategorySection:{
+  browseByCategorySection: {
     flexDirection: 'row', // Align children horizontally
     alignItems: 'center', // Align children vertically in the center
     width: '100%', // Ensure the row takes full width of the screen
@@ -153,8 +158,8 @@ const discoverStyles = StyleSheet.create({
   },
   petitionButton: {
     borderRadius: 12,
-    borderColor:'#1C5AA3',
-    borderWidth:1,
+    borderColor: '#1C5AA3',
+    borderWidth: 1,
     height: 36,
     width: '94%',
     justifyContent: 'center', // Center items horizontally
@@ -169,8 +174,8 @@ const discoverStyles = StyleSheet.create({
   },
   goFundMeButton: {
     borderRadius: 12,
-    borderColor:'#3FC032',
-    borderWidth:1,
+    borderColor: '#3FC032',
+    borderWidth: 1,
     height: 36,
     width: '94%',
     justifyContent: 'center', // Center items horizontally
