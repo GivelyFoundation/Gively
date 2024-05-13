@@ -2,33 +2,60 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView  } from 'react-native';
 import SwitchSelector from "react-native-switch-selector";
 import styles from '../Styles.js/Styles';
-import DonationCard from '../Components/DonationCard'; // Assuming DonationCard component is in a separate file
-import { postsData } from '../MockData';
+import DonationCard from '../Components/DonationCard';
+import { PetitionCard } from '../Components/PetitionCard';
+import { GoFundMeCard } from '../Components/GoFundMeCard';
+import { postsData, postsData2, user } from '../MockData';
+
 import WelcomeCard from '../Components/WelcomeCard';
 
 const ForYouFeed = () => {
+  // Function to select the appropriate card based on postType
+  const renderCard = (item) => {
+    switch (item.postType) {
+      case 'donation':
+        return <DonationCard key={item.id} data={item} />;
+      case 'petition':
+        return <PetitionCard key={item.id} data={item} user = {user}/>;
+      case 'gofundme':
+        return <GoFundMeCard key={item.id} data={item} user = {user}/>;
+      default:
+        return <View key={item.id}><Text>Unknown Post Type</Text></View>;
+    }
+  };
+
   return (
     <View style={[styles.container, styles.page]}>
-       <ScrollView>
-      <View style={{ padding: 10 }}>
-        {postsData.map((item, index) => (
-          <DonationCard key={index} data={item} />
-        ))}
-      </View>
-    </ScrollView>
+      <ScrollView>
+        <View style={{ padding: 10 }}>
+          {postsData2.map((item) => renderCard(item))}
+        </View>
+      </ScrollView>
     </View>
   );
 };
 const FriendsFeed = () => {
+  // Function to select the appropriate card based on postType
+  const renderCard = (item) => {
+    switch (item.postType) {
+      case 'donation':
+        return <DonationCard key={item.id} data={item} />;
+      case 'petition':
+        return <PetitionCard key={item.id} data={item} user = {user}/>;
+      case 'gofundme':
+        return <GoFundMeCard key={item.id} data={item} user = {user}/>;
+      default:
+        return <View key={item.id}><Text>Unknown Post Type</Text></View>;
+    }
+  };
+
   return (
     <View style={[styles.container, styles.page]}>
-     <ScrollView>
-      <View style={{ padding: 10 }}>
-        {postsData.map((item, index) => (
-          <DonationCard key={index} data={item} />
-        ))}
-      </View>
-    </ScrollView>
+      <ScrollView>
+        <View style={{ padding: 10 }}>
+          {postsData2.map((item) => renderCard(item))}
+        </View>
+      </ScrollView>
     </View>
   );
 };

@@ -39,7 +39,7 @@ export const PetitionCard = ({ data = {}, user = {} }) => {
             
                 
          
-            <LinkPreview text={data.petitionUrl} />
+            <LinkPreview text={data.link} />
             <View style={styles.footer}>
             <View style={[styles.row]}>
                 <View style={styles.likesContainer}>

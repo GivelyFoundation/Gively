@@ -35,7 +35,7 @@ export const GoFundMeCard = ({ data = {}, user = {} }) => {
             </View>
 
             <Text style={[styles.postText, { fontFamily: 'Montserrat-Medium' }]}>{data.postText}</Text>
-            <LinkPreview text={data.goFundMeUrl} />
+            <LinkPreview text={data.link} />
             <View style={styles.footer}>
                 <View style={styles.likesContainer}>
                     <Image source={likeIcon} style={[styles.likeIcon, { tintColor: data.isLiked ? '#EB5757' : '#8484A9' }]} />
