@@ -31,14 +31,16 @@ const customStyles = {
   currentStepLabelColor: '#fe7013'
 }
 
-const CreateAccountPage = ({ navigation }) => {
+const CreateAccountScreen = ({ navigation }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [pageMessage, setPageMessage] = useState("Create Account\nSign in and start giving!");
   const [image, setImage] = useState(require('../assets/Images/auth-background.png'));
+  const [accountCreated, setAccountCreated] = useState(false);
   const [userData, setUserData] = useState({
     username: '',
     email: '',
     password: '',
+    confirmPassword:'',
     displayName: '',
     bio: '',
     profilePicture: null,
@@ -69,15 +71,19 @@ const CreateAccountPage = ({ navigation }) => {
   };
 
   const handleChange = (name, value) => {
-    setUserData({ ...userData, [name]: value });
+    setUserData((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
+  
 
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <SignUpForm userData={userData} handleChange={handleChange} />;
+        return <SignUpForm setAccountCreated={setAccountCreated} accountCreated={accountCreated} navigation={navigation} userData={userData} handleChange={handleChange} nextStep={nextStep}/>;
       case 1:
-        return <ProfileDetailsForm userData={userData} handleChange={handleChange} />;
+        return <ProfileDetailsForm userData={userData} handleChange={handleChange} nextStep={nextStep}/>;
       case 2:
         return <PhotoUploadForm userData={userData} handleChange={handleChange} />;
       default:
@@ -116,7 +122,7 @@ const CreateAccountPage = ({ navigation }) => {
           stepCount={3}
         />
       </View>
-      {/* {renderStep()} */}
+      {renderStep()}
     </View>
   );
 };
@@ -128,6 +134,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: '60%',
+    flex: 1,
   },
   backgroundImage: {
     height: '100%',
@@ -155,4 +162,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default CreateAccountPage;
+export default CreateAccountScreen;

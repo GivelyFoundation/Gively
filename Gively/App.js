@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Alert, Button} from 'react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
-import CreateAccountScreen from './Screens/CreateAccountScreen'
+import CreateAccountScreen from './Screens/CreateAccountScreen';
 import HomeScreen from './Screens/HomeScreen'
 import LoginScreen from './Screens/LoginScreen'
 import SplashScreen from './Screens/SplashScreen'
@@ -56,17 +56,19 @@ function shouldShowTabBar(route) {
 
 //Home page main drawer sign out handler
 function CustomDrawerContent(props) {
-  const signOut = () => {
-    // Your sign-out logic here
-    Alert.alert("Signed Out", "You have been signed out.");
-    props.navigation.navigate('Splash'); // Navigate to splasj screen after sign-out
+  const { signOut } = useAuth(); // Destructure signOut from the context
+
+  const handleSignOut = async () => {
+    await signOut();
+    Alert.alert("Signed Out", "You have been successfully signed out.");
+    props.navigation.navigate('Splash'); // Navigate to splash screen after sign-out
   };
 
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
       <View style={{padding: 20}}>
-        <Button title="Sign Out" onPress={signOut} />
+        <Button title="Sign Out" onPress={handleSignOut} />
       </View>
     </DrawerContentScrollView>
   );
@@ -86,7 +88,7 @@ function HomeScreenDrawer() {
 
 //Login Flow Navigation into the Main App
 function RootNavigator() {
-  const { user, loading } = useAuth();
+  const { user, loading, isSigningUp } = useAuth();
 
   if (loading) {
     return null; // Or a loading spinner if you prefer
@@ -94,14 +96,11 @@ function RootNavigator() {
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {user ? (
+      <Stack.Screen name="Splash" component={SplashScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
+      {user && !isSigningUp && (
         <Stack.Screen name="Home" component={MainApp} />
-      ) : (
-        <>
-          <Stack.Screen name="Splash" component={SplashScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
-        </>
       )}
     </Stack.Navigator>
   );
