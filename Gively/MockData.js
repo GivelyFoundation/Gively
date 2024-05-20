@@ -260,6 +260,70 @@ export const charities = [
     // Additional data follows similarly adjusted for new postType as shown above.
   ];
   
+  export const postsData3 = [
+    {
+      id: 1,
+      originalDonationPoster: "Andy Abebaw",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "I've been supporting this charity for years. Their work in education is truly inspiring!",
+      likes: 102,
+      otherDonationUsers: [],
+      date: "Wed, Apr 28 • 5:30 PM",
+      charityName: "Education for All Foundation",
+      postType: "donation",
+      isLiked: true
+    },
+    {
+      id: 2,
+      originalDonationPoster: "Andy Abebaw",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "Please sign this petition to have 'Sweet Victory' performed at the Super Bowl!",
+      likes: 150,
+      otherDonationUsers: ["John", "David"],
+      date: "Thu, Apr 29 • 8:45 AM",
+      link: "https://www.change.org/p/nfl-have-sweet-victory-performed-at-the-super-bowl",
+      postType: "petition",
+      isLiked: false
+    },
+    {
+      id: 3,
+      originalDonationPoster: "Andy Abebaw",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "Support our GoFundMe to honor our hero and dad, Matthew Martinez.",
+      likes: 62,
+      otherDonationUsers: ["Alice", "John", "David"],
+      date: "Fri, Apr 30 • 3:15 PM",
+      link: "https://www.gofundme.com/f/help-champs-chance-rebuild-after-tornado",
+      postType: "gofundme",
+      isLiked: true
+    },
+    {
+      id: 4,
+      originalDonationPoster: "Andy Abebaw",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "I'm happy to support this charity's mission of providing clean water to communities in need.",
+      likes: 48,
+      otherDonationUsers: ["Alice", "Bob", "Charlie"],
+      date: "Sat, May 1 • 10:00 AM",
+      charityName: "Clean Water Initiative",
+      postType: "donation",
+      isLiked: false
+    },
+    {
+      id: 5,
+      originalDonationPoster: "Andy Abebaw",
+      originalPosterProfileImage: require('./assets/Images/poster.png'),
+      postText: "This charity's work in healthcare is vital, especially during these challenging times.",
+      likes: 91,
+      otherDonationUsers: ["John", "David", "Emma"],
+      date: "Sun, May 2 • 1:30 PM",
+      charityName: "Healthcare for All",
+      postType: "donation",
+      isLiked: false
+    },
+    // Additional data would follow similarly adjusted for new postType as shown above.
+  ];
+
   
   export const charityData = [
     {
