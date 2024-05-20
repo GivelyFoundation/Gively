@@ -17,6 +17,8 @@ import SettingScreen from './Screens/SettingScreen'
 import DonationHistoryScreen from './Screens/DonationHistoryScreen';
 import PetitionScreen from './Screens/PetitionScreen';
 import GoFundMeScreen from './Screens/GoFundMeScreen';
+import FavoriteScreen from './Screens/FavoritesScareen';
+import EditProfileScreen from './Screens/EditProfileScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -144,6 +146,7 @@ function HomeScreenDrawer() {
   return (
     <Drawer.Navigator initialRouteName="Home " drawerContent={(props) => <CustomDrawerContent {...props} />}>
       <Drawer.Screen name="Home" component={HomeScreen} />
+      <Drawer.Screen name="Favorites" component={FavoriteScreen} />
       <Drawer.Screen name="Donation History & Tax Form" component={DonationHistoryScreen} />
       <Drawer.Screen name="About Us" component={AboutUsScreen} />
       <Drawer.Screen name="Contact Us" component={ContactUsScreen} />
@@ -169,6 +172,7 @@ function App() {
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Petition" component={PetitionScreen} /> 
         <Stack.Screen name="GoFundMe" component={GoFundMeScreen} />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

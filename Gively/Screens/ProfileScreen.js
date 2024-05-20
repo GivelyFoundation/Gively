@@ -2,10 +2,13 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import SwitchSelector from "react-native-switch-selector";
-import CharityCard from '../Components/CharityCard';
-import { charities, user, charityData } from '../MockData';
+import { user, charityData } from '../MockData';
 import styles from '../Styles.js/Styles';
 import PinnedCharityCard from '../Components/PinnedCharityCard';
+import { postsData3 } from '../MockData';
+import DonationCard from '../Components/DonationCard';
+import { PetitionCard } from '../Components/PetitionCard';
+import { GoFundMeCard } from '../Components/GoFundMeCard';
 
 const profilePicture = require('../assets/Images/profileDefault.png');
 const pieChartPlaceHolder = require('../assets/Images/pieChartPlaceHolder.png')
@@ -32,16 +35,25 @@ const Portfolio = () => {
      </View>
   );
 };
-const Favorites = () => {
+const Posts= () => {
+  const renderCard = (item) => {
+    switch (item.postType) {
+      case 'donation':
+        return <DonationCard key={item.id} data={item} />;
+      case 'petition':
+        return <PetitionCard key={item.id} data={item} user = {user}/>;
+      case 'gofundme':
+        return <GoFundMeCard key={item.id} data={item} user = {user}/>;
+      default:
+        return <View key={item.id}><Text>Unknown Post Type</Text></View>;
+    }
+  };
   return (
     <View style={[profileStyles.contentContainer, styles.page]} >
       <ScrollView
-        horizontal={true}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[profileStyles.scrollView]} >
-        {charities.map((charity, index) => (
-          <CharityCard key={index} charity={charity} />
-        ))}
+           {postsData3.map((item) => renderCard(item))}
       </ScrollView>
     </View>
   );
@@ -86,7 +98,10 @@ export default function ProfileScreen({ navigation }) {
 
         <TouchableOpacity>
 
-          <Text style={[profileStyles.editProfile, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>Edit Profile </Text>
+          <Text 
+          style={[profileStyles.editProfile, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}
+          onPress={() => navigation.navigate('EditProfile')}
+          >Edit Profile </Text>
 
         </TouchableOpacity>
 
@@ -146,7 +161,7 @@ export default function ProfileScreen({ navigation }) {
       <CategoryScroll />
 
      {/* < View style={profileStyles.horizontalLine} /> */}
-     <PinnedCharityCard username= {user.username.split(" ")[0]} charity={"Nami"} reason= {"Help me raise money for mental health awareness!"}/>
+     <PinnedCharityCard username= {user.username.split(" ")[0]} charity={"NAMI"} reason= {"Help me raise money for mental health awareness!"}/>
     
 
       <SwitchSelector
@@ -155,7 +170,7 @@ export default function ProfileScreen({ navigation }) {
         hasPadding
         options={[
           { label: "Portfolio", value: "Portfolio" },
-          { label: "Favorites", value: "Favorites" }
+          { label: "Posts", value: "Posts" }
         ]}
         testID="feed-switch-selector"
         accessibilityLabel="feed-switch-selector"
@@ -168,7 +183,7 @@ export default function ProfileScreen({ navigation }) {
         fontSize={16}
         height={30}
       />
-      {activeTab === 'Portfolio' ? < Portfolio /> : <Favorites />}
+      {activeTab === 'Portfolio' ? < Portfolio /> : <Posts />}
     </View>
     
   );
@@ -294,7 +309,7 @@ const profileStyles = StyleSheet.create({
   },
   scrollView: {
     flexGrow: 1,
-    flexDirection: 'row',
+    flexDirection: 'column',
     paddingVertical: 4,
     paddingHorizontal: 30,
   },
