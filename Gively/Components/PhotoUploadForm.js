@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, Image, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
-import { storage } from '../services/firebaseConfig';
+import { storage, firestore } from '../services/firebaseConfig';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { doc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../services/AuthContext';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -65,7 +66,19 @@ export default function PhotoUploadForm({ userData, handleChange, nextStep }) {
           const downloadURL = await getDownloadURL(imageRef);
           handleChange('profilePicture', downloadURL);
           setUploading(false);
-          nextStep();
+
+          // Update Firestore user document with the image URL
+          try {
+            const userDocRef = doc(firestore, 'users', user.uid);
+            await updateDoc(userDocRef, {
+              profilePicture: downloadURL
+            });
+            Alert.alert('Success', 'Profile picture uploaded successfully.');
+            // nextStep();
+          } catch (error) {
+            console.error('Error updating document: ', error);
+            Alert.alert('Error', 'Failed to save profile picture URL.');
+          }
         }
       );
     } catch (error) {
@@ -89,7 +102,7 @@ export default function PhotoUploadForm({ userData, handleChange, nextStep }) {
         <Pressable
           className="bg-green-500 w-full py-3 rounded-full items-center mb-4"
           onPress={handleUpload}
-          disabled={uploading}
+          disabled={uploading || !image}
         >
           <Text className="text-white text-lg">{uploading ? 'Uploading...' : 'Upload Image'}</Text>
         </Pressable>
