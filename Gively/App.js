@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Alert, Button, Image, TouchableOpacity, Text } from 'react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
-import CreateAccountScreen from './Screens/CreateAccountScreen'
+import CreateAccountScreen from './Screens/CreateAccountScreen';
 import HomeScreen from './Screens/HomeScreen'
 import LoginScreen from './Screens/LoginScreen'
 import SplashScreen from './Screens/SplashScreen'
@@ -30,6 +30,8 @@ import friendsIcon from './assets/Icons/Friends.png'
 import profileIcon from './assets/Icons/Profile.png'
 
 import notificationIcon from './assets/Icons/notificationIcon.png'
+
+import { AuthProvider, useAuth } from './services/AuthContext';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -125,17 +127,19 @@ function shouldShowTabBar(route) {
 
 //Home page main drawer sign out handler
 function CustomDrawerContent(props) {
-  const signOut = () => {
-    // Your sign-out logic here
-    Alert.alert("Signed Out", "You have been signed out.");
-    props.navigation.navigate('Splash'); // Navigate to splasj screen after sign-out
+  const { signOut } = useAuth(); // Destructure signOut from the context
+
+  const handleSignOut = async () => {
+    await signOut();
+    Alert.alert("Signed Out", "You have been successfully signed out.");
+    props.navigation.navigate('Splash'); // Navigate to splash screen after sign-out
   };
 
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
-      <View style={{ padding: 20 }}>
-        <Button title="Sign Out" onPress={signOut} />
+      <View style={{padding: 20}}>
+        <Button title="Sign Out" onPress={handleSignOut} />
       </View>
     </DrawerContentScrollView>
   );
@@ -156,6 +160,34 @@ function HomeScreenDrawer() {
   );
 }
 
+//Login Flow Navigation into the Main App
+function RootNavigator() {
+  const { user, loading, isSigningUp } = useAuth();
+
+  if (loading) {
+    return null; // Or a loading spinner if you prefer
+  }
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Splash" component={SplashScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
+      {user && !isSigningUp && (
+        <>
+          <Stack.Screen name="Home" component={MainApp} />
+          <Stack.Screen name="Petition" component={PetitionScreen} /> 
+          <Stack.Screen name="GoFundMe" component={GoFundMeScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+        </>
+        
+      )}
+    </Stack.Navigator>
+  );
+}
+
+
+
 function App() {
   let [fontsLoaded] = useFonts({
     'Montserrat-Regular': require('./assets/Fonts/Montserrat/static/Montserrat-Regular.ttf'),
@@ -163,18 +195,16 @@ function App() {
     'Montserrat-Bold': require('./assets/Fonts/Montserrat/static/Montserrat-Bold.ttf'),
   });
 
+  if (!fontsLoaded) {
+    return null; // Or a loading screen/spinner until the fonts are loaded
+  }
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName='Profile' screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Home" component={MainApp} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
-        <Stack.Screen name="Splash" component={SplashScreen} />
-        <Stack.Screen name="Petition" component={PetitionScreen} /> 
-        <Stack.Screen name="GoFundMe" component={GoFundMeScreen} />
-        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <RootNavigator />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
 export default App;
