@@ -31,19 +31,21 @@ export default function FriendsListScreen({ navigation }) {
 
 
 
+       
+        <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Medium' }]}>People You May Know</Text>
+       
+        <ScrollView>
+          {fakeFriends.map(friend => (
+            <FriendCard key={friend.id} friend={friend} areFollow={friend.areFollowing} />
+          ))}
+        </ScrollView>
+
         <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Medium' }]}>Following</Text>
-        <View style={friendStyles.horizontalLine} />
+        
         <ScrollView>
           {fakeFriendReccomendations.map(friend => (
 
             <FriendCard key={friend.id} friend={friend} areFollowing={friend.areFollowing} />
-          ))}
-        </ScrollView>
-        <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Bold' }]}>People You May Know</Text>
-        <View style={friendStyles.horizontalLine} />
-        <ScrollView>
-          {fakeFriends.map(friend => (
-            <FriendCard key={friend.id} friend={friend} areFollow={friend.areFollowing} />
           ))}
         </ScrollView>
       </ScrollView>
@@ -61,12 +63,13 @@ const friendStyles = StyleSheet.create({
     borderColor: '#E4DFDF',
     borderWidth: 1,
     marginBottom: 10,
-    paddingHorizontal: 10,
     borderRadius: 12,
     marginVertical:10,
     backgroundColor: '#FFF',
-    marginHorizontal:30
+    marginHorizontal:20,
+    paddingHorizontal: 20
 },
+
   horizontalLine: {
   height: 1, // Line thickness
   backgroundColor: '#cccccc', // Line color, light grey
@@ -82,6 +85,7 @@ const friendStyles = StyleSheet.create({
   title: {
   fontSize: 16,
   paddingLeft: 20,
-  paddingTop: 10
+  paddingTop: 10,
+  paddingBottom: 20
 }
 })

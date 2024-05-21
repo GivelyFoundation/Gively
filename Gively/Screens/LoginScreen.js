@@ -1,7 +1,8 @@
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, ImageBackground, Image, StyleSheet } from 'react-native';
-
+import { View, Text, TextInput, Pressable, ImageBackground, Image, StyleSheet, Alert } from 'react-native';
+import { CommonActions } from '@react-navigation/native';
+import { auth } from '../services/firebaseConfig';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -97,7 +98,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 65,
     right: 20,
-    // backgroundColor: 'rgba(0, 0, 0, 0.5)', // Adding background to enhance visibility
     padding: 8, // Slight padding around the text
     borderRadius: 10, // Rounded corners for the button
   },

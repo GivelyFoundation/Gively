@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { View, Alert, Button} from 'react-native';
+import { View, Alert, Button, Image, TouchableOpacity, Text } from 'react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 import CreateAccountScreen from './Screens/CreateAccountScreen';
@@ -14,11 +14,22 @@ import AboutUsScreen from './Screens/AboutUsScreen'
 import ContactUsScreen from './Screens/ContactUsScreen'
 import FAQScreen from './Screens/FAQScreen'
 import SettingScreen from './Screens/SettingScreen'
+import DonationHistoryScreen from './Screens/DonationHistoryScreen';
+import PetitionScreen from './Screens/PetitionScreen';
+import GoFundMeScreen from './Screens/GoFundMeScreen';
+import FavoriteScreen from './Screens/FavoritesScareen';
+import EditProfileScreen from './Screens/EditProfileScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList} from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { useFonts } from 'expo-font';
+import homeIcon from './assets/Icons/Home.png'
+import discoverIcon from './assets/Icons/Discover.png'
+import friendsIcon from './assets/Icons/Friends.png'
+import profileIcon from './assets/Icons/Profile.png'
+
+import notificationIcon from './assets/Icons/notificationIcon.png'
 
 import { AuthProvider, useAuth } from './services/AuthContext';
 
@@ -29,15 +40,75 @@ const Drawer = createDrawerNavigator();
 //Core App Pages Tab Navigator
 function MainApp() {
   return (
-    <Tab.Navigator initialRouteName="Home " screenOptions={({ route }) => ({
-      headerShown: false,
-      tabBarStyle: { display: shouldShowTabBar(route) ? 'flex' : 'none' }
-    })}
+    <Tab.Navigator
+      initialRouteName="Home"
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarStyle: {
+          display: shouldShowTabBar(route) ? 'flex' : 'none',
+          borderTopWidth: 0
+        }
+      })}
+      tabBarOptions={{
+        activeTintColor: '#3FC032',
+      }}
     >
-      <Tab.Screen name="Home " component={HomeScreenDrawer}/>
-      <Tab.Screen name="Discover" component={DiscoverScreen} />
-      <Tab.Screen name="Friends" component={FriendsListScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreenDrawer}
+        options={{
+          tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
+          tabBarIcon: ({ size, focused }) => {
+            return (
+              <Image
+                style={{ width: size, height: size, tintColor: focused ? '#3FC032' : '#8484A9' }}
+                source={homeIcon}
+              />
+            );
+          }
+        }}
+      />
+      <Tab.Screen
+        name="Discover"
+        component={DiscoverScreen}
+        options={{
+          tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
+          tabBarIcon: ({ size, focused }) => {
+            return (
+              <Image
+                style={{ width: size, height: size, tintColor: focused ? '#3FC032' : '#8484A9' }}
+                source={discoverIcon}
+              />
+            );
+          }
+        }} />
+      <Tab.Screen name="Friends"
+        component={FriendsListScreen}
+        options={{
+          tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
+          tabBarIcon: ({ size, focused }) => {
+            return (
+              <Image
+                style={{ width: size, height: size, tintColor: focused ? '#3FC032' : '#8484A9' }}
+                source={friendsIcon}
+              />
+            );
+          }
+        }} />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
+          tabBarIcon: ({ size, focused }) => {
+            return (
+              <Image
+                style={{ width: size, height: size, tintColor: focused ? '#3FC032' : '#8484A9' }}
+                source={profileIcon}
+              />
+            );
+          }
+        }} />
     </Tab.Navigator>
   );
 }
@@ -75,9 +146,12 @@ function CustomDrawerContent(props) {
 }
 
 function HomeScreenDrawer() {
+  
   return (
     <Drawer.Navigator initialRouteName="Home " drawerContent={(props) => <CustomDrawerContent {...props} />}>
       <Drawer.Screen name="Home" component={HomeScreen} />
+      <Drawer.Screen name="Favorites" component={FavoriteScreen} />
+      <Drawer.Screen name="Donation History & Tax Form" component={DonationHistoryScreen} />
       <Drawer.Screen name="About Us" component={AboutUsScreen} />
       <Drawer.Screen name="Contact Us" component={ContactUsScreen} />
       <Drawer.Screen name="Settings" component={SettingScreen} />
@@ -100,11 +174,19 @@ function RootNavigator() {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
       {user && !isSigningUp && (
-        <Stack.Screen name="Home" component={MainApp} />
+        <>
+          <Stack.Screen name="Home" component={MainApp} />
+          <Stack.Screen name="Petition" component={PetitionScreen} /> 
+          <Stack.Screen name="GoFundMe" component={GoFundMeScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+        </>
+        
       )}
     </Stack.Navigator>
   );
 }
+
+
 
 function App() {
   let [fontsLoaded] = useFonts({
@@ -125,5 +207,4 @@ function App() {
     </AuthProvider>
   );
 }
-
 export default App;

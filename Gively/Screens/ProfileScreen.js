@@ -2,36 +2,59 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import SwitchSelector from "react-native-switch-selector";
-import CharityCard from '../Components/CharityCard';
-import { charities, user } from '../MockData';
+import { user, charityData } from '../MockData';
 import styles from '../Styles.js/Styles';
+import PinnedCharityCard from '../Components/PinnedCharityCard';
+import { postsData3 } from '../MockData';
+import DonationCard from '../Components/DonationCard';
+import { PetitionCard } from '../Components/PetitionCard';
+import { GoFundMeCard } from '../Components/GoFundMeCard';
 
 const profilePicture = require('../assets/Images/profileDefault.png');
+const pieChartPlaceHolder = require('../assets/Images/pieChartPlaceHolder.png')
 
+const CharityInfoComponent = ({ charityName, color, percentage }) => {
+  return (
+    <View style={profileStyles.charityCardInfoContainer}>
+      <Text style={[profileStyles.charityName, { color: color }, {fontFamily: 'Montserrat-Medium'}]}>{charityName}</Text>
+      <Text style={[profileStyles.percentage, {fontFamily: 'Montserrat-Medium'}]}>{percentage}%</Text>
+    </View>
+  );
+};
 
 
 const Portfolio = () => {
   return (
-    <View style={[profileStyles.contentContainer, styles.page]}>
-      <Text style={[profileStyles.contentText, { fontFamily: 'Montserrat-Medium' }]}>Portfolio</Text>
-    </View>
+    <View style={[profileStyles.portfolioContainer, styles.page]}>
+      <Image source={pieChartPlaceHolder} style={profileStyles.pieChartPlaceHolder} />
+      <ScrollView>
+      {charityData.map((charity, index) => (
+          <CharityInfoComponent key={index} charityName = {charity.charityName} color = {charity.color} percentage={charity.percentage}/>
+        ))}
+      </ScrollView>
+     </View>
   );
 };
-const Favorites = () => {
+const Posts= () => {
+  const renderCard = (item) => {
+    switch (item.postType) {
+      case 'donation':
+        return <DonationCard key={item.id} data={item} />;
+      case 'petition':
+        return <PetitionCard key={item.id} data={item} user = {user}/>;
+      case 'gofundme':
+        return <GoFundMeCard key={item.id} data={item} user = {user}/>;
+      default:
+        return <View key={item.id}><Text>Unknown Post Type</Text></View>;
+    }
+  };
   return (
     <View style={[profileStyles.contentContainer, styles.page]} >
       <ScrollView
-        horizontal={true}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[profileStyles.scrollView]} >
-        {charities.map((charity, index) => (
-
-          <CharityCard key={index} charity={charity} />
-
-
-        ))}
+           {postsData3.map((item) => renderCard(item))}
       </ScrollView>
-
     </View>
   );
 };
@@ -75,7 +98,10 @@ export default function ProfileScreen({ navigation }) {
 
         <TouchableOpacity>
 
-          <Text style={[profileStyles.editProfile, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>Edit Profile </Text>
+          <Text 
+          style={[profileStyles.editProfile, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}
+          onPress={() => navigation.navigate('EditProfile')}
+          >Edit Profile </Text>
 
         </TouchableOpacity>
 
@@ -134,7 +160,9 @@ export default function ProfileScreen({ navigation }) {
 
       <CategoryScroll />
 
-      <View style={profileStyles.horizontalLine} />
+     {/* < View style={profileStyles.horizontalLine} /> */}
+     <PinnedCharityCard username= {user.username.split(" ")[0]} charity={"NAMI"} reason= {"Help me raise money for mental health awareness!"}/>
+    
 
       <SwitchSelector
         initial={0}
@@ -142,20 +170,22 @@ export default function ProfileScreen({ navigation }) {
         hasPadding
         options={[
           { label: "Portfolio", value: "Portfolio" },
-          { label: "Favorites", value: "Favorites" }
+          { label: "Posts", value: "Posts" }
         ]}
         testID="feed-switch-selector"
         accessibilityLabel="feed-switch-selector"
         style={[profileStyles.switchStyle]}
         selectedColor={'#1C5AA3'}
-        buttonColor={'rgba(28, 90, 163, 0.1)'}
-        borderColor={'#1C5AA3'}
+        buttonColor={'#fff'}
+        backgroundColor={'#F5F5F5'}
+        borderColor={"#AFB1B3"}
+        textColor = {"#AFB1B3"}
         fontSize={16}
         height={30}
       />
-      {activeTab === 'Portfolio' ? < Portfolio /> : <Favorites />}
-
+      {activeTab === 'Portfolio' ? < Portfolio /> : <Posts />}
     </View>
+    
   );
 }
 
@@ -195,7 +225,7 @@ const profileStyles = StyleSheet.create({
   },
   profileInfo: {
     width: '100%',
-    paddingTop: 30,
+    paddingTop: 20,
     paddingLeft: 30,
     paddingRight: 30,
     justifyContent: 'space-between'
@@ -225,6 +255,12 @@ const profileStyles = StyleSheet.create({
     width: 100, // Set the width as needed
     height: 100, // Set the height as needed
   },
+  pieChartPlaceHolder:{
+    width: 150, // Set the width as needed
+    height: 150, // Set the height as needed
+    alignItems: 'center', // Center items horizontally
+    alignSelf: 'center',
+  },
   buttonText: {
     color: '#1C5AA3',
     fontFamily: ''
@@ -232,6 +268,7 @@ const profileStyles = StyleSheet.create({
   bioHeader: {
     fontSize: 15,
     padding: 30,
+    paddingVertical:10,
     paddingBottom: 10,
     textTransform: 'uppercase',
     color: '#1E1E1E'
@@ -245,6 +282,7 @@ const profileStyles = StyleSheet.create({
   interestContainer: {
     alignItems: 'center',
     padding: 10,
+    paddingBottom:14,
     paddingHorizontal: 30
   },
   interestButton: {
@@ -269,14 +307,30 @@ const profileStyles = StyleSheet.create({
     backgroundColor: '#fff',
     height: 1000
   },
-  contentText: {
-    fontSize: 16, // Set font size
-    textAlign: 'center'
-  },
   scrollView: {
     flexGrow: 1,
-    flexDirection: 'row',
-    paddingVertical: 16,
+    flexDirection: 'column',
+    paddingVertical: 4,
     paddingHorizontal: 30,
   },
+  portfolioContainer:{
+    alignContent: 'center',
+    paddingTop: 20,
+    backgroundColor: '#fff',
+    height: 1000
+  },
+  charityCardInfoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal:30,
+    marginTop: 10,
+  },
+  charityName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  percentage: {
+    fontSize: 16,
+    fontWeight: '500',
+  }
 });
