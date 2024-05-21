@@ -2,15 +2,25 @@
   "expo": {
     "name": "Gively",
     "slug": "Gively",
+    "owner": "andyabebaw",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "permissions": [
+      "CAMERA",
+      "MEDIA_LIBRARY"
+    ],
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "fonts": [
+      "./assets/Fonts/Montserrat/static/Montserrat-Regular.ttf",
+      "./assets/Fonts/Montserrat/static/Montserrat-Medium.ttf",
+      "./assets/Fonts/Montserrat/static/Montserrat-Bold.ttf"
+    ],
     "assetBundlePatterns": [
       "**/*"
     ],
