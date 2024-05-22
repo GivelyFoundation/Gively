@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Alert, Button, Image, TouchableOpacity, Text } from 'react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
+
 import CreateAccountScreen from './Screens/CreateAccountScreen';
 import HomeScreen from './Screens/HomeScreen'
 import LoginScreen from './Screens/LoginScreen'
@@ -164,15 +165,13 @@ function HomeScreenDrawer() {
 function RootNavigator() {
   const { user, loading, isSigningUp } = useAuth();
 
+
   if (loading) {
     return null; // Or a loading spinner if you prefer
   }
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Splash" component={SplashScreen} />
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
       {user && !isSigningUp && (
         <>
           <Stack.Screen name="Home" component={MainApp} />
@@ -180,8 +179,10 @@ function RootNavigator() {
           <Stack.Screen name="GoFundMe" component={GoFundMeScreen} />
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
         </>
-        
       )}
+      <Stack.Screen name="Splash" component={SplashScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
     </Stack.Navigator>
   );
 }
