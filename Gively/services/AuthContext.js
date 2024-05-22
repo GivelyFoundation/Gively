@@ -23,14 +23,22 @@ export const AuthProvider = ({ children }) => {
     const signOut = async () => {
         try {
             await firebaseSignOut(auth);
+            console.log('User signed out');
             setUser(null); // Optionally reset user state
         } catch (error) {
             console.error("Failed to sign out: ", error);
         }
     };
 
-    const startSignUp = () => setIsSigningUp(true);
-    const endSignUp = () => setIsSigningUp(false);
+    const startSignUp = () => {
+        console.log('Starting sign up process');
+        setIsSigningUp(true);
+    };
+    
+    const endSignUp = () => {
+        console.log('Ending sign up process');
+        setIsSigningUp(false);
+    };
 
     return (
         <AuthContext.Provider value={{ user, loading, isSigningUp, startSignUp, endSignUp, signOut }}>

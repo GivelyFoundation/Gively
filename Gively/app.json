@@ -16,11 +16,6 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "fonts": [
-      "./assets/Fonts/Montserrat/static/Montserrat-Regular.ttf",
-      "./assets/Fonts/Montserrat/static/Montserrat-Medium.ttf",
-      "./assets/Fonts/Montserrat/static/Montserrat-Bold.ttf"
-    ],
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -28,15 +23,14 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.GivelyFoundation.Gively",
       "googleServiceFile": "./GoogleService-Info.plist"
-
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "bundleIdentifier": "com.GivelyFoundation.Gively",
-      "googleServiceFile": "google-services.json"
+      "package": "com.GivelyFoundation.Gively",
+      "googleServiceFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
