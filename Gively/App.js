@@ -166,9 +166,9 @@ function RootNavigator() {
   const { user, loading, isSigningUp } = useAuth();
 
 
-  if (loading) {
-    return null; // Or a loading spinner if you prefer
-  }
+  // if (loading) {
+  //   return null; // Or a loading spinner if you prefer
+  // }
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>

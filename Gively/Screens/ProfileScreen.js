@@ -9,6 +9,8 @@ import { postsData3 } from '../MockData';
 import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
+import { useAuth } from '../services/AuthContext';
+
 
 const profilePicture = require('../assets/Images/profileDefault.png');
 const pieChartPlaceHolder = require('../assets/Images/pieChartPlaceHolder.png')
@@ -79,9 +81,20 @@ const CategoryScroll = () => {
   );
 };
 
+// const [userData, setUserData] = useState({
+//   username: '',
+//   email: '',
+//   password: '',
+//   confirmPassword:'',
+//   displayName: '',
+//   bio: '',
+//   profilePicture: null,
+// });
+
 export default function ProfileScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Portfolio');
-
+  const { user2, userData } = useAuth();
+  console.log(userData)
 
   // Update activeTab based on the selected value from SwitchSelector
   const handleTabPress = (tab) => {
@@ -109,11 +122,11 @@ export default function ProfileScreen({ navigation }) {
 
       <View style={[profileStyles.row, profileStyles.profileInfo]}>
 
-        <Image source={profilePicture} style={profileStyles.profilePicture} />
+        <Image source={{uri: userData.profilePicture}} style={profileStyles.profilePicture} />
 
         <View style={[profileStyles.column]}>
 
-          <Text style={[profileStyles.userNameText, { fontFamily: 'Montserrat-Medium' }]}> {user.username}</Text>
+          <Text style={[profileStyles.userNameText, { fontFamily: 'Montserrat-Medium' }]}> {userData.displayName}</Text>
 
           <View style={[profileStyles.followRow]}>
 
@@ -154,9 +167,9 @@ export default function ProfileScreen({ navigation }) {
 
       </View>
 
-      <Text style={[profileStyles.bioHeader, { fontFamily: 'Montserrat-Medium' }]}> {user.bioHeader} </Text>
+      <Text style={[profileStyles.bioHeader, { fontFamily: 'Montserrat-Medium' }]}> {userData.displayName} </Text>
 
-      <Text style={[profileStyles.bioMainText, { fontFamily: 'Montserrat-Medium' }]}> {user.mainBioText}</Text>
+      <Text style={[profileStyles.bioMainText, { fontFamily: 'Montserrat-Medium' }]}> {userData.bio}</Text>
 
       <CategoryScroll />
 
@@ -189,6 +202,15 @@ export default function ProfileScreen({ navigation }) {
   );
 }
 
+// const [userData, setUserData] = useState({
+//   username: '',
+//   email: '',
+//   password: '',
+//   confirmPassword:'',
+//   displayName: '',
+//   bio: '',
+//   profilePicture: null,
+// });
 const profileStyles = StyleSheet.create({
   header: {
     paddingTop: 70,
@@ -254,6 +276,7 @@ const profileStyles = StyleSheet.create({
   profilePicture: {
     width: 100, // Set the width as needed
     height: 100, // Set the height as needed
+    borderRadius: 25,
   },
   pieChartPlaceHolder:{
     width: 150, // Set the width as needed

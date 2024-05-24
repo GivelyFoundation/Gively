@@ -44,6 +44,8 @@ const CreateAccountScreen = ({ navigation }) => {
     displayName: '',
     bio: '',
     profilePicture: null,
+    following: [],
+    followers: []
   });
 
   const nextStep = () => {
