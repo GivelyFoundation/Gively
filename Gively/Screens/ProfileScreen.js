@@ -12,7 +12,6 @@ import { GoFundMeCard } from '../Components/GoFundMeCard';
 import { useAuth } from '../services/AuthContext';
 
 
-const profilePicture = require('../assets/Images/profileDefault.png');
 const pieChartPlaceHolder = require('../assets/Images/pieChartPlaceHolder.png')
 
 const CharityInfoComponent = ({ charityName, color, percentage }) => {
@@ -176,7 +175,6 @@ export default function ProfileScreen({ navigation }) {
      {/* < View style={profileStyles.horizontalLine} /> */}
      <PinnedCharityCard username= {user.username.split(" ")[0]} charity={"NAMI"} reason= {"Help me raise money for mental health awareness!"}/>
     
-    <Button onPress={() => navigation.navigate('CharityDetailedScreen')} title="Red Cross"/>
 
       <SwitchSelector
         initial={0}

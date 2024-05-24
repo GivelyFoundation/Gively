@@ -4,7 +4,7 @@ const likeIcon= require('../assets/Icons/heart.png');
 const profilePicture = require('../assets/Images/profileDefault.png');
 
 const DonationCard = ({ data }) => {
-
+console.log()
   const renderOthersElement = () => {
     const firstDonor = data.otherDonationUsers[0];
     switch (data.otherDonationUsers.length) {
@@ -14,7 +14,7 @@ const DonationCard = ({ data }) => {
         const parts = firstDonor.split(' ');
         return (
         <View style = {styles.row}>
-          <Image source={profilePicture} style={styles.profilePicture} />
+          <Image source={{uri: data.originalPostProfileImage}} style={styles.profilePicture} />
           <Text style={{ fontFamily: 'Montserrat-Medium' }}>
             <Text style={{ fontFamily: 'Montserrat-Bold' }}>{parts[0]}</Text> {parts.slice(1).join(' ')}Donated too!
           </Text>

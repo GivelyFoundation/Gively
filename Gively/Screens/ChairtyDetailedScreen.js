@@ -109,7 +109,7 @@ const INTROSPECTION_QUERY = gql`
   }
 `;
 
-
+  
 
 const StarRating = ({ rating }) => {
     const totalStars = 4;
@@ -172,9 +172,8 @@ function CharityDetailedView({ term }) {
                     
                     <Text style={[styles.header, { fontFamily: 'Montserrat-Medium' }]}>MISSION STATEMENT:</Text>
                     <Text style={[styles.text, { fontFamily: 'Montserrat-Medium' }]}>{charity.mission}</Text>
-                    <Text style={[styles.header, { fontFamily: 'Montserrat-Medium' }]}>Organization URL:</Text>
                     <TouchableOpacity  onPress={() => Linking.openURL('https://' + charity.organization_url).catch((err) => console.error("Couldn't load page", err))} style={styles.websiteButton}>
-        <Text style={styles.websiteText}>Click Here to Visit Their Website</Text>
+        <Text style={[styles.websiteText,  {fontFamily: 'Montserrat-Bold'}]}>Click Here to Visit Their Website</Text>
       </TouchableOpacity>
                     <Text style={[styles.header, { fontFamily: 'Montserrat-Medium' }]}>Encompass Score:</Text>
                     <Text style={[styles.text, { fontFamily: 'Montserrat-Medium' }]}>{parseFloat(charity.encompass_score).toFixed(2)}</Text>
@@ -195,40 +194,6 @@ function CharityDetailedView({ term }) {
     );
 }
 
-// Create a component to perform the query
-function SchemaIntrospection() {
-    const { loading, error, data } = useQuery(INTROSPECTION_QUERY);
-  
-    if (loading) return <Text style={{ fontFamily: 'Montserrat-Medium' }}>Loading...</Text>;
-    if (error) {
-      console.error('Error:', error);
-      return <Text style={{ fontFamily: 'Montserrat-Medium' }}>Error! {error.message}</Text>;
-    }
-  
-    return (
-      <ScrollView style={styles.container}>
-        {data.__schema.types.map((type) => (
-          <View key={type.name} style={styles.typeContainer}>
-            <Text style={[styles.header, { fontFamily: 'Montserrat-Medium' }]}>{type.name}</Text>
-            <Text style={[styles.text, { fontFamily: 'Montserrat-Medium' }]}>{type.description}</Text>
-            {type.fields && (
-              <>
-                <Text style={[styles.subHeader, { fontFamily: 'Montserrat-Medium' }]}>Fields:</Text>
-                {type.fields.map((field) => (
-                  <View key={field.name} style={styles.fieldContainer}>
-                    <Text style={[styles.fieldText, { fontFamily: 'Montserrat-Medium' }]}>{field.name} ({field.type.name || field.type.kind})</Text>
-                    {field.description && <Text style={[styles.text, { fontFamily: 'Montserrat-Medium' }]}>{field.description}</Text>}
-                  </View>
-                ))}
-              </>
-            )}
-          </View>
-        ))}
-      </ScrollView>
-    );
-  }
-  
-
 // Use the ApolloProvider to wrap your app
 export default function CharityDetailedScreen({ navigation }) {
     return (
@@ -241,7 +206,7 @@ export default function CharityDetailedScreen({ navigation }) {
                 <CharityDetailedView term="53-0196605" />
                 
                 <TouchableOpacity style={styles.donateButton}>
-                    <Text style={styles.donateButtonText}>Donate</Text>
+                    <Text style={[styles.donateButtonText,  {fontFamily: 'Montserrat-Bold'}]}>Donate</Text>
                 </TouchableOpacity>
                 {/* <SchemaIntrospection /> */}
             </View>
@@ -353,6 +318,7 @@ const styles = StyleSheet.create({
     websiteButton:{
       backgroundColor: '#1C5AA3',
     padding: 10,
+    marginTop:20,
     borderRadius:10
     },
     websiteText:{
