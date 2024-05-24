@@ -20,6 +20,7 @@ import PetitionScreen from './Screens/PetitionScreen';
 import GoFundMeScreen from './Screens/GoFundMeScreen';
 import FavoriteScreen from './Screens/FavoritesScareen';
 import EditProfileScreen from './Screens/EditProfileScreen';
+import CharityDetailedScreen from './Screens/ChairtyDetailedScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -172,14 +173,15 @@ function RootNavigator() {
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {user && !isSigningUp && (
-        <>
+      {/* {user && !isSigningUp && (
+        <> */}
           <Stack.Screen name="Home" component={MainApp} />
           <Stack.Screen name="Petition" component={PetitionScreen} /> 
           <Stack.Screen name="GoFundMe" component={GoFundMeScreen} />
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-        </>
-      )}
+          <Stack.Screen name="CharityDetailedScreen" component={CharityDetailedScreen} />
+        {/* </>
+      )} */}
       <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />

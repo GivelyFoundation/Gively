@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView , Button} from 'react-native';
 import SwitchSelector from "react-native-switch-selector";
 import { user, charityData } from '../MockData';
 import styles from '../Styles.js/Styles';
@@ -176,6 +176,7 @@ export default function ProfileScreen({ navigation }) {
      {/* < View style={profileStyles.horizontalLine} /> */}
      <PinnedCharityCard username= {user.username.split(" ")[0]} charity={"NAMI"} reason= {"Help me raise money for mental health awareness!"}/>
     
+    <Button onPress={() => navigation.navigate('CharityDetailedScreen')} title="Red Cross"/>
 
       <SwitchSelector
         initial={0}
