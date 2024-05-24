@@ -4,15 +4,15 @@ import { View, Image, StyleSheet, TouchableOpacity } from 'react-native';
 const charityLogo = require('../assets/Images/TSA.png');
 
 
-const DiscoverCharityCard = (image) => {
+const DiscoverCharityCard = ({navigation, image}) => {
   return (
     
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card}  onPress={() => navigation.navigate('CharityDetailedScreen')}>
       <Image
         source={charityLogo}
         style={styles.image}
       />
-    </View>
+    </TouchableOpacity>
   );
 };
 
