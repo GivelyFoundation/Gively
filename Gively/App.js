@@ -1,4 +1,5 @@
 import 'react-native-gesture-handler';
+import 'react-native-get-random-values';
 import React from 'react';
 import { View, Alert, Button, Image, TouchableOpacity, Text } from 'react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';

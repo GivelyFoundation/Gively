@@ -5,6 +5,23 @@ import { LinkPreview } from '@flyerhq/react-native-link-preview'
 const likeIcon = require('../assets/Icons/heart.png');
 const profilePicture = require('../assets/Images/profileDefault.png');
 
+const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+  
+    // Options for the date part
+    const optionsDate = { weekday: 'short', month: 'short', day: 'numeric' };
+  
+    // Format the date part
+    const formattedDate = date.toLocaleDateString('en-US', optionsDate);
+  
+    // Options for the time part
+    const optionsTime = { hour: 'numeric', minute: 'numeric', hour12: true };
+  
+    // Format the time part
+    const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
+  
+    return `${formattedDate} • ${formattedTime}`;
+  };
 
 export const PetitionCard = ({ data = {}, user = {} }) => {
     // Ensure there are default values or checks to handle missing data

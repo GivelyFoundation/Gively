@@ -125,7 +125,7 @@ export default function ProfileScreen({ navigation }) {
 
         <View style={[profileStyles.column]}>
 
-          <Text style={[profileStyles.userNameText, { fontFamily: 'Montserrat-Medium' }]}> {userData.displayName}</Text>
+          <Text style={[profileStyles.userNameText, { fontFamily: 'Montserrat-Medium' }]}> {userData.username}</Text>
 
           <View style={[profileStyles.followRow]}>
 
