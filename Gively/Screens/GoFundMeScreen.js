@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, TextInput, ScrollView, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, Button, StyleSheet, TextInput, ScrollView, Alert, TouchableOpacity, Image } from 'react-native';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
 import { useAuth } from '../services/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
-import { collection, addDoc  } from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig';
+import Icon from 'react-native-vector-icons/MaterialIcons'; // Importing Material Icons
+
+const GoFundMeLogo = require('../assets/Images/GoFundMeLogo.jpg');
 
 const GoFundMePreview = ({ data }) => {
     const { userData } = useAuth();
@@ -54,7 +57,7 @@ const GoFundMeScreen = ({ navigation }) => {
                 date: new Date().toISOString(),
                 id: uniqueId,
                 originalDonationPoster: userData.username,
-                originalDonationPosterProfileImage: userData.profilePicture,
+                originalPosterProfileImage: userData.profilePicture,
                 postText: userText,
             };
             setData(newData);
@@ -102,17 +105,26 @@ const GoFundMeScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <ScrollView>
-            <TouchableOpacity style = {styles.backButton}  onPress={() => navigation.goBack()}>
-                            <Text style={[styles.backButtonText, {fontFamily: 'Montserrat-Medium'}]}>Go Back</Text>
-                        </TouchableOpacity>
-                <Text style={[styles.label, {fontFamily: 'Montserrat-Medium'}]}>Caption:</Text>
+                
+                <View style = {styles.row}>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <Icon name="arrow-back" size={30} color="#000" />
+                </TouchableOpacity>
+
+                <Image
+                        source={GoFundMeLogo}
+                        style={styles.goFundMeLogo}
+                    />
+                </View>
+              
+                <Text style={[styles.label, { fontFamily: 'Montserrat-Medium' }]}>Caption:</Text>
                 <TextInput
                     style={styles.input}
                     value={userText}
                     onChangeText={handleUserTextChange}
                     placeholder="Enter your text"
                 />
-                <Text style={[styles.label, {fontFamily: 'Montserrat-Medium'}]}>GoFundMe Link:</Text>
+                <Text style={[styles.label, { fontFamily: 'Montserrat-Medium' }]}>GoFundMe Link:</Text>
                 <TextInput
                     style={styles.input}
                     value={goFundMeLink}
@@ -122,10 +134,10 @@ const GoFundMeScreen = ({ navigation }) => {
                 {containsGoFundMe(goFundMeLink) && (
                     <>
                         <TouchableOpacity style={styles.button} onPress={handleButtonPress}>
-                            <Text style={[styles.buttonText, {fontFamily: 'Montserrat-Medium'}]}>Preview</Text>
+                            <Text style={[styles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>Preview</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.shareButton} onPress={shareGoFundMePress}>
-                            <Text style={[styles.shareButtonText, {fontFamily: 'Montserrat-Medium'}]}>Share GoFundMe Link</Text>
+                            <Text style={[styles.shareButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share GoFundMe Link</Text>
                         </TouchableOpacity>
                     </>
                 )}
@@ -156,6 +168,7 @@ const styles = StyleSheet.create({
         padding: 20,
         paddingTop: 100,
         justifyContent: 'center',
+        backgroundColor: '#fff',
     },
     label: {
         fontSize: 16,
@@ -204,12 +217,22 @@ const styles = StyleSheet.create({
     card: {
         marginVertical: 50,
     },
-    backButtonText:{
+    backButtonText: {
         fontSize: 20
     },
-    backButton:{
+    backButton: {
         fpaddingTop: 60,
         paddingLeft: 20
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingBottom: 40
+    },
+    goFundMeLogo:{
+    width: 150,
+    height: 50
     }
 });
 

@@ -4,7 +4,7 @@ import { View, Text, ScrollView, StyleSheet, TextInput } from 'react-native';
 import styles from '../Styles.js/Styles';
 import { FriendCard } from '../Components/FriendCard';
 import { fakeFriends, fakeFriendReccomendations } from '../MockData';
-
+const GoFundMeLogo = require('../assets/Images/GoFundMeLogo.jpg');
 export default function FriendsListScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, TextInput, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Importing Material Icons
 import { user } from '../MockData';
-
 const profilePicture = require('../assets/Images/profileDefault.png');
 export default EditProfileScreen = ({ navigation }) => {
     const [name, setName] = useState(user.username);
@@ -15,10 +14,10 @@ export default EditProfileScreen = ({ navigation }) => {
         // Add your image editing functionality here
     };
     return (
-        <View style = {styles.container}>
-             <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.backButton}>
-                    <Text style={[{ fontFamily: 'Montserrat-Medium' }, styles.backButtonText]}>Back</Text>
-                </TouchableOpacity>
+        <View style={styles.container}>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.backButton}>
+                <Icon name="arrow-back" size={30} color="#000" />
+            </TouchableOpacity>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.profilePicContainer}>
                     <Image
