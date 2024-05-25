@@ -5,21 +5,21 @@ import styles from '../Styles.js/Styles';
 import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
-import { postsData, postsData2, user } from '../MockData';
 import { collection, getDocs } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig';
-
+import { useAuth } from '../services/AuthContext';
 import WelcomeCard from '../Components/WelcomeCard';
 
-let posts2;
-
-const ForYouFeed = () => {
+const ForYouFeed = ({ posts }) => {
   const renderCard = (item) => {
+    if (!item) {
+      return null;
+    }
     switch (item.PostType) {
       case 'donation':
         return <DonationCard key={item.id} data={item} />;
       case 'petition':
-        return <PetitionCard key={item.id} data={item} user={user} />;
+        return <PetitionCard key={item.id} data={item} />;
       case 'gofundme':
         return <GoFundMeCard key={item.id} data={item} />;
       default:
@@ -30,32 +30,39 @@ const ForYouFeed = () => {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 10 }}>
-        {posts2.map((item) => renderCard(item))}
+        {posts.map((item) => {
+          console.log("Rendering item:", item);
+          return renderCard(item);
+        })}
       </ScrollView>
     </View>
   );
 };
 
-const FriendsFeed = () => {
+const FriendsFeed = ({ posts }) => {
   const renderCard = (item) => {
-    switch (item.postType) {
+    if (!item) {
+      return null;
+    }
+    switch (item.PostType) {
       case 'donation':
         return <DonationCard key={item.id} data={item} />;
       case 'petition':
-        return <PetitionCard key={item.id} data={item} user={user} />;
+        return <PetitionCard key={item.id} data={item} />;
       case 'gofundme':
-        return <GoFundMeCard key={item.id} data={item} user={user} />;
+        return <GoFundMeCard key={item.id} data={item} />;
       default:
         return <View key={item.id}><Text>Unknown Post Type</Text></View>;
     }
   };
 
   return (
-    <View style={[styles.container, styles.page,  homeStyles.scrollViewContainer]}>
-      <ScrollView>
-        <View style={{ padding: 10, flex: 1 }}>
-          {postsData2.map((item) => renderCard(item))}
-        </View>
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 10 }}>
+        {posts.map((item) => {
+          console.log("Rendering item:", item);
+          return renderCard(item);
+        })}
       </ScrollView>
     </View>
   );
@@ -64,6 +71,7 @@ const FriendsFeed = () => {
 export default function HomeFeedScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('For You');
   const [posts, setPosts] = useState([]);
+  const { userData } = useAuth();
 
   const handleTabPress = (tab) => {
     setActiveTab(tab);
@@ -79,7 +87,24 @@ export default function HomeFeedScreen({ navigation }) {
           const serializedData = serializeData(data);
           return { id: doc.id, ...serializedData };
         });
-        setPosts(postsList);
+
+        // Log and clean data
+        console.log("Fetched postsList:", postsList);
+
+        const cleanedPostsList = postsList.map(post => {
+          console.log("Post before cleaning:", post);
+          return JSON.parse(JSON.stringify(post)); // Ensure serializability
+        });
+
+        console.log("Cleaned: ", cleanedPostsList);
+        const validPosts = cleanedPostsList.filter(post => post !== null);
+        console.log("Valid posts:", validPosts);
+
+        if (validPosts.length > 0) {
+          setPosts(validPosts);
+        } else {
+          console.error('No valid posts found');
+        }
       } catch (error) {
         console.error('Error fetching posts:', error);
       }
@@ -87,12 +112,16 @@ export default function HomeFeedScreen({ navigation }) {
 
     fetchPosts();
   }, []);
-  
-  posts2 = posts;
+
+  console.log("Current posts state:", posts);
 
   return (
     <View style={[styles.container, styles.page]}>
-      <WelcomeCard username="Andy" donationAmount={2515} charityCount={25} />
+      {userData && userData.displayName ? (
+        <WelcomeCard username={userData.displayName.split(' ')[0]} donationAmount={2515} charityCount={25} />
+      ) : (
+        <Text>Loading...</Text>
+      )}
       <SwitchSelector
         initial={0}
         onPress={value => handleTabPress(value)}
@@ -112,7 +141,7 @@ export default function HomeFeedScreen({ navigation }) {
         fontSize={16}
         height={30}
       />
-      {activeTab === 'For You' ? <ForYouFeed /> : <FriendsFeed />}
+      {activeTab === 'For You' ? <ForYouFeed posts={posts} /> : <FriendsFeed posts={posts} />}
     </View>
   );
 }
@@ -120,16 +149,15 @@ export default function HomeFeedScreen({ navigation }) {
 const homeStyles = StyleSheet.create({
   switchStyle: {
     paddingTop: 10,
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
     paddingBottom: 20
   },
 });
 
-// Helper function to serialize Firestore data
 function serializeData(data) {
   const serializedData = {};
   for (const key in data) {
-    if (data[key] && typeof data[key] === 'object') {
+    if (data[key] && typeof data[key] === 'object' && !Array.isArray(data[key])) {
       if (data[key].seconds) {
         // Convert Firestore timestamp to string
         serializedData[key] = new Date(data[key].seconds * 1000).toISOString();
