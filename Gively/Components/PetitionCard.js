@@ -1,9 +1,8 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { LinkPreview } from '@flyerhq/react-native-link-preview'
 
 const likeIcon = require('../assets/Icons/heart.png');
-const profilePicture = require('../assets/Images/profileDefault.png');
 
 const formatDate = (dateStr) => {
     const date = new Date(dateStr);
@@ -24,64 +23,52 @@ const formatDate = (dateStr) => {
   };
 
 export const PetitionCard = ({ data = {}, user = {} }) => {
-    // Ensure there are default values or checks to handle missing data
-    const {
-        postDate = '',
-        postText = '',
-        petitionUrl = '',
-        isLiked = false,
-        likesCount = 0
-    } = data;
-
-    const {
-        userName = 'Anonymous'
-    } = user;
-
     return (
-        <View style={styles.card}>
-            <View style={styles.header}>
-                <Image source={profilePicture} style={styles.profileImage} />
-                <View style={styles.posterInfo}>
-                    <View style={styles.column}>
-                        <Text style={styles.posterName}>
-                            <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{user.username}</Text>
-                            <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this Petition:</Text>
-                        </Text>
-                        <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{data.postDate}</Text>
+        <View style={styles.cardContainer}>
+            <View style={styles.card}>
+                <View style={styles.header}>
+                    <Image source={{ uri: data.originalPosterProfileImage }} style={styles.profileImage} />
+                    <View style={styles.posterInfo}>
+                        <View style={styles.column}>
+                            <Text style={styles.posterName}>
+                                <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{data.originalDonationPoster}</Text>
+                                <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this Change.org Petiton:</Text>
+                            </Text>
+                            <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(data.date)}</Text>
+                        </View>
                     </View>
                 </View>
-            </View>
-
-            <Text style={[styles.postText, { fontFamily: 'Montserrat-Medium' }]}>{data.postText}</Text>
-            
-                
-         
-            <LinkPreview text={data.link} />
-            <View style={styles.footer}>
-            <View style={[styles.row]}>
-                <View style={styles.likesContainer}>
-                    <Image source={likeIcon} style={[styles.likeIcon, { tintColor: data.isLiked ? '#EB5757' : '#8484A9' }]} />
-                    <Text style={[styles.likes, { fontFamily: 'Montserrat-Medium', color: data.isLiked ? '#EB5757' : '#8484A9' }]}>{data.likesCount}</Text>
+                <Text style={[styles.postText, { fontFamily: 'Montserrat-Medium' }]}>{data.postText}</Text>
+                <View style={styles.linkView}>
+                    <LinkPreview text={data.Link} />
                 </View>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Share Petition</Text>
-                </TouchableOpacity>
+                <View style={styles.footer}>
+                    <View style={styles.likesContainer}>
+                        <Image source={likeIcon} style={[styles.likeIcon, { tintColor: data.isLiked ? '#EB5757' : '#8484A9' }]} />
+                        <Text style={[styles.likes, { fontFamily: 'Montserrat-Medium', color: data.isLiked ? '#EB5757' : '#8484A9' }]}>{data.Likers}</Text>
+                    </View>
+                    <TouchableOpacity style={styles.button}>
+                        <Text style={styles.buttonText}>Share Petition</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
-
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    cardContainer: {
+        width: '100%',
+        marginHorizontal: 10,
+        marginBottom: 20,
+    },
     card: {
         width: '100%',
         backgroundColor: '#fff',
         borderRadius: 10,
         padding: 15,
-        marginBottom: 20,
         shadowColor: '#5A5A5A',
-        shadowOffset: { width: 0, height: 4 }, // Reduced shadow height for more subtle effect
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
         shadowRadius: 5,
         elevation: 5,
@@ -139,7 +126,8 @@ const styles = StyleSheet.create({
         borderRadius: 7,
         paddingVertical: 10,
         paddingHorizontal: 20,
-        width: '50%', // Consider adjusting or removing width if dynamic sizing is needed
+        width: '50%',
+        marginRight:10
     },
     buttonText: {
         color: '#fff',
@@ -154,5 +142,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '100%',
     },
+    linkView: {
+        paddingRight: 10
+    }
 });
 

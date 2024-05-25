@@ -201,7 +201,7 @@ export default function CharityDetailedScreen({ navigation }) {
         <ApolloProvider client={client}>
             <View style={styles.wrapper}>
                 <TouchableOpacity onPress={() => navigation.navigate("Discover")} style={styles.backButton}>
-                    <Text style={[{ fontFamily: 'Montserrat-Medium' }, styles.backButtonText]}>Back</Text>
+                <Icon name="arrow-back" size={30} color="#000" />
                 </TouchableOpacity>
                 <CharityDetailedView term="53-0196605" />
                 
