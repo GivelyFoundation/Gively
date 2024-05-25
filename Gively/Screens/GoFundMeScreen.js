@@ -54,6 +54,7 @@ const GoFundMeScreen = ({ navigation }) => {
                 date: new Date().toISOString(),
                 id: uniqueId,
                 originalDonationPoster: userData.username,
+                originalDonationPosterProfileImage: userData.profilePicture,
                 postText: userText,
             };
             setData(newData);
@@ -104,7 +105,7 @@ const GoFundMeScreen = ({ navigation }) => {
             <TouchableOpacity style = {styles.backButton}  onPress={() => navigation.goBack()}>
                             <Text style={[styles.backButtonText, {fontFamily: 'Montserrat-Medium'}]}>Go Back</Text>
                         </TouchableOpacity>
-                <Text style={[styles.label, {fontFamily: 'Montserrat-Medium'}]}>User Text:</Text>
+                <Text style={[styles.label, {fontFamily: 'Montserrat-Medium'}]}>Caption:</Text>
                 <TextInput
                     style={styles.input}
                     value={userText}
