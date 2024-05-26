@@ -14,10 +14,15 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setLoading(true); // Ensure loading is set to true while fetching data
+            
             if (currentUser) {
                 try {
                     const userDoc = await getDoc(doc(firestore, 'users', currentUser.uid));
-                    setUserData(userDoc.data());
+                    if (userDoc.exists()) {
+                        setUserData({ uid: currentUser.uid, ...userDoc.data() });
+                    } else {
+                        setUserData(null);
+                    }
                 } catch (error) {
                     console.error("Failed to fetch user data: ", error);
                 }
