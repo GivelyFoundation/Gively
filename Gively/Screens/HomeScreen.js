@@ -26,6 +26,7 @@ const ForYouFeed = ({ posts, refreshing, onRefresh }) => {
         return <View key={item.id}><Text>Unknown Post Type</Text></View>;
     }
   };
+  const sortedPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
     <View style={{ flex: 1 }}>
@@ -35,7 +36,7 @@ const ForYouFeed = ({ posts, refreshing, onRefresh }) => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {posts.map((item) => {
+        {sortedPosts.map((item) => {
           console.log("Rendering item:", item);
           return renderCard(item);
         })}
@@ -60,6 +61,7 @@ const FriendsFeed = ({ posts, refreshing, onRefresh }) => {
         return <View key={item.id}><Text>Unknown Post Type</Text></View>;
     }
   };
+  const sortedPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
     <View style={{ flex: 1 }}>
@@ -69,7 +71,7 @@ const FriendsFeed = ({ posts, refreshing, onRefresh }) => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {posts.map((item) => {
+        {sortedPosts.map((item) => {
           console.log("Rendering item:", item);
           return renderCard(item);
         })}

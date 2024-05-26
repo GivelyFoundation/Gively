@@ -94,7 +94,8 @@ const Posts = () => {
         return <View key={item.id}><Text>Unknown Post Type</Text></View>;
     }
   };
-  
+  const sortedPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
   return (
     <View style={[profileStyles.contentContainer, styles.page]}>
       <ScrollView
@@ -103,7 +104,7 @@ const Posts = () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {posts.map((item) => renderCard(item))}
+        {sortedPosts.map((item) => renderCard(item))}
         <View style = {profileStyles.spacer}/>
       </ScrollView>
     </View>
