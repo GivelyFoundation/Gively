@@ -56,14 +56,13 @@ const Posts = () => {
         const serializedData = serializeData(data);
         return { id: doc.id, ...serializedData };
       });
-
+  
       const cleanedPostsList = postsList.map(post => JSON.parse(JSON.stringify(post)));
       const validPosts = cleanedPostsList.filter(post => post !== null);
-      const validPosts2 = validPosts .filter(post => post => post.originalDonationPoster === userData.displayName)
-
-
-      if (validPosts.length > 0) {
-        setPosts(validPosts2);
+      const validPostsByUser = validPosts.filter(post =>  post.originalDonationPoster === userData.username);
+  
+      if (validPostsByUser.length > 0) {
+        setPosts(validPostsByUser);
       } else {
         console.error('No valid posts found');
       }
@@ -71,20 +70,20 @@ const Posts = () => {
       console.error('Error fetching posts:', error);
     }
   };
-
+  
   useEffect(() => {
     fetchPosts();
   }, []);
-
+  
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchPosts();
     setRefreshing(false);
   };
-
+  
   const renderCard = (item) => {
-    console.log("here")
-    console.log(item)
+    console.log("here");
+    console.log(item);
     switch (item.PostType) {
       case 'donation':
         return <DonationCard key={item.id} data={item} />;
@@ -96,22 +95,20 @@ const Posts = () => {
         return <View key={item.id}><Text>Unknown Post Type</Text></View>;
     }
   };
+  
   return (
-    <View style={[profileStyles.contentContainer, styles.page]} >
-
+    <View style={[profileStyles.contentContainer, styles.page]}>
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 10 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        
-        {posts.map((item) =>
-        renderCard(item))}
-
+        {posts.map((item) => renderCard(item))}
       </ScrollView>
     </View>
   );
+  
 };
 
 
