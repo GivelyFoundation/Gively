@@ -59,8 +59,7 @@ const Posts = () => {
   
       const cleanedPostsList = postsList.map(post => JSON.parse(JSON.stringify(post)));
       const validPosts = cleanedPostsList.filter(post => post !== null);
-      const validPostsByUser = validPosts.filter(post =>  post.originalDonationPoster === userData.username);
-  
+      const validPostsByUser = validPosts.filter(post =>  post.uid === userData.uid);
       if (validPostsByUser.length > 0) {
         setPosts(validPostsByUser);
       } else {
