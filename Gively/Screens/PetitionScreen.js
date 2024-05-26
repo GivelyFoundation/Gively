@@ -59,6 +59,7 @@ const  PetitionScreen = ({ navigation }) => {
                 originalDonationPoster: userData.username,
                 originalPosterProfileImage: userData.profilePicture,
                 postText: userText,
+                uid: userData.uid
             };
             setData(newData);
             setIsVisible(true);
@@ -67,7 +68,7 @@ const  PetitionScreen = ({ navigation }) => {
             setIsVisible(false);
             Alert.alert(
                 "Invalid Input",
-                "There's an error with your inputs. Please remember that the GoFundMe link input cannot be empty and must contain 'change.org'.",
+                "There's an error with your inputs. Please remember that the Change.org link input cannot be empty and must contain 'change.org'.",
                 [{ text: "OK" }]
             );
         }
