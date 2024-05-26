@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView , Button} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import SwitchSelector from "react-native-switch-selector";
 import { user, charityData } from '../MockData';
 import styles from '../Styles.js/Styles';
@@ -10,15 +10,17 @@ import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
 import { useAuth } from '../services/AuthContext';
+import { collection, getDocs } from 'firebase/firestore';
 
+import { firestore } from '../services/firebaseConfig';
 
 const pieChartPlaceHolder = require('../assets/Images/pieChartPlaceHolder.png')
 
 const CharityInfoComponent = ({ charityName, color, percentage }) => {
   return (
     <View style={profileStyles.charityCardInfoContainer}>
-      <Text style={[profileStyles.charityName, { color: color }, {fontFamily: 'Montserrat-Medium'}]}>{charityName}</Text>
-      <Text style={[profileStyles.percentage, {fontFamily: 'Montserrat-Medium'}]}>{percentage}%</Text>
+      <Text style={[profileStyles.charityName, { color: color }, { fontFamily: 'Montserrat-Medium' }]}>{charityName}</Text>
+      <Text style={[profileStyles.percentage, { fontFamily: 'Montserrat-Medium' }]}>{percentage}%</Text>
     </View>
   );
 };
@@ -29,32 +31,84 @@ const Portfolio = () => {
     <View style={[profileStyles.portfolioContainer, styles.page]}>
       <Image source={pieChartPlaceHolder} style={profileStyles.pieChartPlaceHolder} />
       <ScrollView>
-      {charityData.map((charity, index) => (
-          <CharityInfoComponent key={index} charityName = {charity.charityName} color = {charity.color} percentage={charity.percentage}/>
+        {charityData.map((charity, index) => (
+          <CharityInfoComponent key={index} charityName={charity.charityName} color={charity.color} percentage={charity.percentage} />
         ))}
       </ScrollView>
-     </View>
+    </View>
   );
 };
-const Posts= () => {
+const Posts = () => {
+  const [posts, setPosts] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const { userData } = useAuth();
+
+  const handleTabPress = (tab) => {
+    setActiveTab(tab);
+  };
+
+  const fetchPosts = async () => {
+    try {
+      const postsCollection = collection(firestore, 'Posts');
+      const postsSnapshot = await getDocs(postsCollection);
+      const postsList = postsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        const serializedData = serializeData(data);
+        return { id: doc.id, ...serializedData };
+      });
+
+      const cleanedPostsList = postsList.map(post => JSON.parse(JSON.stringify(post)));
+      const validPosts = cleanedPostsList.filter(post => post !== null);
+      const validPosts2 = validPosts .filter(post => post => post.originalDonationPoster === userData.displayName)
+
+
+      if (validPosts.length > 0) {
+        setPosts(validPosts2);
+      } else {
+        console.error('No valid posts found');
+      }
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchPosts();
+    setRefreshing(false);
+  };
+
   const renderCard = (item) => {
-    switch (item.postType) {
+    console.log("here")
+    console.log(item)
+    switch (item.PostType) {
       case 'donation':
         return <DonationCard key={item.id} data={item} />;
       case 'petition':
-        return <PetitionCard key={item.id} data={item} user = {user}/>;
+        return <PetitionCard key={item.id} data={item} user={user} />;
       case 'gofundme':
-        return <GoFundMeCard key={item.id} data={item} user = {user}/>;
+        return <GoFundMeCard key={item.id} data={item} user={user} />;
       default:
         return <View key={item.id}><Text>Unknown Post Type</Text></View>;
     }
   };
   return (
     <View style={[profileStyles.contentContainer, styles.page]} >
+
       <ScrollView
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={[profileStyles.scrollView]} >
-           {postsData3.map((item) => renderCard(item))}
+        contentContainerStyle={{ paddingHorizontal: 10 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        
+        {posts.map((item) =>
+        renderCard(item))}
+
       </ScrollView>
     </View>
   );
@@ -110,9 +164,9 @@ export default function ProfileScreen({ navigation }) {
 
         <TouchableOpacity>
 
-          <Text 
-          style={[profileStyles.editProfile, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}
-          onPress={() => navigation.navigate('EditProfile')}
+          <Text
+            style={[profileStyles.editProfile, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}
+            onPress={() => navigation.navigate('EditProfile')}
           >Edit Profile </Text>
 
         </TouchableOpacity>
@@ -121,7 +175,7 @@ export default function ProfileScreen({ navigation }) {
 
       <View style={[profileStyles.row, profileStyles.profileInfo]}>
 
-        <Image source={{uri: userData.profilePicture}} style={profileStyles.profilePicture} />
+        <Image source={{ uri: userData.profilePicture }} style={profileStyles.profilePicture} />
 
         <View style={[profileStyles.column]}>
 
@@ -172,9 +226,9 @@ export default function ProfileScreen({ navigation }) {
 
       <CategoryScroll />
 
-     {/* < View style={profileStyles.horizontalLine} /> */}
-     <PinnedCharityCard username= {user.username.split(" ")[0]} charity={"NAMI"} reason= {"Help me raise money for mental health awareness!"}/>
-    
+      {/* < View style={profileStyles.horizontalLine} /> */}
+      <PinnedCharityCard username={user.username.split(" ")[0]} charity={"NAMI"} reason={"Help me raise money for mental health awareness!"} />
+
 
       <SwitchSelector
         initial={0}
@@ -191,13 +245,13 @@ export default function ProfileScreen({ navigation }) {
         buttonColor={'#fff'}
         backgroundColor={'#F5F5F5'}
         borderColor={"#AFB1B3"}
-        textColor = {"#AFB1B3"}
+        textColor={"#AFB1B3"}
         fontSize={16}
         height={30}
       />
       {activeTab === 'Portfolio' ? < Portfolio /> : <Posts />}
     </View>
-    
+
   );
 }
 
@@ -277,7 +331,7 @@ const profileStyles = StyleSheet.create({
     height: 100, // Set the height as needed
     borderRadius: 25,
   },
-  pieChartPlaceHolder:{
+  pieChartPlaceHolder: {
     width: 150, // Set the width as needed
     height: 150, // Set the height as needed
     alignItems: 'center', // Center items horizontally
@@ -290,7 +344,7 @@ const profileStyles = StyleSheet.create({
   bioHeader: {
     fontSize: 15,
     padding: 30,
-    paddingVertical:10,
+    paddingVertical: 10,
     paddingBottom: 10,
     textTransform: 'uppercase',
     color: '#1E1E1E'
@@ -304,7 +358,7 @@ const profileStyles = StyleSheet.create({
   interestContainer: {
     alignItems: 'center',
     padding: 10,
-    paddingBottom:14,
+    paddingBottom: 14,
     paddingHorizontal: 30
   },
   interestButton: {
@@ -335,7 +389,7 @@ const profileStyles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 30,
   },
-  portfolioContainer:{
+  portfolioContainer: {
     alignContent: 'center',
     paddingTop: 20,
     backgroundColor: '#fff',
@@ -344,7 +398,7 @@ const profileStyles = StyleSheet.create({
   charityCardInfoContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginHorizontal:30,
+    marginHorizontal: 30,
     marginTop: 10,
   },
   charityName: {
@@ -356,3 +410,21 @@ const profileStyles = StyleSheet.create({
     fontWeight: '500',
   }
 });
+
+function serializeData(data) {
+  const serializedData = {};
+  for (const key in data) {
+    if (data[key] && typeof data[key] === 'object' && !Array.isArray(data[key])) {
+      if (data[key].seconds) {
+        // Convert Firestore timestamp to string
+        serializedData[key] = new Date(data[key].seconds * 1000).toISOString();
+      } else {
+        // Recursively serialize nested objects
+        serializedData[key] = serializeData(data[key]);
+      }
+    } else {
+      serializedData[key] = data[key];
+    }
+  }
+  return serializedData;
+}
