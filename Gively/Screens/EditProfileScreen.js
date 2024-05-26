@@ -1,18 +1,44 @@
-import React, { useState } from 'react';
-import { View, TextInput, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Importing Material Icons
-import { user } from '../MockData';
-const profilePicture = require('../assets/Images/profileDefault.png');
-export default EditProfileScreen = ({ navigation }) => {
-    const [name, setName] = useState(user.username);
-    const [bioHeader, setBioHeader] = useState(user.bioHeader);
-    const [bio, setBio] = useState(user.mainBioText);
-    const [charity, setCharity] = useState('NAMI');
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useAuth } from '../services/AuthContext';
+import { firestore } from '../services/firebaseConfig';
+import { doc, updateDoc } from 'firebase/firestore';
 
-    const handleEditPicture = () => {
-        console.log('Edit Picture');
-        // Add your image editing functionality here
+export default EditProfileScreen = ({ navigation }) => {
+    const { user2, userData } = useAuth();
+
+    const [displayName, setDisplayName] = useState(userData.displayName);
+    const [bio, setBio] = useState(userData.bio);
+    const [charity, setCharity] = useState('');
+    const [profilePicture, setProfilePicture] = useState(userData.profilePicture);
+    const [isChanged, setIsChanged] = useState(false);
+
+    useEffect(() => {
+        if (displayName !== userData.displayName || bio !== userData.bio || profilePicture !== userData.profilePicture) {
+            setIsChanged(true);
+        } else {
+            setIsChanged(false);
+        }
+    }, [displayName, bio, profilePicture]);
+
+    const handleSaveChanges = async () => {
+        console.log("here")
+        try {
+            const userDocRef = doc(firestore, 'users', userData.uid);
+            await updateDoc(userDocRef, {
+                displayName: displayName,
+                bio: bio,
+                profilePicture: profilePicture,
+            });
+            console.log('User profile updated successfully!');
+            navigation.navigate('Profile');
+        } catch (error) {
+            console.error('Error updating user profile: ', error);
+            Alert.alert('Error', 'Failed to update profile details. Please try again.');
+        }
     };
+
     return (
         <View style={styles.container}>
             <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.backButton}>
@@ -21,25 +47,19 @@ export default EditProfileScreen = ({ navigation }) => {
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.profilePicContainer}>
                     <Image
-                        source={profilePicture}
+                        source={{ uri: profilePicture }}
                         style={styles.profilePic}
                     />
-                    <TouchableOpacity style={styles.iconContainer} onPress={handleEditPicture} >
+                    <TouchableOpacity style={styles.iconContainer}>
                         <Icon name="edit" size={24} color="#FFF" />
                     </TouchableOpacity>
                 </View>
 
                 <TextInput
                     style={styles.input}
-                    onChangeText={setName}
-                    value={name}
-                    placeholder="Your Name"
-                />
-                <TextInput
-                    style={styles.input}
-                    onChangeText={setBioHeader}
-                    value={bioHeader}
-                    placeholder="Bio Header"
+                    onChangeText={setDisplayName}
+                    value={displayName}
+                    placeholder="Display Name"
                 />
                 <TextInput
                     style={styles.textArea}
@@ -55,34 +75,33 @@ export default EditProfileScreen = ({ navigation }) => {
                     value={charity}
                     placeholder="Search and pin your favorite charity"
                 />
-
             </ScrollView>
             <TouchableOpacity
-                style={styles.donateButton}
-                onPress={() => navigation.navigate('Profile')}
+                style={[styles.donateButton, !isChanged && styles.disabledButton]}
+                onPress={handleSaveChanges}
+                disabled={!isChanged}
             >
                 <Text style={styles.donateButtonText}>Save Changes</Text>
             </TouchableOpacity>
         </View>
-
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
     },
     scrollContainer: {
         padding: 20,
         alignItems: 'center',
-        paddingTop: 80
+        paddingTop: 80,
     },
     backButton: {
         paddingTop: 60,
-        paddingLeft: 20
+        paddingLeft: 20,
     },
     backButtonText: {
-        fontSize: 20
+        fontSize: 20,
     },
     iconContainer: {
         position: 'absolute',
@@ -108,7 +127,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         borderWidth: 1,
         padding: 10,
-        borderRadius: 10
+        borderRadius: 10,
     },
     textArea: {
         height: 100,
@@ -117,7 +136,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         padding: 10,
         textAlignVertical: 'top',
-        borderRadius: 10
+        borderRadius: 10,
     },
     donateButton: {
         position: 'absolute',
@@ -139,5 +158,7 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
     },
+    disabledButton: {
+        backgroundColor: '#cccccc', // Gray color for disabled state
+    },
 });
-
