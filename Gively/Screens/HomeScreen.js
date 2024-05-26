@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import SwitchSelector from "react-native-switch-selector";
 import styles from '../Styles.js/Styles';
 import DonationCard from '../Components/DonationCard';
@@ -10,7 +10,7 @@ import { firestore } from '../services/firebaseConfig';
 import { useAuth } from '../services/AuthContext';
 import WelcomeCard from '../Components/WelcomeCard';
 
-const ForYouFeed = ({ posts }) => {
+const ForYouFeed = ({ posts, refreshing, onRefresh }) => {
   const renderCard = (item) => {
     if (!item) {
       return null;
@@ -29,7 +29,12 @@ const ForYouFeed = ({ posts }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 10 }}>
+      <ScrollView 
+        contentContainerStyle={{ paddingHorizontal: 10 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {posts.map((item) => {
           console.log("Rendering item:", item);
           return renderCard(item);
@@ -39,7 +44,7 @@ const ForYouFeed = ({ posts }) => {
   );
 };
 
-const FriendsFeed = ({ posts }) => {
+const FriendsFeed = ({ posts, refreshing, onRefresh }) => {
   const renderCard = (item) => {
     if (!item) {
       return null;
@@ -58,7 +63,12 @@ const FriendsFeed = ({ posts }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 10 }}>
+      <ScrollView 
+        contentContainerStyle={{ paddingHorizontal: 10 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {posts.map((item) => {
           console.log("Rendering item:", item);
           return renderCard(item);
@@ -67,53 +77,50 @@ const FriendsFeed = ({ posts }) => {
     </View>
   );
 };
+
 
 export default function HomeFeedScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('For You');
   const [posts, setPosts] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   const { userData } = useAuth();
 
   const handleTabPress = (tab) => {
     setActiveTab(tab);
   };
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const postsCollection = collection(firestore, 'Posts');
-        const postsSnapshot = await getDocs(postsCollection);
-        const postsList = postsSnapshot.docs.map(doc => {
-          const data = doc.data();
-          const serializedData = serializeData(data);
-          return { id: doc.id, ...serializedData };
-        });
+  const fetchPosts = async () => {
+    try {
+      const postsCollection = collection(firestore, 'Posts');
+      const postsSnapshot = await getDocs(postsCollection);
+      const postsList = postsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        const serializedData = serializeData(data);
+        return { id: doc.id, ...serializedData };
+      });
 
-        // Log and clean data
-        console.log("Fetched postsList:", postsList);
+      const cleanedPostsList = postsList.map(post => JSON.parse(JSON.stringify(post)));
+      const validPosts = cleanedPostsList.filter(post => post !== null);
 
-        const cleanedPostsList = postsList.map(post => {
-          console.log("Post before cleaning:", post);
-          return JSON.parse(JSON.stringify(post)); // Ensure serializability
-        });
-
-        console.log("Cleaned: ", cleanedPostsList);
-        const validPosts = cleanedPostsList.filter(post => post !== null);
-        console.log("Valid posts:", validPosts);
-
-        if (validPosts.length > 0) {
-          setPosts(validPosts);
-        } else {
-          console.error('No valid posts found');
-        }
-      } catch (error) {
-        console.error('Error fetching posts:', error);
+      if (validPosts.length > 0) {
+        setPosts(validPosts);
+      } else {
+        console.error('No valid posts found');
       }
-    };
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchPosts();
   }, []);
 
-  console.log("Current posts state:", posts);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchPosts();
+    setRefreshing(false);
+  };
 
   return (
     <View style={[styles.container, styles.page]}>
@@ -141,7 +148,10 @@ export default function HomeFeedScreen({ navigation }) {
         fontSize={16}
         height={30}
       />
-      {activeTab === 'For You' ? <ForYouFeed posts={posts} /> : <FriendsFeed posts={posts} />}
+      {activeTab === 'For You' ? 
+        <ForYouFeed posts={posts} refreshing={refreshing} onRefresh={onRefresh} /> : 
+        <FriendsFeed posts={posts} refreshing={refreshing} onRefresh={onRefresh} />
+      }
     </View>
   );
 }
