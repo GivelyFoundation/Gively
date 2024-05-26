@@ -105,6 +105,7 @@ const Posts = () => {
         }
       >
         {posts.map((item) => renderCard(item))}
+        <View style = {profileStyles.spacer}/>
       </ScrollView>
     </View>
   );
@@ -247,6 +248,7 @@ export default function ProfileScreen({ navigation }) {
         height={30}
       />
       {activeTab === 'Portfolio' ? < Portfolio /> : <Posts />}
+      
     </View>
 
   );
@@ -405,6 +407,9 @@ const profileStyles = StyleSheet.create({
   percentage: {
     fontSize: 16,
     fontWeight: '500',
+  },
+  spacer:{
+    height: 700
   }
 });
 
