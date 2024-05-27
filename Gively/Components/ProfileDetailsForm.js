@@ -162,20 +162,6 @@ export default function ProfileDetailsForm({ userData, handleChange, nextStep })
 };
 
 const styles = StyleSheet.create({
-  logo: {
-    width: 80,
-    height: 80,
-    position: 'absolute',
-    top: 45,
-    left: 20,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 65,
-    right: 20,
-    padding: 8,
-    borderRadius: 10,
-  },
   loginForm: {
     marginTop: '40%',
     minHeight: '70%',
@@ -184,5 +170,5 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: 30,
     paddingBottom: 30,
-  }
+  },
 });

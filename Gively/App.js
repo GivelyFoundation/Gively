@@ -166,23 +166,26 @@ function RootNavigator() {
   const { user, loading, isSigningUp } = useAuth();
 
 
-  if (loading) {
-    return null; // Or a loading spinner if you prefer
-  }
+  // if (loading) {
+  //   return null; // Or a loading spinner if you prefer
+  // }
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {user && !isSigningUp && (
+      {user && !isSigningUp ? (
         <>
           <Stack.Screen name="Home" component={MainApp} />
-          <Stack.Screen name="Petition" component={PetitionScreen} /> 
+          <Stack.Screen name="Petition" component={PetitionScreen} />
           <Stack.Screen name="GoFundMe" component={GoFundMeScreen} />
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
         </>
+      ) : (
+        <>
+          <Stack.Screen name="Splash" component={SplashScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
+        </>
       )}
-      <Stack.Screen name="Splash" component={SplashScreen} />
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="CreateAccount" component={CreateAccountScreen} />
     </Stack.Navigator>
   );
 }

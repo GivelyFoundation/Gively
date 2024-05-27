@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { View, SafeAreaView, ImageBackground, Image, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, ImageBackground, Image, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import StepIndicator from 'react-native-step-indicator';
 import SignUpForm from '../Components/SignUpForm';
 import ProfileDetailsForm from '../Components/ProfileDetailsForm';
 import PhotoUploadForm from '../Components/PhotoUploadForm';
+import InterestsSelectionForm from '../Components/InterestsSelectionForm';
+import { useAuth } from '../services/AuthContext';
 
-const labels = ["Sign Up","Profile Details","Photo Upload"];
+const labels = ["Sign Up", "Profile Details", "Photo Upload", "Interests"];
 
 const customStyles = {
   stepIndicatorSize: 25,
-  currentStepIndicatorSize:30,
+  currentStepIndicatorSize: 30,
   separatorStrokeWidth: 2,
   currentStepStrokeWidth: 3,
   stepStrokeCurrentColor: '#fe7013',
@@ -29,25 +31,24 @@ const customStyles = {
   labelColor: '#999999',
   labelSize: 13,
   currentStepLabelColor: '#fe7013'
-}
+};
 
 const CreateAccountScreen = ({ navigation }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [pageMessage, setPageMessage] = useState("Create Account\nSign in and start giving!");
   const [image, setImage] = useState(require('../assets/Images/auth-background.png'));
   const [accountCreated, setAccountCreated] = useState(false);
   const [userData, setUserData] = useState({
     username: '',
     email: '',
     password: '',
-    confirmPassword:'',
+    confirmPassword: '',
     displayName: '',
     bio: '',
     profilePicture: null,
   });
 
   const nextStep = () => {
-    setCurrentStep((prevStep) => (prevStep < 2 ? prevStep + 1 : prevStep));
+    setCurrentStep((prevStep) => (prevStep < 3 ? prevStep + 1 : prevStep));
   };
 
   const prevStep = () => {
@@ -76,16 +77,17 @@ const CreateAccountScreen = ({ navigation }) => {
       [name]: value
     }));
   };
-  
 
   const renderStep = () => {
     switch (currentStep) {
       case 0:
-        return <SignUpForm setAccountCreated={setAccountCreated} accountCreated={accountCreated} navigation={navigation} userData={userData} handleChange={handleChange} nextStep={nextStep}/>;
+        return <SignUpForm setAccountCreated={setAccountCreated} accountCreated={accountCreated} navigation={navigation} userData={userData} handleChange={handleChange} nextStep={nextStep} />;
       case 1:
-        return <ProfileDetailsForm userData={userData} handleChange={handleChange} nextStep={nextStep}/>;
+        return <ProfileDetailsForm userData={userData} handleChange={handleChange} nextStep={nextStep} />;
       case 2:
-        return <PhotoUploadForm userData={userData} handleChange={handleChange} />;
+        return <PhotoUploadForm userData={userData} handleChange={handleChange} nextStep={nextStep} />;
+      case 3:
+        return <InterestsSelectionForm userData={userData} navigation={navigation} handleChange={handleChange} nextStep={nextStep} />;
       default:
         return null;
     }
@@ -119,7 +121,7 @@ const CreateAccountScreen = ({ navigation }) => {
           customStyles={customStyles}
           currentPosition={currentStep}
           labels={labels}
-          stepCount={3}
+          stepCount={4}
         />
       </View>
       {renderStep()}
@@ -155,9 +157,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 65,
     right: 20,
-    // backgroundColor: 'rgba(0, 0, 0, 0.5)', // Adding background to enhance visibility
-    padding: 8, // Slight padding around the text
-    borderRadius: 10, // Rounded corners for the button
+    padding: 8,
+    borderRadius: 10,
     zIndex: 20,
   }
 });
