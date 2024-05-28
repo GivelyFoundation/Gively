@@ -9,6 +9,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig';
 import { useAuth } from '../services/AuthContext';
 import WelcomeCard from '../Components/WelcomeCard';
+import FirstTimeDonationCard from '../Components/FirstTimeDonationCard';
 
 const ForYouFeed = ({ posts, refreshing, onRefresh }) => {
   const renderCard = (item) => {
@@ -22,6 +23,8 @@ const ForYouFeed = ({ posts, refreshing, onRefresh }) => {
         return <PetitionCard key={item.id} data={item} />;
       case 'gofundme':
         return <GoFundMeCard key={item.id} data={item} />;
+      case 'firstTime':
+        return <FirstTimeDonationCard key={item.id} data={item} />;
       default:
         return <View key={item.id}><Text>Unknown Post Type</Text></View>;
     }
@@ -30,7 +33,7 @@ const ForYouFeed = ({ posts, refreshing, onRefresh }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={{ paddingHorizontal: 10 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -57,6 +60,8 @@ const FriendsFeed = ({ posts, refreshing, onRefresh }) => {
         return <PetitionCard key={item.id} data={item} />;
       case 'gofundme':
         return <GoFundMeCard key={item.id} data={item} />;
+      case 'firstTime':
+        return <FirstTimeDonationCard key={item.id} data={item} />;
       default:
         return <View key={item.id}><Text>Unknown Post Type</Text></View>;
     }
@@ -65,7 +70,7 @@ const FriendsFeed = ({ posts, refreshing, onRefresh }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={{ paddingHorizontal: 10 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -150,8 +155,8 @@ export default function HomeFeedScreen({ navigation }) {
         fontSize={16}
         height={30}
       />
-      {activeTab === 'For You' ? 
-        <ForYouFeed posts={posts} refreshing={refreshing} onRefresh={onRefresh} /> : 
+      {activeTab === 'For You' ?
+        <ForYouFeed posts={posts} refreshing={refreshing} onRefresh={onRefresh} /> :
         <FriendsFeed posts={posts} refreshing={refreshing} onRefresh={onRefresh} />
       }
     </View>
