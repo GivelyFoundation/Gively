@@ -3,8 +3,27 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 const likeIcon= require('../assets/Icons/heart.png');
 const profilePicture = require('../assets/Images/profileDefault.png');
 
+
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+
+  // Options for the date part
+  const optionsDate = { weekday: 'short', month: 'short', day: 'numeric' };
+
+  // Format the date part
+  const formattedDate = date.toLocaleDateString('en-US', optionsDate);
+
+  // Options for the time part
+  const optionsTime = { hour: 'numeric', minute: 'numeric', hour12: true };
+
+  // Format the time part
+  const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
+
+  return `${formattedDate} • ${formattedTime}`;
+};
+
 const DonationCard = ({ data }) => {
-console.log()
+
   const renderOthersElement = () => {
     const firstDonor = data.otherDonationUsers[0];
     switch (data.otherDonationUsers.length) {
@@ -14,7 +33,7 @@ console.log()
         const parts = firstDonor.split(' ');
         return (
         <View style = {styles.row}>
-          <Image source={{uri: data.originalPostProfileImage}} style={styles.profilePicture} />
+          <Image source={profilePicture} style={styles.profilePicture} />
           <Text style={{ fontFamily: 'Montserrat-Medium' }}>
             <Text style={{ fontFamily: 'Montserrat-Bold' }}>{parts[0]}</Text> {parts.slice(1).join(' ')}Donated too!
           </Text>
@@ -43,7 +62,7 @@ console.log()
               <Text style={{ fontFamily: 'Montserrat-Medium' }}> donated to </Text>
               <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{data.charityName}</Text>
             </Text>
-            <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{data.date}</Text>
+            <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(data.data)}</Text>
           </View>
         </View>
       </View>
