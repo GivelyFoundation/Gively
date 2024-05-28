@@ -4,6 +4,25 @@ import { getUserByUsername } from '../services/userService';
 const likeIcon= require('../assets/Icons/heart.png');
 const welcome = require ('../assets/Images/Welcome.png')
 
+
+const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+
+    // Options for the date part
+    const optionsDate = { weekday: 'short', month: 'short', day: 'numeric' };
+
+    // Format the date part
+    const formattedDate = date.toLocaleDateString('en-US', optionsDate);
+
+    // Options for the time part
+    const optionsTime = { hour: 'numeric', minute: 'numeric', hour12: true };
+
+    // Format the time part
+    const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
+
+    return `${formattedDate} • ${formattedTime}`;
+};
+
 const FirstTimeDonationCard = ({ data }) => {
     const [user, setUser] = useState(null);
 
@@ -23,11 +42,6 @@ const FirstTimeDonationCard = ({ data }) => {
     return `${firstName} ${lastInitial}`;
   };
 
-  if (!user) {
-    console.log(user)
-    return null; // or a loading indicator
-  }
-
   const formattedName = getFirstNameLastInitial(user.displayName);
   
 
@@ -42,7 +56,7 @@ const FirstTimeDonationCard = ({ data }) => {
               <Text style={{ fontFamily: 'Montserrat-Medium' }}>'s first donation is to </Text>
               <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{data.charity}!</Text>
             </Text>
-            <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{data.date}</Text>
+            <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(data.date)}</Text>
           </View>
         </View>
       </View>

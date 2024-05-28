@@ -24,7 +24,6 @@ const formatDate = (dateStr) => {
 };
 
 export const GoFundMeCard = ({ data = {} }) => {
-    console.log("hererrere")
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -43,11 +42,6 @@ export const GoFundMeCard = ({ data = {} }) => {
       return `${firstName} ${lastInitial}`;
     };
   
-    if (!user) {
-      console.log(user)
-      return null; // or a loading indicator
-    }
-  
     const formattedName = getFirstNameLastInitial(user.displayName);
     
   
@@ -62,6 +56,8 @@ export const GoFundMeCard = ({ data = {} }) => {
                                 <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
                                 <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this GoFundMe:</Text>
                             </Text>
+                            {console.log("hehe1234")}
+            {console.log(data.date)}
                             <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(data.date)}</Text>
                         </View>
                     </View>
