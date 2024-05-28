@@ -1,11 +1,11 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { LinkPreview } from '@flyerhq/react-native-link-preview';
 
+import { getUserByUsername } from '../services/userService';
 const likeIcon = require('../assets/Icons/heart.png');
 
 const formatDate = (dateStr) => {
-    console.log(dateStr)
     const date = new Date(dateStr);
 
     // Options for the date part
@@ -24,7 +24,33 @@ const formatDate = (dateStr) => {
 };
 
 export const GoFundMeCard = ({ data = {} }) => {
-    console.log(data)
+    console.log("hererrere")
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+      const fetchUser = async () => {
+        const userData = await getUserByUsername(data.originalDonationPoster);
+        setUser(userData);
+      };
+  
+      fetchUser();
+    }, [data.originalDonationPoster]);
+  
+    const getFirstNameLastInitial = (displayName) => {
+      if (!displayName) return '';
+      const [firstName, lastName] = displayName.split(' ');
+      const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
+      return `${firstName} ${lastInitial}`;
+    };
+  
+    if (!user) {
+      console.log(user)
+      return null; // or a loading indicator
+    }
+  
+    const formattedName = getFirstNameLastInitial(user.displayName);
+    
+  
     return (
         <View style={styles.cardContainer}>
             <View style={styles.card}>
@@ -33,7 +59,7 @@ export const GoFundMeCard = ({ data = {} }) => {
                     <View style={styles.posterInfo}>
                         <View style={styles.column}>
                             <Text style={styles.posterName}>
-                                <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{data.originalDonationPoster}</Text>
+                                <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
                                 <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this GoFundMe:</Text>
                             </Text>
                             <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(data.date)}</Text>
