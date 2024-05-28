@@ -81,8 +81,6 @@ const Posts = () => {
   };
   
   const renderCard = (item) => {
-    console.log("here");
-    console.log(item);
     switch (item.PostType) {
       case 'donation':
         return <DonationCard key={item.id} data={item} />;
@@ -145,8 +143,6 @@ const CategoryScroll = () => {
 export default function ProfileScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Portfolio');
   const { user2, userData } = useAuth();
-  console.log(userData)
-
   // Update activeTab based on the selected value from SwitchSelector
   const handleTabPress = (tab) => {
     setActiveTab(tab);

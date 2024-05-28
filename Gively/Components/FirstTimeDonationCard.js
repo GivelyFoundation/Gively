@@ -1,28 +1,54 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { getUserByUsername } from '../services/userService';
 const likeIcon= require('../assets/Icons/heart.png');
-const profilePicture = require('../assets/Images/profileDefault.png');
+const welcome = require ('../assets/Images/Welcome.png')
 
 const FirstTimeDonationCard = ({ data }) => {
+    const [user, setUser] = useState(null);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userData = await getUserByUsername(data.originalDonationPoster);
+      setUser(userData);
+    };
+
+    fetchUser();
+  }, [data.originalDonationPoster]);
+
+  const getFirstNameLastInitial = (displayName) => {
+    if (!displayName) return '';
+    const [firstName, lastName] = displayName.split(' ');
+    const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
+    return `${firstName} ${lastInitial}`;
+  };
+
+  if (!user) {
+    console.log(user)
+    return null; // or a loading indicator
+  }
+
+  const formattedName = getFirstNameLastInitial(user.displayName);
+  
 
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Image source={data.originalPosterProfileImage} style={styles.profileImage} />
+        <Image source={{uri: data.originalPosterProfileImage}} style={styles.profileImage} />
         <View style={styles.posterInfo}>
           <View style={styles.column}>
             <Text style={styles.posterName}>
-              <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{data.originalDonationPoster}</Text>
+              <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
               <Text style={{ fontFamily: 'Montserrat-Medium' }}>'s first donation is to </Text>
-              <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{data.charityName}!</Text>
+              <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{data.charity}!</Text>
             </Text>
             <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{data.date}</Text>
           </View>
         </View>
       </View>
-
-      <Text style={[styles.postText, { fontFamily: 'Montserrat-Medium' }]}>Welcome {data.originalDonationPoster} to Gively!!!</Text>
+      <Image source={welcome} style={styles.welcome} resizeMode="contain" />
+        
+      <Text style={[styles.postText, styles.welcomeText, { fontFamily: 'Montserrat-Medium' }]}>Welcome {formattedName} to Gively!!!</Text>
       <View style={styles.footer}>
         <View style={styles.likesContainer}>
           <Image source={likeIcon} style={[styles.likeIcon, {tintColor: data.isLiked ? '#EB5757' : '#8484A9'}]} />
@@ -116,6 +142,14 @@ const styles = StyleSheet.create({
 row:{
   flexDirection: 'row',
   alignItems: 'center'
+},
+welcomeText: {
+    alignSelf: 'center'
+},
+welcome:{
+    width: 200,
+    height: 150,
+    alignSelf: 'center'
 }
 });
 
