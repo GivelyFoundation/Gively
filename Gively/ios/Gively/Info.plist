@@ -41,6 +41,11 @@
     <string>1</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
+    <key>NSContactsUsageDescription</key>
+    <string>Allow us permission to access your contacts so we can't invite your friends.s</string>
+    <key>NSSMSUsageDescription</key>
+    <string>Allow us permission to access SMS so we can't invite your friends.</string>
+
     <key>NSAppTransportSecurity</key>
     <dict>
       <key>NSAllowsArbitraryLoads</key>
