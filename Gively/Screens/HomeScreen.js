@@ -40,7 +40,6 @@ const ForYouFeed = ({ posts, refreshing, onRefresh }) => {
         }
       >
         {sortedPosts.map((item) => {
-          console.log("Rendering item:", item);
           return renderCard(item);
         })}
       </ScrollView>
@@ -76,8 +75,8 @@ const FriendsFeed = ({ posts, refreshing, onRefresh }) => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
+
         {sortedPosts.map((item) => {
-          console.log("Rendering item:", item);
           return renderCard(item);
         })}
       </ScrollView>
