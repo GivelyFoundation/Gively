@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Pressable, ImageBackground, Image, StyleSheet, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useAuth } from '../services/AuthContext';
 import { auth, firestore } from '../services/firebaseConfig';
 import { doc, setDoc } from 'firebase/firestore';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 export default function SignUpForm({ navigation, userData, nextStep, handleChange, accountCreated, setAccountCreated }) {
-  const { startSignUp, endSignUp } = useAuth();
-
-  useEffect(() => {
-    startSignUp();
-    return () => {};
-  }, []);
+  const { startSignUp } = useAuth();
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
   const handleSignUp = async () => {
     if (accountCreated) {
@@ -41,6 +40,7 @@ export default function SignUpForm({ navigation, userData, nextStep, handleChang
         following: [],
         followers: []
       });
+      startSignUp();
       setAccountCreated(true);
       nextStep(); // Move to the next step in the account creation process
     } catch (error) {
@@ -49,73 +49,133 @@ export default function SignUpForm({ navigation, userData, nextStep, handleChang
   };
 
   return (
-    <View className="flex-2">
-      <View className="flex-1 bg-white rounded-t-3xl px-6 items-center justify-center" style={styles.loginForm}>
+    <View style={styles.container}>
+      <Text style={styles.title}>Sign up</Text>
+      <View style={styles.inputContainer}>
+        <Icon name="email" size={20} color="#A9A9A9" />
         <TextInput
-          className="bg-gray-200 w-full rounded-full px-4 py-2 mb-4 mt-8"
-          placeholder="Email"
+          style={styles.input}
+          placeholder="abc@email.com"
           value={userData.email}
           onChangeText={(value) => handleChange('email', value)}
           textContentType="emailAddress"
         />
+      </View>
+      <View style={styles.inputContainer}>
+        <Icon name="lock" size={20} color="#A9A9A9" />
         <TextInput
-          className="bg-gray-200 w-full rounded-full px-4 py-2 mb-4"
-          placeholder="Password"
+          style={styles.input}
+          placeholder="Your password"
           value={userData.password}
           onChangeText={(value) => handleChange('password', value)}
-          secureTextEntry
+          secureTextEntry={!passwordVisible}
           textContentType="password"
         />
+        <Pressable onPress={() => setPasswordVisible(!passwordVisible)}>
+          <Icon name={passwordVisible ? "visibility-off" : "visibility"} size={20} color="#A9A9A9" />
+        </Pressable>
+      </View>
+      <View style={styles.inputContainer}>
+        <Icon name="lock" size={20} color="#A9A9A9" />
         <TextInput
-          className="bg-gray-200 w-full rounded-full px-4 py-2 mb-8"
-          placeholder="Confirm Password"
+          style={styles.input}
+          placeholder="Confirm password"
           value={userData.confirmPassword}
           onChangeText={(value) => handleChange('confirmPassword', value)}
-          secureTextEntry
+          secureTextEntry={!confirmPasswordVisible}
           textContentType="password"
         />
-        <Pressable className="bg-green-500 w-full py-3 rounded-full items-center mb-4" onPress={handleSignUp}>
-          <Text className="text-white text-lg">Sign Up</Text>
+        <Pressable onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
+          <Icon name={confirmPasswordVisible ? "visibility-off" : "visibility"} size={20} color="#A9A9A9" />
         </Pressable>
-        <Pressable className="bg-blue-600 w-full py-3 rounded-full items-center mb-2">
-          <Text className="text-white text-lg">Sign up with Google</Text>
-        </Pressable>
-        <Pressable className="bg-black w-full py-3 rounded-full items-center mb-2">
-          <Text className="text-white text-lg">Sign up with Apple</Text>
-        </Pressable>
-        <Pressable className="bg-blue-800 w-full py-3 rounded-full items-center mb-4">
-          <Text className="text-white text-lg">Sign up with Facebook</Text>
-        </Pressable>
-        <Text onPress={() => navigation.navigate('Login')} className="text-sm underline">
-          Already have an account? Sign In
-        </Text>
       </View>
+      <Pressable style={styles.signUpButton} onPress={handleSignUp}>
+        <Text style={styles.signUpButtonText}>SIGN UP</Text>
+      </Pressable>
+      <View style={styles.socialLoginContainer}>
+        <Pressable style={styles.socialButton}>
+          <FontAwesome name="google" size={20} color="#DB4437" />
+          <Text style={styles.socialButtonText}>Sign up with Google</Text>
+        </Pressable>
+        <Pressable style={styles.socialButton}>
+          <FontAwesome name="facebook" size={20} color="#4267B2" />
+          <Text style={styles.socialButtonText}>Sign up with Facebook</Text>
+        </Pressable>
+      </View>
+      <Pressable onPress={() => navigation.navigate('Login')}>
+        <Text style={styles.signInText}>
+          ALREADY HAVE AN ACCOUNT? <Text style={styles.signInLink}>SIGN IN</Text>
+        </Text>
+      </Pressable>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  logo: {
-    width: 80,
-    height: 80,
-    position: 'absolute',
-    top: 45,
-    left: 20,
+  container: {
+    flex: 1,
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    paddingHorizontal: 30,
+    paddingVertical: 40,
   },
-  backButton: {
-    position: 'absolute',
-    top: 65,
-    right: 20,
-    padding: 8,
-    borderRadius: 10,
+  title: {
+    fontSize: 28,
+    color: '#000',
+    marginBottom: 20,
   },
-  loginForm: {
-    marginTop: '40%',
-    minHeight: '70%',
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    marginBottom: 10,
+    backgroundColor: '#F8F8F8',
+  },
+  input: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  signUpButton: {
+    width: '100%',
+    paddingVertical: 20,
+    borderRadius: 12,
+    backgroundColor: '#3FC032',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  signUpButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  socialLoginContainer: {
     width: '100%',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 30,
-    paddingBottom: 30,
+  },
+  socialButton: {
+    width: '70%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  socialButtonText: {
+    fontSize: 16,
+    marginLeft: 10,
+  },
+  signInText: {
+    color: '#A9A9A9',
+  },
+  signInLink: {
+    color: '#1C5AA3',
   },
 });

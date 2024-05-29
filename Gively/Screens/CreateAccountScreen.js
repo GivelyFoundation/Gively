@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, ImageBackground, Image, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import StepIndicator from 'react-native-step-indicator';
 import SignUpForm from '../Components/SignUpForm';
 import ProfileDetailsForm from '../Components/ProfileDetailsForm';
 import PhotoUploadForm from '../Components/PhotoUploadForm';
 import InterestsSelectionForm from '../Components/InterestsSelectionForm';
 import { useAuth } from '../services/AuthContext';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const labels = ["Sign Up", "Profile Details", "Photo Upload", "Interests"];
 
@@ -35,7 +36,6 @@ const customStyles = {
 
 const CreateAccountScreen = ({ navigation }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [image, setImage] = useState(require('../assets/Images/auth-background.png'));
   const [accountCreated, setAccountCreated] = useState(false);
   const [userData, setUserData] = useState({
     username: '',
@@ -94,29 +94,11 @@ const CreateAccountScreen = ({ navigation }) => {
   };
 
   return (
-    <View className="flex-1">
-      <View style={styles.backgroundContainer}>
-        <ImageBackground 
-          source={image} 
-          resizeMode="contain"
-          style={styles.backgroundImage}
-        >
-          <View style={styles.imageOverlay} />
-        </ImageBackground>
-      </View>
-
-      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'flex-end' }}>
-        <Image 
-          source={require('../assets/Images/logo-1.png')} 
-          style={styles.logo} 
-          resizeMode="contain" 
-        />
-
-        <Pressable onPress={() => prevStep()} style={styles.backButton}>
-          <Text className="text-white text-lg">Back</Text>
-        </Pressable>
-      </View>
-      <View className="mt-32">
+    <View style={styles.container}>
+      <Pressable onPress={() => prevStep()} style={styles.backButton}>
+        <Icon name="arrow-back" size={24} color="#000" />
+      </Pressable>
+      <View style={styles.stepIndicatorContainer}>
         <StepIndicator
           customStyles={customStyles}
           currentPosition={currentStep}
@@ -124,43 +106,32 @@ const CreateAccountScreen = ({ navigation }) => {
           stepCount={4}
         />
       </View>
-      {renderStep()}
+      <View style={styles.formContainer}>
+        {renderStep()}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  backgroundContainer: {
-    position: 'absolute',
-    top: -120,
-    left: 0,
-    right: 0,
-    height: '60%',
+  container: {
     flex: 1,
-  },
-  backgroundImage: {
-    height: '100%',
-    width: '100%',
-  },
-  imageOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)', // Semi-transparent black to enhance contrast
-  },
-  logo: {
-    width: 80,
-    height: 80,
-    position: 'absolute',
-    top: 45,
-    left: 20,
+    backgroundColor: 'white',
   },
   backButton: {
     position: 'absolute',
-    top: 65,
-    right: 20,
-    padding: 8,
-    borderRadius: 10,
-    zIndex: 20,
-  }
+    top: 40,
+    left: 20,
+    zIndex: 10,
+  },
+  stepIndicatorContainer: {
+    marginTop: 100,
+  },
+  formContainer: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+    flex: 1,
+  },
 });
 
 export default CreateAccountScreen;
