@@ -1,11 +1,11 @@
-import firebase from 'firebase/app';
 import 'firebase/firestore';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
 import { LinkPreview } from '@flyerhq/react-native-link-preview';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
-import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 
 const likeIcon = require('../assets/Icons/heart.png');
 
@@ -22,7 +22,6 @@ const hasUserLikedPost = async (postId, userId) => {
     const postRef = doc(firestore, 'Posts', postId);
     const docSnapshot = await getDoc(postRef);
     const likers = docSnapshot.data().Likers || [];
-    console.log("Checking if user has liked the post:", likers.includes(userId));
     return likers.includes(userId);
 };
 
@@ -48,9 +47,9 @@ export const GoFundMeCard = ({ data = {} }) => {
     const [isLiked, setIsLiked] = useState(false);
     const [likesCount, setLikesCount] = useState(data.Likers.length);
     const [postId, setPostId] = useState("");
+    const navigation = useNavigation();
 
     const getPostDocumentIdById = async (id) => {
-        console.log(id);
         const postsRef = collection(firestore, "Posts");
         const q = query(postsRef, where('id', '==', id));
         const querySnapshot = await getDocs(q);
@@ -65,7 +64,23 @@ export const GoFundMeCard = ({ data = {} }) => {
         }
     };
 
+    const getUserDocumentIdById = async (id) => {
+        const postsRef = collection(firestore, "Users");
+        const q = query(postsRef, where('id', '==', id));
+        const querySnapshot = await getDocs(q);
+        console.log(querySnapshot);
+        if (!querySnapshot.empty) {
+            querySnapshot.forEach(doc => {
+                console.log('Document ID:', doc.id);
+                setPostId(doc.id);
+            });
+        } else {
+            console.log('No matching documents.');
+        }
+    };
+
     useEffect(() => {
+        console.log("here: " + data.id)
         getPostDocumentIdById(data.id);
     }, [data.id]);
 
@@ -122,6 +137,12 @@ export const GoFundMeCard = ({ data = {} }) => {
 
     const formattedName = userData ? getFirstNameLastInitial(userData.displayName) : '';
 
+    const handleNamePress = () => {
+        console.log("PRess")
+        console.log(data)
+       // navigation.navigate('UserScreen', { user: data });
+    };
+
     if (loading) {
         return <ActivityIndicator size="large" color="#0000ff" />;
     }
@@ -133,10 +154,12 @@ export const GoFundMeCard = ({ data = {} }) => {
                     <Image source={{ uri: data.originalPosterProfileImage }} style={styles.profileImage} />
                     <View style={styles.posterInfo}>
                         <View style={styles.column}>
-                            <Text style={styles.posterName}>
-                                <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
-                                <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this GoFundMe:</Text>
-                            </Text>
+                            <TouchableOpacity onPress={handleNamePress}>
+                                <Text style={styles.posterName}>
+                                    <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
+                                    <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this GoFundMe:</Text>
+                                </Text>
+                            </TouchableOpacity>
                             <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(data.date)}</Text>
                         </View>
                     </View>

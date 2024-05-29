@@ -53,6 +53,7 @@ export { db };
 import notificationIcon from './assets/Icons/notificationIcon.png'
 
 import { AuthProvider, useAuth } from './services/AuthContext';
+import UserScreen from './Screens/UserScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -190,6 +191,7 @@ function RootNavigator() {
   //   return null; // Or a loading spinner if you prefer
   // }
 
+  
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {/* {user && !isSigningUp && (
@@ -199,6 +201,7 @@ function RootNavigator() {
           <Stack.Screen name="GoFundMe" component={GoFundMeScreen} />
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
           <Stack.Screen name="CharityDetailedScreen" component={CharityDetailedScreen} />
+          <Stack.Screen name="UserScreen" component={UserScreen} />
         {/* </>
       )} */}
       <Stack.Screen name="Splash" component={SplashScreen} />
