@@ -54,12 +54,13 @@ export default function FriendsListScreen({ navigation }) {
         onChangeText={text => setSearchQuery(text)}
         value={searchQuery}
       />
+      
+      <ScrollView>
       <TouchableOpacity style={friendStyles.inviteFriendsButton} onPress={handleInviteFriends}>
         <Text style={[friendStyles.inviteFriendsButtonText, { fontFamily: 'Montserrat-Bold' }]}>
           Invite Friends From Contacts
         </Text>
       </TouchableOpacity>
-      <ScrollView>
         <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Medium' }]}>People You May Know</Text>
         <ScrollView>
           {fakeFriends.map(friend => (
