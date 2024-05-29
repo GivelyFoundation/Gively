@@ -172,8 +172,7 @@ export default function ProfileScreen({ navigation }) {
         <Image source={{ uri: userData.profilePicture }} style={profileStyles.profilePicture} />
 
         <View style={[profileStyles.column]}>
-
-          <Text style={[profileStyles.userNameText, { fontFamily: 'Montserrat-Medium' }]}> {userData.userame}</Text>
+          <Text style={[profileStyles.userNameText, { fontFamily: 'Montserrat-Medium' }]}> {userData.username}</Text>
 
           <View style={[profileStyles.followRow]}>
 
