@@ -1,5 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { useAuth } from '../services/AuthContext';
+import { firestore } from '../services/firebaseConfig';
+import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from 'firebase/firestore';
+
+
 const likeIcon= require('../assets/Icons/heart.png');
 const profilePicture = require('../assets/Images/profileDefault.png');
 
@@ -21,9 +26,100 @@ const formatDate = (dateStr) => {
 
   return `${formattedDate} • ${formattedTime}`;
 };
+const hasUserLikedPost = async (postId, userId) => {
+  const postRef = doc(firestore, 'Posts', postId);
+  const docSnapshot = await getDoc(postRef);
+  const likers = docSnapshot.data().Likers || [];
+  console.log("Checking if user has liked the post:", likers.includes(userId));
+  return likers.includes(userId);
+};
+
+const unlikePost = async (postId, userId) => {
+  const postRef = doc(firestore, 'Posts', postId);
+  console.log("Unliking post for user:", userId);
+  await updateDoc(postRef, {
+      Likers: arrayRemove(userId)
+  });
+};
+
+const likePost = async (postId, userId, username) => {
+  const postRef = doc(firestore, 'Posts', postId);
+  console.log("Liking post for user:", userId, "with username:", username);
+  await updateDoc(postRef, {
+      Likers: arrayUnion(userId)
+  });
+  console.log("Post liked successfully for user:", userId);
+};
 
 const DonationCard = ({ data }) => {
+  const { userData, loading } = useAuth();
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(data.Likers.length);
+  const [postId, setPostId] = useState("");
 
+  const getPostDocumentIdById = async (id) => {
+      console.log(id);
+      const postsRef = collection(firestore, "Posts");
+      const q = query(postsRef, where('id', '==', id));
+      const querySnapshot = await getDocs(q);
+      console.log(querySnapshot);
+      if (!querySnapshot.empty) {
+          querySnapshot.forEach(doc => {
+              console.log('Document ID:', doc.id);
+              setPostId(doc.id);
+          });
+      } else {
+          console.log('No matching documents.');
+      }
+  };
+
+  useEffect(() => {
+      getPostDocumentIdById(data.id);
+  }, [data.id]);
+
+  useEffect(() => {
+      const checkIfLiked = async () => {
+          if (userData && postId) {
+              console.log("Checking if user liked the post for user ID:", userData.uid);
+              const liked = await hasUserLikedPost(postId, userData.uid);
+              setIsLiked(liked);
+              console.log("User liked status:", liked);
+          }
+      };
+      if (!loading && postId) {
+          checkIfLiked();
+      }
+  }, [userData, postId, loading]);
+
+  const handleLikeToggle = async () => {
+      try {
+          if (!userData) {
+              console.log("User data is not loaded yet");
+              return;
+          }
+
+          if (isLiked) {
+              console.log("Unlike post initiated");
+              await unlikePost(postId, userData.uid);
+              setIsLiked(false);
+              setLikesCount(likesCount - 1);
+              console.log("Post unliked successfully");
+          } else {
+              console.log("Like post initiated");
+              await likePost(postId, userData.uid, userData.username);
+              setIsLiked(true);
+              setLikesCount(likesCount + 1);
+              console.log("Post liked successfully");
+          }
+      } catch (error) {
+          console.error("Failed to like/unlike post: ", error);
+          Alert.alert(
+              "Error",
+              "There was an error updating your like status. Please try again.",
+              [{ text: "OK" }]
+          );
+      }
+  };
   const renderOthersElement = () => {
     const firstDonor = data.otherDonationUsers[0];
     switch (data.otherDonationUsers.length) {
@@ -71,9 +167,11 @@ const DonationCard = ({ data }) => {
       <View style={styles.footer}>
         {renderOthersElement()}
         <View style={styles.likesContainer}>
-          <Image source={likeIcon} style={[styles.likeIcon, {tintColor: data.isLiked ? '#EB5757' : '#8484A9'}]} />
-          <Text style={[styles.likes, { fontFamily: 'Montserrat-Medium' , color: data.isLiked ? '#EB5757' : '#8484A9'}]}>{data.likes}</Text>
-        </View>
+          <TouchableOpacity  style={styles.likesContainer}  onPress={handleLikeToggle}>
+          <Image source={likeIcon} style={[styles.likeIcon, {tintColor: isLiked ? '#EB5757' : '#8484A9'}]} />
+          <Text style={[styles.likes, { fontFamily: 'Montserrat-Medium' , color: data.isLiked ? '#EB5757' : '#8484A9'}]}>{likesCount}</Text>
+          </TouchableOpacity>
+          </View>
         <TouchableOpacity style={styles.button}>
           <Text style={[styles.buttonText, { fontFamily: 'Montserrat-Bold' }]}>Donate</Text>
         </TouchableOpacity>
@@ -162,7 +260,11 @@ const styles = StyleSheet.create({
 row:{
   flexDirection: 'row',
   alignItems: 'center'
-}
+},
+likesContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+},
 });
 
 export default DonationCard;
