@@ -1,61 +1,198 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
 import { LinkPreview } from '@flyerhq/react-native-link-preview';
+import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../services/AuthContext';
+import { firestore } from '../services/firebaseConfig';
+import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 
 const likeIcon = require('../assets/Icons/heart.png');
-const profilePicture = require('../assets/Images/profileDefault.png');
 
-export const GoFundMeCard = ({ data = {}, user = {} }) => {
-    // Ensure there are default values or checks to handle missing data
-    const {
-        postDate = '',
-        postText = '',
-        goFundMeUrl = '',
-        isLiked = false,
-        likesCount = 0
-    } = data;
+const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const optionsDate = { weekday: 'short', month: 'short', day: 'numeric' };
+    const formattedDate = date.toLocaleDateString('en-US', optionsDate);
+    const optionsTime = { hour: 'numeric', minute: 'numeric', hour12: true };
+    const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
+    return `${formattedDate} • ${formattedTime}`;
+};
 
-    const {
-        userName = 'Anonymous'
-    } = user;
+const hasUserLikedPost = async (postId, userId) => {
+    const postRef = doc(firestore, 'Posts', postId);
+    const docSnapshot = await getDoc(postRef);
+    const likers = docSnapshot.data().Likers || [];
+    return likers.includes(userId);
+};
+
+const unlikePost = async (postId, userId) => {
+    const postRef = doc(firestore, 'Posts', postId);
+    console.log("Unliking post for user:", userId);
+    await updateDoc(postRef, {
+        Likers: arrayRemove(userId)
+    });
+};
+
+const likePost = async (postId, userId, username) => {
+    const postRef = doc(firestore, 'Posts', postId);
+    console.log("Liking post for user:", userId, "with username:", username);
+    await updateDoc(postRef, {
+        Likers: arrayUnion(userId)
+    });
+    console.log("Post liked successfully for user:", userId);
+};
+
+export const GoFundMeCard = ({ data = {} }) => {
+    const { userData, loading } = useAuth();
+    const [isLiked, setIsLiked] = useState(false);
+    const [likesCount, setLikesCount] = useState(data.Likers.length);
+    const [postId, setPostId] = useState("");
+    const navigation = useNavigation();
+
+    const getPostDocumentIdById = async (id) => {
+        const postsRef = collection(firestore, "Posts");
+        const q = query(postsRef, where('id', '==', id));
+        const querySnapshot = await getDocs(q);
+        console.log(querySnapshot);
+        if (!querySnapshot.empty) {
+            querySnapshot.forEach(doc => {
+                console.log('Document ID:', doc.id);
+                setPostId(doc.id);
+            });
+        } else {
+            console.log('No matching documents.');
+        }
+    };
+
+    const getUserDocumentIdById = async (id) => {
+        const postsRef = collection(firestore, "Users");
+        const q = query(postsRef, where('id', '==', id));
+        const querySnapshot = await getDocs(q);
+        console.log(querySnapshot);
+        if (!querySnapshot.empty) {
+            querySnapshot.forEach(doc => {
+                console.log('Document ID:', doc.id);
+                setPostId(doc.id);
+            });
+        } else {
+            console.log('No matching documents.');
+        }
+    };
+
+    useEffect(() => {
+        console.log("here: " + data.id)
+        getPostDocumentIdById(data.id);
+    }, [data.id]);
+
+    useEffect(() => {
+        const checkIfLiked = async () => {
+            if (userData && postId) {
+                console.log("Checking if user liked the post for user ID:", userData.uid);
+                const liked = await hasUserLikedPost(postId, userData.uid);
+                setIsLiked(liked);
+                console.log("User liked status:", liked);
+            }
+        };
+        if (!loading && postId) {
+            checkIfLiked();
+        }
+    }, [userData, postId, loading]);
+
+    const handleLikeToggle = async () => {
+        try {
+            if (!userData) {
+                console.log("User data is not loaded yet");
+                return;
+            }
+
+            if (isLiked) {
+                console.log("Unlike post initiated");
+                await unlikePost(postId, userData.uid);
+                setIsLiked(false);
+                setLikesCount(likesCount - 1);
+                console.log("Post unliked successfully");
+            } else {
+                console.log("Like post initiated");
+                await likePost(postId, userData.uid, userData.username);
+                setIsLiked(true);
+                setLikesCount(likesCount + 1);
+                console.log("Post liked successfully");
+            }
+        } catch (error) {
+            console.error("Failed to like/unlike post: ", error);
+            Alert.alert(
+                "Error",
+                "There was an error updating your like status. Please try again.",
+                [{ text: "OK" }]
+            );
+        }
+    };
+
+    const getFirstNameLastInitial = (displayName) => {
+        if (!displayName) return '';
+        const [firstName, lastName] = displayName.split(' ');
+        const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
+        return `${firstName} ${lastInitial}`;
+    };
+
+    const formattedName = userData ? getFirstNameLastInitial(userData.displayName) : '';
+
+    const handleNamePress = () => {
+        console.log("PRess")
+        console.log(data)
+       // navigation.navigate('UserScreen', { user: data });
+    };
+
+    if (loading) {
+        return <ActivityIndicator size="large" color="#0000ff" />;
+    }
 
     return (
-        <View style={styles.card}>
-            <View style={styles.header}>
-                <Image source={profilePicture} style={styles.profileImage} />
-                <View style={styles.posterInfo}>
-                    <View style={styles.column}>
-                        <Text style={styles.posterName}>
-                            <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{user.username}</Text>
-                            <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this GoFundMe:</Text>
-                        </Text>
-                        <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{data.postDate}</Text>
+        <View style={styles.cardContainer}>
+            <View style={styles.card}>
+                <View style={styles.header}>
+                    <Image source={{ uri: data.originalPosterProfileImage }} style={styles.profileImage} />
+                    <View style={styles.posterInfo}>
+                        <View style={styles.column}>
+                            <TouchableOpacity onPress={handleNamePress}>
+                                <Text style={styles.posterName}>
+                                    <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
+                                    <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this GoFundMe:</Text>
+                                </Text>
+                            </TouchableOpacity>
+                            <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(data.date)}</Text>
+                        </View>
                     </View>
                 </View>
-            </View>
-
-            <Text style={[styles.postText, { fontFamily: 'Montserrat-Medium' }]}>{data.postText}</Text>
-            <LinkPreview text={data.link} />
-            <View style={styles.footer}>
-                <View style={styles.likesContainer}>
-                    <Image source={likeIcon} style={[styles.likeIcon, { tintColor: data.isLiked ? '#EB5757' : '#8484A9' }]} />
-                    <Text style={[styles.likes, { fontFamily: 'Montserrat-Medium', color: data.isLiked ? '#EB5757' : '#8484A9' }]}>{data.likesCount}</Text>
+                <Text style={[styles.postText, { fontFamily: 'Montserrat-Medium' }]}>{data.postText}</Text>
+                <View style={styles.linkView}>
+                    <LinkPreview text={data.Link} />
                 </View>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Share GoFundMe</Text>
-                </TouchableOpacity>
+                <View style={styles.footer}>
+                    <TouchableOpacity style={styles.likesContainer} onPress={handleLikeToggle}>
+                        <Image source={likeIcon} style={[styles.likeIcon, { tintColor: isLiked ? '#EB5757' : '#8484A9' }]} />
+                        <Text style={[styles.likes, { fontFamily: 'Montserrat-Medium', color: isLiked ? '#EB5757' : '#8484A9' }]}>{likesCount}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.button}>
+                        <Text style={styles.buttonText}>Share GoFundMe</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    cardContainer: {
+        width: '100%',
+        marginHorizontal: 10,
+        marginBottom: 20,
+    },
     card: {
         width: '100%',
         backgroundColor: '#fff',
         borderRadius: 10,
         padding: 15,
-        marginBottom: 20,
         shadowColor: '#5A5A5A',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
@@ -116,18 +253,22 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 20,
         width: '50%',
+        marginRight: 10,
     },
     buttonText: {
         color: '#fff',
         fontSize: 12,
         fontWeight: 'bold',
         textTransform: 'uppercase',
-        alignSelf: 'center'
+        alignSelf: 'center',
     },
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         width: '100%',
+    },
+    linkView: {
+        paddingRight: 10,
     },
 });

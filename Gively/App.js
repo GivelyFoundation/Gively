@@ -1,4 +1,5 @@
 import 'react-native-gesture-handler';
+import 'react-native-get-random-values';
 import React from 'react';
 import { View, Alert, Button, Image, TouchableOpacity, Text } from 'react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
@@ -20,6 +21,7 @@ import PetitionScreen from './Screens/PetitionScreen';
 import GoFundMeScreen from './Screens/GoFundMeScreen';
 import FavoriteScreen from './Screens/FavoritesScareen';
 import EditProfileScreen from './Screens/EditProfileScreen';
+import CharityDetailedScreen from './Screens/ChairtyDetailedScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -29,10 +31,29 @@ import homeIcon from './assets/Icons/Home.png'
 import discoverIcon from './assets/Icons/Discover.png'
 import friendsIcon from './assets/Icons/Friends.png'
 import profileIcon from './assets/Icons/Profile.png'
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCJ0lvNYPed98Piop1WCIjDaI99YjF8l-4",
+  authDomain: "gively-1c014.firebaseapp.com",
+  databaseURL: "https://gively-1c014-default-rtdb.firebaseio.com",
+  projectId: "gively-1c014",
+  storageBucket: "gively-1c014.appspot.com",
+  messagingSenderId: "479338294390",
+  appId: "1:479338294390:web:233e87af7ab30144184357",
+  measurementId: "G-R5LZD333FY"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+export { db };
 
 import notificationIcon from './assets/Icons/notificationIcon.png'
 
 import { AuthProvider, useAuth } from './services/AuthContext';
+import UserScreen from './Screens/UserScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -170,6 +191,7 @@ function RootNavigator() {
   //   return null; // Or a loading spinner if you prefer
   // }
 
+  
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user && !isSigningUp ? (

@@ -18,8 +18,12 @@ export const AuthProvider = ({ children }) => {
             if (currentUser) {
                 try {
                     const userDoc = await getDoc(doc(firestore, 'users', currentUser.uid));
-                    setUserData(userDoc.data());
-                    console.log("Fetched user data: ", userDoc.data());
+                    if (userDoc.exists()) {
+                        setUserData({ uid: currentUser.uid, ...userDoc.data() });
+                        console.log("Fetched user data: ", userDoc.data());
+                    } else {
+                        setUserData(null);
+                    }
                 } catch (error) {
                     console.error("Failed to fetch user data: ", error);
                 }

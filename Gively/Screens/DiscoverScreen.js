@@ -4,14 +4,16 @@ import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity } from 
 import styles from '../Styles.js/Styles';
 import DiscoverCharityCard from '../Components/DiscoverCharityCard';
 import { charityCategories } from '../MockData';
+import { useNavigation } from '@react-navigation/native';
 
 const charityLogo = require('../assets/Images/TSA.png');
 
 const charitylogos = [charityLogo, charityLogo, charityLogo, charityLogo, charityLogo, charityLogo, charityLogo]
 
 const renderDiscoverCharityCards = (charityLogos) => {
+  const navigation = useNavigation();
   return charityLogos.map((charityLogo, index) => (
-    <DiscoverCharityCard key={index} image={charityLogo} />
+    <DiscoverCharityCard key={index} image={charityLogo} navigation = {navigation}/>
   ));
 };
 
