@@ -9,7 +9,7 @@ import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
 import { useAuth } from '../services/AuthContext';
-import { collection, getDocs } from 'firebase/firestore';
+import {collection, query, where, getDocs} from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig';
 
 const pieChartPlaceHolder = require('../assets/Images/pieChartPlaceHolder.png');
@@ -43,22 +43,19 @@ const Posts = ({ user }) => {
   const fetchPosts = async () => {
     try {
       const postsCollection = collection(firestore, 'Posts');
-      const postsSnapshot = await getDocs(postsCollection);
+      const q = query(postsCollection, where('originalDonationPoster', '==', user.username));
+      const postsSnapshot = await getDocs(q);
       const postsList = postsSnapshot.docs.map(doc => {
         const data = doc.data();
         const serializedData = serializeData(data);
         return { id: doc.id, ...serializedData };
       });
-
+  
       const cleanedPostsList = postsList.map(post => JSON.parse(JSON.stringify(post)));
       const validPosts = cleanedPostsList.filter(post => post !== null);
-      console.log("_____________________________________________________________")
-      console.log(user)
-      console.log("_____________________________________________________________")
-      const validPostsByUser = validPosts.filter(post => post.originalDonationPoster === user.username);
-
-      if (validPostsByUser.length > 0) {
-        setPosts(validPostsByUser);
+  
+      if (validPosts.length > 0) {
+        setPosts(validPosts);
       } else {
         console.error('No valid posts found');
       }
