@@ -60,11 +60,9 @@ export const PetitionCard = ({ data = {}}) => {
     const [postId, setPostId] = useState("");
     const navigation = useNavigation();
     const getPostDocumentIdById = async (id) => {
-        console.log(id);
         const postsRef = collection(firestore, "Posts");
         const q = query(postsRef, where('id', '==', id));
         const querySnapshot = await getDocs(q);
-        console.log(querySnapshot);
         if (!querySnapshot.empty) {
             querySnapshot.forEach(doc => {
                 console.log('Document ID:', doc.id);
@@ -167,7 +165,9 @@ export const PetitionCard = ({ data = {}}) => {
         <View style={styles.cardContainer}>
             <View style={styles.card}>
                 <View style={styles.header}>
+                <TouchableOpacity onPress={handleNamePress}>
                     <Image source={{ uri: data.originalPosterProfileImage }} style={styles.profileImage} />
+                    </TouchableOpacity>
                     <View style={styles.posterInfo}>
                         <View style={styles.column}>
                             <Text style={styles.posterName}>
