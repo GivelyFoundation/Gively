@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import SwitchSelector from "react-native-switch-selector";
-import { charityData } from '../MockData';
+import { charityData, user } from '../MockData';
 import styles from '../Styles.js/Styles';
 import PinnedCharityCard from '../Components/PinnedCharityCard';
 import DonationCard from '../Components/DonationCard';
@@ -51,7 +52,10 @@ const Posts = ({ user }) => {
 
       const cleanedPostsList = postsList.map(post => JSON.parse(JSON.stringify(post)));
       const validPosts = cleanedPostsList.filter(post => post !== null);
-      const validPostsByUser = validPosts.filter(post => post.originalDonationPoster === user.displayName);
+      console.log("_____________________________________________________________")
+      console.log(user)
+      console.log("_____________________________________________________________")
+      const validPostsByUser = validPosts.filter(post => post.originalDonationPoster === user.username);
 
       if (validPostsByUser.length > 0) {
         setPosts(validPostsByUser);
@@ -103,7 +107,7 @@ const Posts = ({ user }) => {
   );
 };
 
-const CategoryScroll = ({ user }) => {
+const CategoryScroll = ({ }) => {
   return (
     <ScrollView
       horizontal={true}
@@ -119,7 +123,8 @@ const CategoryScroll = ({ user }) => {
   );
 };
 
-export default function UserScreen({ user, navigation }) {
+export default function UserScreen({ route, navigation }) {
+  const { user } = route.params; // Retrieve the user object from route params
   const [activeTab, setActiveTab] = useState('Portfolio');
   const { userData } = useAuth();
 
@@ -127,11 +132,14 @@ export default function UserScreen({ user, navigation }) {
     setActiveTab(tab);
   };
 
+  if (!user) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
   return (
     <View style={styles.page}>
-      <View style={[profileStyles.header]}>
-        <Text style={[profileStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Profile</Text>
-      </View>
+      <TouchableOpacity onPress={() => navigation.navigate('Home')} style={profileStyles.backButton}>
+        <Icon name="arrow-back" size={30} color="#000" />
+      </TouchableOpacity>
 
       <View style={[profileStyles.row, profileStyles.profileInfo]}>
         <Image source={{ uri: user.profilePicture }} style={profileStyles.profilePicture} />
@@ -140,14 +148,14 @@ export default function UserScreen({ user, navigation }) {
           <View style={[profileStyles.followRow]}>
             <View style={[profileStyles.column]}>
               <TouchableOpacity>
-                <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>{user.followers.length}</Text>
+                <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>{0}</Text>
               </TouchableOpacity>
               <Text style={[profileStyles.followText, { fontFamily: 'Montserrat-Medium' }]}>Followers</Text>
             </View>
             <View style={profileStyles.verticalLine} />
             <View style={[profileStyles.column]}>
               <TouchableOpacity>
-                <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>{user.following.length}</Text>
+                <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>{0}</Text>
               </TouchableOpacity>
               <Text style={[profileStyles.followText, { fontFamily: 'Montserrat-Medium' }]}>Following</Text>
             </View>
@@ -328,7 +336,11 @@ const profileStyles = StyleSheet.create({
   },
   spacer: {
     height: 700
-  }
+  },
+  backButton: {
+    paddingTop: 60,
+    paddingLeft: 20,
+  },
 });
 
 function serializeData(data) {

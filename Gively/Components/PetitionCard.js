@@ -5,7 +5,7 @@ import { getUserByUsername } from '../services/userService';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
 import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from 'firebase/firestore';
-
+import { useNavigation } from '@react-navigation/native';
 
 const likeIcon = require('../assets/Icons/heart.png');
 
@@ -56,11 +56,9 @@ export const PetitionCard = ({ data = {}}) => {
     const [user, setUser] = useState(null);
     const { userData, loading } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
-    console.log(data.Likers)
     const [likesCount, setLikesCount] = useState( data.Likers.length);
     const [postId, setPostId] = useState("");
-
-    console.log(data.Likers.length)
+    const navigation = useNavigation();
     const getPostDocumentIdById = async (id) => {
         console.log(id);
         const postsRef = collection(firestore, "Posts");
@@ -77,9 +75,20 @@ export const PetitionCard = ({ data = {}}) => {
         }
     };
 
-    useEffect(() => {
+    const getUserDocumentById = async (userId) => {
+        const userRef = doc(firestore, 'users', userId);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+            setUser(userDoc.data());
+        } else {
+            console.log('No such document!');
+        }
+    };
+
+   useEffect(() => {
         getPostDocumentIdById(data.id);
-    }, [data.id]);
+        getUserDocumentById(data.uid);
+    }, [data.id, data.uid]);
 
     useEffect(() => {
         const checkIfLiked = async () => {
@@ -144,10 +153,16 @@ export const PetitionCard = ({ data = {}}) => {
       console.log(user)
       return null; // or a loading indicator
     }
-  
+    const handleNamePress = () => {
+        if (user) {
+            navigation.navigate('UserScreen', { user });
+        } else {
+            console.log('User data is not available.');
+        }
+    };
+
     const formattedName = getFirstNameLastInitial(user.displayName);
-    
-  
+
     return (
         <View style={styles.cardContainer}>
             <View style={styles.card}>
@@ -156,7 +171,9 @@ export const PetitionCard = ({ data = {}}) => {
                     <View style={styles.posterInfo}>
                         <View style={styles.column}>
                             <Text style={styles.posterName}>
+                            <TouchableOpacity onPress={handleNamePress}>
                                 <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
+                                </TouchableOpacity>
                                 <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this Change.org Petiton:</Text>
                             </Text>
                             <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(data.date)}</Text>
@@ -276,6 +293,9 @@ const styles = StyleSheet.create({
     },
     linkView: {
         paddingRight: 10
+    },
+    boldText:{
+        fontSize: 16 ,
     }
 });
 
