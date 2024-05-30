@@ -15,23 +15,23 @@ const customStyles = {
   currentStepIndicatorSize: 30,
   separatorStrokeWidth: 2,
   currentStepStrokeWidth: 3,
-  stepStrokeCurrentColor: '#fe7013',
+  stepStrokeCurrentColor: '#3FC032',
   stepStrokeWidth: 3,
-  stepStrokeFinishedColor: '#fe7013',
+  stepStrokeFinishedColor: '#3FC032',
   stepStrokeUnFinishedColor: '#aaaaaa',
-  separatorFinishedColor: '#fe7013',
+  separatorFinishedColor: '#3FC032',
   separatorUnFinishedColor: '#aaaaaa',
-  stepIndicatorFinishedColor: '#fe7013',
+  stepIndicatorFinishedColor: '#3FC032',
   stepIndicatorUnFinishedColor: '#ffffff',
   stepIndicatorCurrentColor: '#ffffff',
   stepIndicatorLabelFontSize: 13,
   currentStepIndicatorLabelFontSize: 13,
-  stepIndicatorLabelCurrentColor: '#fe7013',
+  stepIndicatorLabelCurrentColor: '#3FC032',
   stepIndicatorLabelFinishedColor: '#ffffff',
   stepIndicatorLabelUnFinishedColor: '#aaaaaa',
   labelColor: '#999999',
   labelSize: 13,
-  currentStepLabelColor: '#fe7013'
+  currentStepLabelColor: '#3FC032'
 };
 
 const CreateAccountScreen = ({ navigation }) => {
