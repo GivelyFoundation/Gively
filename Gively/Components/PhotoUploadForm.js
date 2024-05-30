@@ -87,9 +87,8 @@ export default function PhotoUploadForm({ userData, handleChange, nextStep }) {
             });
 
             Alert.alert('Success', 'Profile picture uploaded successfully.');
-            // nextStep();
+            nextStep();
           } catch (error) {
-            setUploading(false);
             console.error('Error getting download URL or updating document:', error);
             Alert.alert('Error', 'Failed to save profile picture URL.');
           } finally {
