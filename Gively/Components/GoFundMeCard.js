@@ -7,6 +7,8 @@ import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
 import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 
+import { getUserByUsername } from '../services/userService';
+
 const likeIcon = require('../assets/Icons/heart.png');
 
 const formatDate = (dateStr) => {
@@ -43,13 +45,18 @@ const likePost = async (postId, userId, username) => {
 };
 
 export const GoFundMeCard = ({ data = {} }) => {
+    const [user, setUser] = useState(null);
+    const [userDoc, setUserDoc] = useState(null);
     const { userData, loading } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
-    const [likesCount, setLikesCount] = useState(data.Likers.length);
+    console.log(data.Likers)
+    const [likesCount, setLikesCount] = useState( data.Likers.length);
     const [postId, setPostId] = useState("");
     const navigation = useNavigation();
 
+    console.log(data.Likers.length)
     const getPostDocumentIdById = async (id) => {
+        console.log(id);
         const postsRef = collection(firestore, "Posts");
         const q = query(postsRef, where('id', '==', id));
         const querySnapshot = await getDocs(q);
@@ -64,25 +71,20 @@ export const GoFundMeCard = ({ data = {} }) => {
         }
     };
 
-    const getUserDocumentIdById = async (id) => {
-        const postsRef = collection(firestore, "Users");
-        const q = query(postsRef, where('id', '==', id));
-        const querySnapshot = await getDocs(q);
-        console.log(querySnapshot);
-        if (!querySnapshot.empty) {
-            querySnapshot.forEach(doc => {
-                console.log('Document ID:', doc.id);
-                setPostId(doc.id);
-            });
+    const getUserDocumentById = async (userId) => {
+        const userRef = doc(firestore, 'users', userId);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+            setUser(userDoc.data());
         } else {
-            console.log('No matching documents.');
+            console.log('No such document!');
         }
     };
 
-    useEffect(() => {
-        console.log("here: " + data.id)
+   useEffect(() => {
         getPostDocumentIdById(data.id);
-    }, [data.id]);
+        getUserDocumentById(data.uid);
+    }, [data.id, data.uid]);
 
     useEffect(() => {
         const checkIfLiked = async () => {
@@ -127,25 +129,39 @@ export const GoFundMeCard = ({ data = {} }) => {
             );
         }
     };
-
+    useEffect(() => {
+      const fetchUser = async () => {
+        const userData = await getUserByUsername(data.originalDonationPoster);
+        setUser(userData);
+      };
+  
+      fetchUser();
+    }, [data.originalDonationPoster]);
+  
     const getFirstNameLastInitial = (displayName) => {
-        if (!displayName) return '';
-        const [firstName, lastName] = displayName.split(' ');
-        const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
-        return `${firstName} ${lastInitial}`;
+      if (!displayName) return '';
+      const [firstName, lastName] = displayName.split(' ');
+      const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
+      return `${firstName} ${lastInitial}`;
     };
-
-    const formattedName = userData ? getFirstNameLastInitial(userData.displayName) : '';
-
-    const handleNamePress = () => {
-        console.log("PRess")
-        console.log(data)
-       // navigation.navigate('UserScreen', { user: data });
-    };
-
-    if (loading) {
-        return <ActivityIndicator size="large" color="#0000ff" />;
+  
+    if (!user) {
+      console.log(user)
+      return null; // or a loading indicator
     }
+    const handleNamePress = () => {
+        if (user) {
+
+            navigation.navigate('UserScreen', { user });
+        } else {
+            console.log('User data is not available.');
+        }
+    };
+
+    const formattedName = getFirstNameLastInitial(user.displayName);
+    console.log("hereHere")
+    console.log(user)
+    
 
     return (
         <View style={styles.cardContainer}>
@@ -154,12 +170,14 @@ export const GoFundMeCard = ({ data = {} }) => {
                     <Image source={{ uri: data.originalPosterProfileImage }} style={styles.profileImage} />
                     <View style={styles.posterInfo}>
                         <View style={styles.column}>
-                            <TouchableOpacity onPress={handleNamePress}>
                                 <Text style={styles.posterName}>
+
+                            <TouchableOpacity onPress={handleNamePress}>
                                     <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
+                                    </TouchableOpacity>
                                     <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this GoFundMe:</Text>
                                 </Text>
-                            </TouchableOpacity>
+                            
                             <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(data.date)}</Text>
                         </View>
                     </View>
@@ -271,4 +289,7 @@ const styles = StyleSheet.create({
     linkView: {
         paddingRight: 10,
     },
+    boldText:{
+        fontSize: 16 ,
+    }
 });

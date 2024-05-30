@@ -21,6 +21,7 @@ import PetitionScreen from './Screens/PetitionScreen';
 import GoFundMeScreen from './Screens/GoFundMeScreen';
 import FavoriteScreen from './Screens/FavoritesScareen';
 import EditProfileScreen from './Screens/EditProfileScreen';
+import UserScreen from './Screens/UserScreen';
 import CharityDetailedScreen from './Screens/ChairtyDetailedScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -53,7 +54,6 @@ export { db };
 import notificationIcon from './assets/Icons/notificationIcon.png'
 
 import { AuthProvider, useAuth } from './services/AuthContext';
-import UserScreen from './Screens/UserScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -200,6 +200,7 @@ function RootNavigator() {
           <Stack.Screen name="Petition" component={PetitionScreen} />
           <Stack.Screen name="GoFundMe" component={GoFundMeScreen} />
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          <Stack.Screen name="UserScreen" component={UserScreen} /> 
         </>
       ) : (
         <>

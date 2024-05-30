@@ -5,6 +5,7 @@ import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
 import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from 'firebase/firestore';
 
+import { useNavigation } from '@react-navigation/native';
 
 const likeIcon = require('../assets/Icons/heart.png');
 const welcome = require('../assets/Images/Welcome.png');
@@ -54,13 +55,15 @@ const likePost = async (postId, userId, username) => {
 
 const FirstTimeDonationCard = ({ data }) => {
     const [user, setUser] = useState(null);
+    const [userDoc, setUserDoc] = useState(null);
     const { userData, loading } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
-    const [likesCount, setLikesCount] = useState(data.Likers.length);
-    console.log("FirstTimeLikes: " + data.Likers)
-    console.log("FirstTimeLikes: " + likesCount)
+    console.log(data.Likers)
+    const [likesCount, setLikesCount] = useState( data.Likers.length);
     const [postId, setPostId] = useState("");
+    const navigation = useNavigation();
 
+    console.log(data.Likers.length)
     const getPostDocumentIdById = async (id) => {
         console.log(id);
         const postsRef = collection(firestore, "Posts");
@@ -77,9 +80,20 @@ const FirstTimeDonationCard = ({ data }) => {
         }
     };
 
-    useEffect(() => {
+    const getUserDocumentById = async (userId) => {
+        const userRef = doc(firestore, 'users', userId);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+            setUser(userDoc.data());
+        } else {
+            console.log('No such document!');
+        }
+    };
+
+   useEffect(() => {
         getPostDocumentIdById(data.id);
-    }, [data.id]);
+        getUserDocumentById(data.uid);
+    }, [data.id, data.uid]);
 
     useEffect(() => {
         const checkIfLiked = async () => {
@@ -124,26 +138,39 @@ const FirstTimeDonationCard = ({ data }) => {
             );
         }
     };
-
-
-
     useEffect(() => {
-        const fetchUser = async () => {
-            const userData = await getUserByUsername(data.originalDonationPoster);
-            setUser(userData);
-        };
-
-        fetchUser();
+      const fetchUser = async () => {
+        const userData = await getUserByUsername(data.originalDonationPoster);
+        setUser(userData);
+      };
+  
+      fetchUser();
     }, [data.originalDonationPoster]);
-
+  
     const getFirstNameLastInitial = (displayName) => {
-        if (!displayName) return '';
-        const [firstName, lastName] = displayName.split(' ');
-        const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
-        return `${firstName} ${lastInitial}`;
+      if (!displayName) return '';
+      const [firstName, lastName] = displayName.split(' ');
+      const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
+      return `${firstName} ${lastInitial}`;
+    };
+  
+    if (!user) {
+      console.log(user)
+      return null; // or a loading indicator
+    }
+    const handleNamePress = () => {
+        if (user) {
+            
+            navigation.navigate('UserScreen', { user });
+        } else {
+            console.log('User data is not available.');
+        }
     };
 
-    const formattedName = user ? getFirstNameLastInitial(user.displayName) : '';
+    const formattedName = getFirstNameLastInitial(user.displayName);
+    console.log("hereHere")
+    console.log(user)
+    
 
     return (
         <View style={styles.card}>
@@ -152,7 +179,9 @@ const FirstTimeDonationCard = ({ data }) => {
                 <View style={styles.posterInfo}>
                     <View style={styles.column}>
                         <Text style={styles.posterName}>
-                            <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
+                        <TouchableOpacity onPress={handleNamePress}>
+                                <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
+                                </TouchableOpacity>
                             <Text style={{ fontFamily: 'Montserrat-Medium' }}>'s first donation is to </Text>
                             <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{data.charity}!</Text>
                         </Text>
@@ -264,6 +293,9 @@ const styles = StyleSheet.create({
         width: 200,
         height: 150,
         alignSelf: 'center'
+    },
+    boldText:{
+        fontSize: 16 
     }
 });
 
