@@ -5,7 +5,7 @@ import styles from '../Styles.js/Styles';
 import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
-import { collection, query, getDocs, limit, startAfter } from 'firebase/firestore';
+import { collection, query, getDocs, limit, startAfter, orderBy } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig';
 import { useAuth } from '../services/AuthContext';
 import WelcomeCard from '../Components/WelcomeCard';
@@ -108,7 +108,7 @@ export default function HomeFeedScreen({ navigation }) {
   const fetchPosts = async () => {
     try {
       const postsCollection = collection(firestore, 'Posts');
-      const q = query(postsCollection, limit(POSTS_LIMIT));
+      const q = query(postsCollection, orderBy('date', 'desc'), limit(POSTS_LIMIT));
       const postsSnapshot = await getDocs(q);
       const lastVisibleDoc = postsSnapshot.docs[postsSnapshot.docs.length - 1];
       setLastVisible(lastVisibleDoc);
@@ -138,7 +138,7 @@ export default function HomeFeedScreen({ navigation }) {
 
     try {
       const postsCollection = collection(firestore, 'Posts');
-      const q = query(postsCollection, startAfter(lastVisible), limit(POSTS_LIMIT));
+      const q = query(postsCollection, orderBy('date', 'desc'), startAfter(lastVisible), limit(POSTS_LIMIT));
       const postsSnapshot = await getDocs(q);
       const lastVisibleDoc = postsSnapshot.docs[postsSnapshot.docs.length - 1];
       setLastVisible(lastVisibleDoc);
@@ -205,7 +205,7 @@ export default function HomeFeedScreen({ navigation }) {
         <ForYouFeed posts={posts} refreshing={refreshing} onRefresh={onRefresh} fetchMorePosts={fetchMorePosts} /> :
         <FriendsFeed posts={posts} refreshing={refreshing} onRefresh={onRefresh} fetchMorePosts={fetchMorePosts} />
       }
-      {loadingMore && <ActivityIndicator size="large" color="#0000ff" />}
+      {loadingMore && <ActivityIndicator size="large" color="#3FC032" />}
     </View>
   );
 }

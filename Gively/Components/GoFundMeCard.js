@@ -1,6 +1,6 @@
 import 'firebase/firestore';
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Dimensions } from 'react-native';
 import { LinkPreview } from '@flyerhq/react-native-link-preview';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../services/AuthContext';
@@ -10,6 +10,8 @@ import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, 
 import { getUserByUsername } from '../services/userService';
 
 const likeIcon = require('../assets/Icons/heart.png');
+
+const screenWidth = Dimensions.get('window').width; // Get screen width
 
 const formatDate = (dateStr) => {
     const date = new Date(dateStr);
@@ -48,11 +50,10 @@ export const GoFundMeCard = ({ data = {} }) => {
     const [user, setUser] = useState(null);
     const { userData, loading } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
-    const [likesCount, setLikesCount] = useState( data.Likers.length);
+    const [likesCount, setLikesCount] = useState(data.Likers.length);
     const [postId, setPostId] = useState("");
     const navigation = useNavigation();
 
-    console.log(data.Likers.length)
     const getPostDocumentIdById = async (id) => {
         const postsRef = collection(firestore, "Posts");
         const q = query(postsRef, where('id', '==', id));
@@ -77,7 +78,7 @@ export const GoFundMeCard = ({ data = {} }) => {
         }
     };
 
-   useEffect(() => {
+    useEffect(() => {
         getPostDocumentIdById(data.id);
         getUserDocumentById(data.uid);
     }, [data.id, data.uid]);
@@ -125,28 +126,28 @@ export const GoFundMeCard = ({ data = {} }) => {
             );
         }
     };
+
     useEffect(() => {
-      const fetchUser = async () => {
-        const userData = await getUserByUsername(data.originalDonationPoster);
-        setUser(userData);
-      };
-  
-      fetchUser();
+        const fetchUser = async () => {
+            const userData = await getUserByUsername(data.originalDonationPoster);
+            setUser(userData);
+        };
+
+        fetchUser();
     }, [data.originalDonationPoster]);
-  
+
     const getFirstNameLastInitial = (displayName) => {
-      if (!displayName) return '';
-      const [firstName, lastName] = displayName.split(' ');
-      const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
-      return `${firstName} ${lastInitial}`;
+        if (!displayName) return '';
+        const [firstName, lastName] = displayName.split(' ');
+        const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
+        return `${firstName} ${lastInitial}`;
     };
-  
+
     if (!user) {
-      return null; // or a loading indicator
+        return null; // or a loading indicator
     }
     const handleNamePress = () => {
         if (user) {
-
             navigation.navigate('UserScreen', { user });
         } else {
             console.log('User data is not available.');
@@ -159,19 +160,17 @@ export const GoFundMeCard = ({ data = {} }) => {
         <View style={styles.cardContainer}>
             <View style={styles.card}>
                 <View style={styles.header}>
-                <TouchableOpacity onPress={handleNamePress}>
-                    <Image source={{ uri: data.originalPosterProfileImage }} style={styles.profileImage} />
+                    <TouchableOpacity onPress={handleNamePress}>
+                        <Image source={{ uri: data.originalPosterProfileImage }} style={styles.profileImage} />
                     </TouchableOpacity>
                     <View style={styles.posterInfo}>
                         <View style={styles.column}>
-                                <Text style={styles.posterName}>
-
-                            <TouchableOpacity onPress={handleNamePress}>
+                            <View style={styles.nameContainer}>
+                                <TouchableOpacity onPress={handleNamePress}>
                                     <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
-                                    </TouchableOpacity>
-                                    <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this GoFundMe:</Text>
-                                </Text>
-                            
+                                </TouchableOpacity>
+                                <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this GoFundMe:</Text>
+                            </View>
                             <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(data.date)}</Text>
                         </View>
                     </View>
@@ -196,7 +195,7 @@ export const GoFundMeCard = ({ data = {} }) => {
 
 const styles = StyleSheet.create({
     cardContainer: {
-        width: '100%',
+        width: screenWidth - 20, // Set width to screen width with some padding
         marginHorizontal: 10,
         marginBottom: 20,
     },
@@ -283,7 +282,13 @@ const styles = StyleSheet.create({
     linkView: {
         paddingRight: 10,
     },
-    boldText:{
-        fontSize: 16 ,
-    }
+    boldText: {
+        fontSize: 16,
+    },
+    nameContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
 });
+
+export default GoFundMeCard;

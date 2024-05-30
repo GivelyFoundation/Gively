@@ -1,33 +1,26 @@
-import React, {useState, useEffect} from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { LinkPreview } from '@flyerhq/react-native-link-preview'
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, Alert } from 'react-native';
+import { LinkPreview } from '@flyerhq/react-native-link-preview';
 import { getUserByUsername } from '../services/userService';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
-import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 
 const likeIcon = require('../assets/Icons/heart.png');
 
+const cardWidth = Dimensions.get('window').width - 40;
+
 const formatDate = (dateStr) => {
     const date = new Date(dateStr);
-  
-    // Options for the date part
     const optionsDate = { weekday: 'short', month: 'short', day: 'numeric' };
-  
-    // Format the date part
     const formattedDate = date.toLocaleDateString('en-US', optionsDate);
-  
-    // Options for the time part
     const optionsTime = { hour: 'numeric', minute: 'numeric', hour12: true };
-  
-    // Format the time part
     const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
-  
     return `${formattedDate} • ${formattedTime}`;
-  };
+};
 
-  const hasUserLikedPost = async (postId, userId) => {
+const hasUserLikedPost = async (postId, userId) => {
     const postRef = doc(firestore, 'Posts', postId);
     const docSnapshot = await getDoc(postRef);
     const likers = docSnapshot.data().Likers || [];
@@ -52,13 +45,14 @@ const likePost = async (postId, userId, username) => {
     console.log("Post liked successfully for user:", userId);
 };
 
-export const PetitionCard = ({ data = {}}) => {
+export const PetitionCard = ({ data = {} }) => {
     const [user, setUser] = useState(null);
     const { userData, loading } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
-    const [likesCount, setLikesCount] = useState( data.Likers.length);
+    const [likesCount, setLikesCount] = useState(data.Likers.length);
     const [postId, setPostId] = useState("");
     const navigation = useNavigation();
+
     const getPostDocumentIdById = async (id) => {
         const postsRef = collection(firestore, "Posts");
         const q = query(postsRef, where('id', '==', id));
@@ -83,7 +77,7 @@ export const PetitionCard = ({ data = {}}) => {
         }
     };
 
-   useEffect(() => {
+    useEffect(() => {
         getPostDocumentIdById(data.id);
         getUserDocumentById(data.uid);
     }, [data.id, data.uid]);
@@ -131,25 +125,26 @@ export const PetitionCard = ({ data = {}}) => {
             );
         }
     };
+
     useEffect(() => {
-      const fetchUser = async () => {
-        const userData = await getUserByUsername(data.originalDonationPoster);
-        setUser(userData);
-      };
-  
-      fetchUser();
+        const fetchUser = async () => {
+            const userData = await getUserByUsername(data.originalDonationPoster);
+            setUser(userData);
+        };
+
+        fetchUser();
     }, [data.originalDonationPoster]);
-  
+
     const getFirstNameLastInitial = (displayName) => {
-      if (!displayName) return '';
-      const [firstName, lastName] = displayName.split(' ');
-      const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
-      return `${firstName} ${lastInitial}`;
+        if (!displayName) return '';
+        const [firstName, lastName] = displayName.split(' ');
+        const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
+        return `${firstName} ${lastInitial}`;
     };
-  
+
     if (!user) {
-      console.log(user)
-      return null; // or a loading indicator
+        console.log(user);
+        return null; // or a loading indicator
     }
     const handleNamePress = () => {
         if (user) {
@@ -165,17 +160,17 @@ export const PetitionCard = ({ data = {}}) => {
         <View style={styles.cardContainer}>
             <View style={styles.card}>
                 <View style={styles.header}>
-                <TouchableOpacity onPress={handleNamePress}>
-                    <Image source={{ uri: data.originalPosterProfileImage }} style={styles.profileImage} />
+                    <TouchableOpacity onPress={handleNamePress}>
+                        <Image source={{ uri: data.originalPosterProfileImage }} style={styles.profileImage} />
                     </TouchableOpacity>
                     <View style={styles.posterInfo}>
                         <View style={styles.column}>
-                            <Text style={styles.posterName}>
-                            <TouchableOpacity onPress={handleNamePress}>
-                                <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
+                            <View style={styles.nameContainer}>
+                                <TouchableOpacity onPress={handleNamePress}>
+                                    <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
                                 </TouchableOpacity>
                                 <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this Change.org Petiton:</Text>
-                            </Text>
+                            </View>
                             <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(data.date)}</Text>
                         </View>
                     </View>
@@ -186,12 +181,11 @@ export const PetitionCard = ({ data = {}}) => {
                 </View>
                 <View style={styles.footer}>
                     <View style={styles.likesContainer}>
-                        <TouchableOpacity  style={styles.likesContainer}  onPress={handleLikeToggle}>
-                        <Image source={likeIcon} style={[styles.likeIcon, { tintColor: isLiked ? '#EB5757' : '#8484A9' }]} />
-                        <Text style={[styles.likes, { fontFamily: 'Montserrat-Medium', color: data.isLiked ? '#EB5757' : '#8484A9' }]}>{likesCount}</Text>
-                   
+                        <TouchableOpacity style={styles.likesContainer} onPress={handleLikeToggle}>
+                            <Image source={likeIcon} style={[styles.likeIcon, { tintColor: isLiked ? '#EB5757' : '#8484A9' }]} />
+                            <Text style={[styles.likes, { fontFamily: 'Montserrat-Medium', color: data.isLiked ? '#EB5757' : '#8484A9' }]}>{likesCount}</Text>
                         </TouchableOpacity>
-                         </View>
+                    </View>
                     <TouchableOpacity style={styles.button}>
                         <Text style={styles.buttonText}>Share Petition</Text>
                     </TouchableOpacity>
@@ -203,7 +197,7 @@ export const PetitionCard = ({ data = {}}) => {
 
 const styles = StyleSheet.create({
     cardContainer: {
-        width: '100%',
+        width: cardWidth,
         marginHorizontal: 10,
         marginBottom: 20,
     },
@@ -241,10 +235,6 @@ const styles = StyleSheet.create({
         color: '#1C5AA3',
         paddingTop: 5,
     },
-    likesContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
     postText: {
         fontSize: 14,
         marginBottom: 10,
@@ -276,7 +266,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 20,
         width: '50%',
-        marginRight:10
+        marginRight: 10
     },
     buttonText: {
         color: '#fff',
@@ -294,8 +284,13 @@ const styles = StyleSheet.create({
     linkView: {
         paddingRight: 10
     },
-    boldText:{
-        fontSize: 16 ,
-    }
+    boldText: {
+        fontSize: 16,
+    },
+    nameContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
 });
 
+export default PetitionCard;
