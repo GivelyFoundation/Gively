@@ -55,21 +55,17 @@ const likePost = async (postId, userId, username) => {
 
 const FirstTimeDonationCard = ({ data }) => {
     const [user, setUser] = useState(null);
-    const [userDoc, setUserDoc] = useState(null);
     const { userData, loading } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
-    console.log(data.Likers)
     const [likesCount, setLikesCount] = useState( data.Likers.length);
     const [postId, setPostId] = useState("");
     const navigation = useNavigation();
 
     console.log(data.Likers.length)
     const getPostDocumentIdById = async (id) => {
-        console.log(id);
         const postsRef = collection(firestore, "Posts");
         const q = query(postsRef, where('id', '==', id));
         const querySnapshot = await getDocs(q);
-        console.log(querySnapshot);
         if (!querySnapshot.empty) {
             querySnapshot.forEach(doc => {
                 console.log('Document ID:', doc.id);
@@ -168,14 +164,14 @@ const FirstTimeDonationCard = ({ data }) => {
     };
 
     const formattedName = getFirstNameLastInitial(user.displayName);
-    console.log("hereHere")
-    console.log(user)
     
 
     return (
         <View style={styles.card}>
             <View style={styles.header}>
+            <TouchableOpacity onPress={handleNamePress}>
                 <Image source={{ uri: data.originalPosterProfileImage }} style={styles.profileImage} />
+                </TouchableOpacity>
                 <View style={styles.posterInfo}>
                     <View style={styles.column}>
                         <Text style={styles.posterName}>
