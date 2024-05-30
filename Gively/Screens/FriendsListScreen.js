@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import * as SMS from 'expo-sms';
 import styles from '../Styles.js/Styles';
 import { FriendCard } from '../Components/FriendCard';
 import { fakeFriends, fakeFriendReccomendations } from '../MockData';
 
 const GoFundMeLogo = require('../assets/Images/GoFundMeLogo.jpg');
+import notificationIcon from '../assets/Icons/notificationIcon.png';
 
 export default function FriendsListScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,22 +46,28 @@ export default function FriendsListScreen({ navigation }) {
       console.log("SMS is not available on this device");
     }
   };
+
   return (
     <View style={[styles.page, friendStyles.container]}>
-      <Text style={[friendStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Friends</Text>
+      <View style={friendStyles.headerContainer}>
+        <Text style={[friendStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Friends</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
+          <Image source={notificationIcon} style={friendStyles.notificationIcon} />
+        </TouchableOpacity>
+      </View>
       <TextInput
         style={[friendStyles.searchBox]}
         placeholder="Search..."
         onChangeText={text => setSearchQuery(text)}
         value={searchQuery}
       />
-      
+
       <ScrollView>
-      <TouchableOpacity style={friendStyles.inviteFriendsButton} onPress={handleInviteFriends}>
-        <Text style={[friendStyles.inviteFriendsButtonText, { fontFamily: 'Montserrat-Bold' }]}>
-          Invite Friends From Contacts
-        </Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={friendStyles.inviteFriendsButton} onPress={handleInviteFriends}>
+          <Text style={[friendStyles.inviteFriendsButtonText, { fontFamily: 'Montserrat-Bold' }]}>
+            Invite Friends From Contacts
+          </Text>
+        </TouchableOpacity>
         <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Medium' }]}>People You May Know</Text>
         <ScrollView>
           {fakeFriends.map(friend => (
@@ -79,9 +86,19 @@ export default function FriendsListScreen({ navigation }) {
 }
 
 const friendStyles = StyleSheet.create({
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
   headerText: {
-    paddingLeft: 20,
-    fontSize: 24
+    fontSize: 24,
+  },
+  notificationIcon: {
+    width: 24,
+    height: 24,
   },
   searchBox: {
     height: 40,
@@ -92,7 +109,7 @@ const friendStyles = StyleSheet.create({
     marginVertical: 10,
     backgroundColor: '#FFF',
     marginHorizontal: 20,
-    paddingHorizontal: 20
+    paddingHorizontal: 20,
   },
   horizontalLine: {
     height: 1, // Line thickness
@@ -104,13 +121,13 @@ const friendStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 10,
     paddingVertical: 30,
-    marginTop: 40
+    marginTop: 40,
   },
   title: {
     fontSize: 16,
     paddingLeft: 20,
     paddingTop: 10,
-    paddingBottom: 20
+    paddingBottom: 20,
   },
   inviteFriendsButton: {
     backgroundColor: '#3FC032',
