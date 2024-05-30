@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
 import SwitchSelector from "react-native-switch-selector";
 import styles from '../Styles.js/Styles';
 import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, query, getDocs, limit, startAfter } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig';
 import { useAuth } from '../services/AuthContext';
 import WelcomeCard from '../Components/WelcomeCard';
 import FirstTimeDonationCard from '../Components/FirstTimeDonationCard';
 
-const ForYouFeed = ({ posts, refreshing, onRefresh }) => {
+const POSTS_LIMIT = 10;
+
+const ForYouFeed = ({ posts, refreshing, onRefresh, fetchMorePosts }) => {
   const renderCard = (item) => {
     if (!item) {
       return null;
@@ -38,16 +40,20 @@ const ForYouFeed = ({ posts, refreshing, onRefresh }) => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        onScroll={({ nativeEvent }) => {
+          if (isCloseToBottom(nativeEvent)) {
+            fetchMorePosts();
+          }
+        }}
+        scrollEventThrottle={400}
       >
-        {sortedPosts.map((item) => {
-          return renderCard(item);
-        })}
+        {sortedPosts.map((item) => renderCard(item))}
       </ScrollView>
     </View>
   );
 };
 
-const FriendsFeed = ({ posts, refreshing, onRefresh }) => {
+const FriendsFeed = ({ posts, refreshing, onRefresh, fetchMorePosts }) => {
   const renderCard = (item) => {
     if (!item) {
       return null;
@@ -74,21 +80,25 @@ const FriendsFeed = ({ posts, refreshing, onRefresh }) => {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        onScroll={({ nativeEvent }) => {
+          if (isCloseToBottom(nativeEvent)) {
+            fetchMorePosts();
+          }
+        }}
+        scrollEventThrottle={400}
       >
-
-        {sortedPosts.map((item) => {
-          return renderCard(item);
-        })}
+        {sortedPosts.map((item) => renderCard(item))}
       </ScrollView>
     </View>
   );
 };
-
 
 export default function HomeFeedScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('For You');
   const [posts, setPosts] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [lastVisible, setLastVisible] = useState(null);
+  const [loadingMore, setLoadingMore] = useState(false);
   const { userData } = useAuth();
 
   const handleTabPress = (tab) => {
@@ -98,7 +108,11 @@ export default function HomeFeedScreen({ navigation }) {
   const fetchPosts = async () => {
     try {
       const postsCollection = collection(firestore, 'Posts');
-      const postsSnapshot = await getDocs(postsCollection);
+      const q = query(postsCollection, limit(POSTS_LIMIT));
+      const postsSnapshot = await getDocs(q);
+      const lastVisibleDoc = postsSnapshot.docs[postsSnapshot.docs.length - 1];
+      setLastVisible(lastVisibleDoc);
+
       const postsList = postsSnapshot.docs.map(doc => {
         const data = doc.data();
         const serializedData = serializeData(data);
@@ -118,12 +132,45 @@ export default function HomeFeedScreen({ navigation }) {
     }
   };
 
+  const fetchMorePosts = async () => {
+    if (loadingMore || !lastVisible) return;
+    setLoadingMore(true);
+
+    try {
+      const postsCollection = collection(firestore, 'Posts');
+      const q = query(postsCollection, startAfter(lastVisible), limit(POSTS_LIMIT));
+      const postsSnapshot = await getDocs(q);
+      const lastVisibleDoc = postsSnapshot.docs[postsSnapshot.docs.length - 1];
+      setLastVisible(lastVisibleDoc);
+
+      const postsList = postsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        const serializedData = serializeData(data);
+        return { id: doc.id, ...serializedData };
+      });
+
+      const cleanedPostsList = postsList.map(post => JSON.parse(JSON.stringify(post)));
+      const validPosts = cleanedPostsList.filter(post => post !== null);
+
+      if (validPosts.length > 0) {
+        setPosts(prevPosts => [...prevPosts, ...validPosts]);
+      } else {
+        console.error('No valid posts found');
+      }
+    } catch (error) {
+      console.error('Error fetching more posts:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
   useEffect(() => {
     fetchPosts();
   }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
+    setLastVisible(null);
     await fetchPosts();
     setRefreshing(false);
   };
@@ -155,9 +202,10 @@ export default function HomeFeedScreen({ navigation }) {
         height={30}
       />
       {activeTab === 'For You' ?
-        <ForYouFeed posts={posts} refreshing={refreshing} onRefresh={onRefresh} /> :
-        <FriendsFeed posts={posts} refreshing={refreshing} onRefresh={onRefresh} />
+        <ForYouFeed posts={posts} refreshing={refreshing} onRefresh={onRefresh} fetchMorePosts={fetchMorePosts} /> :
+        <FriendsFeed posts={posts} refreshing={refreshing} onRefresh={onRefresh} fetchMorePosts={fetchMorePosts} />
       }
+      {loadingMore && <ActivityIndicator size="large" color="#0000ff" />}
     </View>
   );
 }
@@ -186,4 +234,9 @@ function serializeData(data) {
     }
   }
   return serializedData;
+}
+
+function isCloseToBottom({ layoutMeasurement, contentOffset, contentSize }) {
+  const paddingToBottom = 20;
+  return layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom;
 }
