@@ -201,6 +201,7 @@ function RootNavigator() {
           <Stack.Screen name="GoFundMe" component={GoFundMeScreen} />
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
           <Stack.Screen name="UserScreen" component={UserScreen} /> 
+          <Stack.Screen name="CharityDetailedScreen" component={CharityDetailedScreen} /> 
         </>
       ) : (
         <>
