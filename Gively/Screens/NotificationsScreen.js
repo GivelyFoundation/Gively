@@ -19,19 +19,20 @@ const NotificationsScreen = () => {
       const q = query(notificationsRef, orderBy('timestamp', 'desc'));
 
       const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-        const notificationsList = [];
-        for (const docSnapshot of querySnapshot.docs) {
-          const data = docSnapshot.data();
-          const userRef = doc(firestore, 'users', data.user);
-          const userDoc = await getDoc(userRef);
-          const userProfile = userDoc.exists() ? userDoc.data() : {};
+        const notificationsList = await Promise.all(
+          querySnapshot.docs.map(async (docSnapshot) => {
+            const data = docSnapshot.data();
+            const userRef = doc(firestore, 'users', data.user);
+            const userDoc = await getDoc(userRef);
+            const userProfile = userDoc.exists() ? userDoc.data() : {};
 
-          notificationsList.push({
-            id: docSnapshot.id,
-            ...data,
-            profilePicture: userProfile.profilePicture || 'default_profile_picture_url', // Replace with default if needed
-          });
-        }
+            return {
+              id: docSnapshot.id,
+              ...data,
+              profilePicture: userProfile.profilePicture || 'default_profile_picture_url', // Replace with default if needed
+            };
+          })
+        );
         setNotifications(notificationsList);
       });
 
