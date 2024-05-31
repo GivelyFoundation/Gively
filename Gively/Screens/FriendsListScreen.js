@@ -52,7 +52,9 @@ export default function FriendsListScreen({ navigation }) {
       <View style={friendStyles.headerContainer}>
         <Text style={[friendStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Friends</Text>
         <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
+        <TouchableOpacity  onPress={() => navigation.navigate('Nofications')}>
           <Image source={notificationIcon} style={friendStyles.notificationIcon} />
+          </TouchableOpacity>
         </TouchableOpacity>
       </View>
       <TextInput
