@@ -296,8 +296,9 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     welcome: {
-        width: 200,
+        width: 300,
         height: 150,
+        marginVertical:10,
         alignSelf: 'center'
     },
     boldText: {
