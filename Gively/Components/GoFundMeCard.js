@@ -43,16 +43,11 @@ const likePost = async (postId, userId, username, postOwnerId) => {
     await updateDoc(postRef, {
         Likers: arrayUnion(userId)
     });
-
-    // Add notification
-    console.log("postOwnerId: " + postOwnerId)
-    console.log("username: " + username)
-    console.log("userId: " + userId)
-    console.log("postId: " + postId)
     const notification = {
         message: `${username} liked your post!`,
         timestamp: serverTimestamp(),
-        postId: postId
+        postId: postId,
+        user: userId
     }
     await addDoc(collection(firestore, 'users', postOwnerId, 'notifications'), notification);
     console.log("notification sent")
@@ -61,7 +56,6 @@ const likePost = async (postId, userId, username, postOwnerId) => {
 };
 
 export const GoFundMeCard = ({ data = {} }) => {
-
     const [postOwnerId, setPostOwnerId] = useState(null);
     const [user, setUser] = useState(null);
     const { userData, loading } = useAuth();

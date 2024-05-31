@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, getDoc, doc } from 'firebase/firestore';
 
 const NotificationsScreen = ({ navigation }) => {
   const { userData } = useAuth();
@@ -12,18 +12,31 @@ const NotificationsScreen = ({ navigation }) => {
   useEffect(() => {
     if (!userData) return;
 
-    const notificationsRef = collection(firestore, 'users', userData.uid, 'notifications');
-    const q = query(notificationsRef, orderBy('timestamp', 'desc'));
+    const fetchNotifications = async () => {
+      const notificationsRef = collection(firestore, 'users', userData.uid, 'notifications');
+      const q = query(notificationsRef, orderBy('timestamp', 'desc'));
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const notificationsList = [];
-      querySnapshot.forEach((doc) => {
-        notificationsList.push({ id: doc.id, ...doc.data() });
+      const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+        const notificationsList = [];
+        for (const docSnapshot of querySnapshot.docs) {
+          const data = docSnapshot.data();
+          const userRef = doc(firestore, 'users', data.user);
+          const userDoc = await getDoc(userRef);
+          const userProfile = userDoc.exists() ? userDoc.data() : {};
+            console.log(userProfile)
+          notificationsList.push({
+            id: docSnapshot.id,
+            ...data,
+            profilePicture: userProfile.profilePicture || 'default_profile_picture_url', // Replace with default if needed
+          });
+        }
+        setNotifications(notificationsList);
       });
-      setNotifications(notificationsList);
-    });
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    };
+
+    fetchNotifications();
   }, [userData]);
 
   const formatDate = (timestamp) => {
@@ -37,8 +50,11 @@ const NotificationsScreen = ({ navigation }) => {
 
   const renderItem = ({ item }) => (
     <View style={styles.notificationItem}>
-      <Text style={[styles.title, { fontFamily: 'Montserrat-Medium' }]}>{item.message}</Text>
-      <Text style={[styles.timestamp, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(item.timestamp)}</Text>
+      <Image source={{ uri: item.profilePicture }} style={styles.profilePicture} />
+      <View style={styles.notificationText}>
+        <Text style={[styles.title, { fontFamily: 'Montserrat-Medium' }]}>{item.message}</Text>
+        <Text style={[styles.timestamp, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(item.timestamp)}</Text>
+      </View>
     </View>
   );
 
@@ -84,17 +100,24 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   notificationItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
+  profilePicture: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    marginRight: 16,
+  },
+  notificationText: {
+    flex: 1,
+  },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  description: {
-    fontSize: 14,
-    color: '#555',
   },
   timestamp: {
     fontSize: 12,

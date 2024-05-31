@@ -43,7 +43,8 @@ const likePost = async (postId, userId, username, postOwnerId) => {
     const notification = {
         message: `${username} liked your post!`,
         timestamp: serverTimestamp(),
-        postId: postId
+        postId: postId,
+        user: userId
     }
     await addDoc(collection(firestore, 'users', postOwnerId, 'notifications'), notification);
     console.log("notification sent")
