@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-na
 import { getUserByUsername } from '../services/userService';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
-import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 
 const likeIcon = require('../assets/Icons/heart.png');
@@ -34,16 +34,26 @@ const unlikePost = async (postId, userId) => {
     });
 };
 
-const likePost = async (postId, userId, username) => {
+const likePost = async (postId, userId, username, postOwnerId) => {
     const postRef = doc(firestore, 'Posts', postId);
-    console.log("Liking post for user:", userId, "with username:", username);
+    console.log("Liking post for user:", userId);
     await updateDoc(postRef, {
         Likers: arrayUnion(userId)
     });
+    const notification = {
+        message: `${username} liked your post!`,
+        timestamp: serverTimestamp(),
+        postId: postId,
+        user: userId
+    }
+    await addDoc(collection(firestore, 'users', postOwnerId, 'notifications'), notification);
+    console.log("notification sent")
+
     console.log("Post liked successfully for user:", userId);
 };
 
 const FirstTimeDonationCard = ({ data }) => {
+    const [postOwnerId, setPostOwnerId] = useState(null);
     const [user, setUser] = useState(null);
     const { userData, loading } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
@@ -60,6 +70,9 @@ const FirstTimeDonationCard = ({ data }) => {
             querySnapshot.forEach(doc => {
                 console.log('Document ID:', doc.id);
                 setPostId(doc.id);
+                const postData = doc.data();
+                setPostOwnerId(postData.uid);  // Set the post owner ID from the post data
+                setLikesCount(postData.Likers.length);
             });
         } else {
             console.log('No matching documents.');
@@ -78,8 +91,13 @@ const FirstTimeDonationCard = ({ data }) => {
 
     useEffect(() => {
         getPostDocumentIdById(data.id);
-        getUserDocumentById(data.uid);
-    }, [data.id, data.uid]);
+    }, [data.id]);
+
+    useEffect(() => {
+        if (postOwnerId) {
+            getUserDocumentById(postOwnerId);
+        }
+    }, [postOwnerId]);
 
     useEffect(() => {
         const checkIfLiked = async () => {
@@ -110,7 +128,7 @@ const FirstTimeDonationCard = ({ data }) => {
                 console.log("Post unliked successfully");
             } else {
                 console.log("Like post initiated");
-                await likePost(postId, userData.uid, userData.username);
+                await likePost(postId, userData.uid, userData.username, postOwnerId);
                 setIsLiked(true);
                 setLikesCount(likesCount + 1);
                 console.log("Post liked successfully");

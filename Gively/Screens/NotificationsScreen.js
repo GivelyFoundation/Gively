@@ -1,14 +1,60 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { notifications } from '../MockData';
+import { useAuth } from '../services/AuthContext';
+import { firestore } from '../services/firebaseConfig';
+import { collection, query, orderBy, onSnapshot, getDoc, doc } from 'firebase/firestore';
 
 const NotificationsScreen = ({ navigation }) => {
+  const { userData } = useAuth();
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    if (!userData) return;
+
+    const fetchNotifications = async () => {
+      const notificationsRef = collection(firestore, 'users', userData.uid, 'notifications');
+      const q = query(notificationsRef, orderBy('timestamp', 'desc'));
+
+      const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+        const notificationsList = [];
+        for (const docSnapshot of querySnapshot.docs) {
+          const data = docSnapshot.data();
+          const userRef = doc(firestore, 'users', data.user);
+          const userDoc = await getDoc(userRef);
+          const userProfile = userDoc.exists() ? userDoc.data() : {};
+            console.log(userProfile)
+          notificationsList.push({
+            id: docSnapshot.id,
+            ...data,
+            profilePicture: userProfile.profilePicture || 'default_profile_picture_url', // Replace with default if needed
+          });
+        }
+        setNotifications(notificationsList);
+      });
+
+      return () => unsubscribe();
+    };
+
+    fetchNotifications();
+  }, [userData]);
+
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp.toDate());
+    const optionsDate = { weekday: 'short', month: 'short', day: 'numeric' };
+    const formattedDate = date.toLocaleDateString('en-US', optionsDate);
+    const optionsTime = { hour: 'numeric', minute: 'numeric', hour12: true };
+    const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
+    return `${formattedDate} • ${formattedTime}`;
+  };
+
   const renderItem = ({ item }) => (
     <View style={styles.notificationItem}>
-      <Text style={[styles.title, { fontFamily: 'Montserrat-Medium' }]}>{item.title}</Text>
-      <Text style={[styles.description, { fontFamily: 'Montserrat-Medium' }]}>{item.description}</Text>
-      <Text style={[styles.timestamp, { fontFamily: 'Montserrat-Medium' }]}>{item.timestamp}</Text>
+      <Image source={{ uri: item.profilePicture }} style={styles.profilePicture} />
+      <View style={styles.notificationText}>
+        <Text style={[styles.title, { fontFamily: 'Montserrat-Medium' }]}>{item.message}</Text>
+        <Text style={[styles.timestamp, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(item.timestamp)}</Text>
+      </View>
     </View>
   );
 
@@ -54,17 +100,24 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   notificationItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
+  profilePicture: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    marginRight: 16,
+  },
+  notificationText: {
+    flex: 1,
+  },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  description: {
-    fontSize: 14,
-    color: '#555',
   },
   timestamp: {
     fontSize: 12,
