@@ -5,8 +5,7 @@ import styles from '../Styles.js/Styles';
 import { FriendCard } from '../Components/FriendCard';
 import { fakeFriends, fakeFriendReccomendations } from '../MockData';
 const noFriends = require('../assets/Images/NoFriendsYet.png');
-
-import notificationIcon from '../assets/Icons/notificationIcon.png';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function FriendsListScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,7 +52,7 @@ export default function FriendsListScreen({ navigation }) {
         
         <Text style={[friendStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Friends</Text>
         <TouchableOpacity  onPress={() => navigation.navigate('Nofications')}>
-        <Image source={notificationIcon} style={friendStyles.notificationIcon} />
+        <Icon name="notifications" size={30} color='#1C5AA3' />
         </TouchableOpacity>
       </View>
       <TextInput
@@ -69,14 +68,14 @@ export default function FriendsListScreen({ navigation }) {
             Invite Friends From Contacts
           </Text>
         </TouchableOpacity>
-        <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Medium' }]}>People You May Know</Text>
+        <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Bold' }]}>People You May Know</Text>
         <ScrollView>
           {fakeFriends.map(friend => (
             <FriendCard key={friend.id} friend={friend} areFollow={friend.areFollowing} />
           ))}
         </ScrollView>
         
-        <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Medium' }]}>Following</Text>
+        <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Bold' }]}>Following</Text>
         {/* <ScrollView>
           {fakeFriendReccomendations.map(friend => (
             <FriendCard key={friend.id} friend={friend} areFollowing={friend.areFollowing} />
