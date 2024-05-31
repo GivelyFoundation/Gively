@@ -54,6 +54,7 @@ export { db };
 import notificationIcon from './assets/Icons/notificationIcon.png'
 
 import { AuthProvider, useAuth } from './services/AuthContext';
+import NotificationsScreen from './Screens/NotificationsScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -202,7 +203,9 @@ function RootNavigator() {
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
           <Stack.Screen name="UserScreen" component={UserScreen} /> 
           <Stack.Screen name="CharityDetailedScreen" component={CharityDetailedScreen} /> 
+          <Stack.Screen name= "Nofications" component={NotificationsScreen}/>
         </>
+        
       ) : (
         <>
           <Stack.Screen name="Splash" component={SplashScreen} />
