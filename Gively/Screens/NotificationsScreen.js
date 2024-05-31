@@ -4,10 +4,12 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
 import { collection, query, orderBy, onSnapshot, getDoc, doc } from 'firebase/firestore';
+import { useNavigation } from '@react-navigation/native';
 
-const NotificationsScreen = ({ navigation }) => {
+const NotificationsScreen = () => {
   const { userData } = useAuth();
   const [notifications, setNotifications] = useState([]);
+  const navigation = useNavigation();
 
   useEffect(() => {
     if (!userData) return;
@@ -23,7 +25,7 @@ const NotificationsScreen = ({ navigation }) => {
           const userRef = doc(firestore, 'users', data.user);
           const userDoc = await getDoc(userRef);
           const userProfile = userDoc.exists() ? userDoc.data() : {};
-            console.log(userProfile)
+
           notificationsList.push({
             id: docSnapshot.id,
             ...data,
@@ -49,13 +51,16 @@ const NotificationsScreen = ({ navigation }) => {
   };
 
   const renderItem = ({ item }) => (
-    <View style={styles.notificationItem}>
+    <TouchableOpacity
+      style={styles.notificationItem}
+      onPress={() => navigation.navigate('SinglePostScreen', { postId: item.postId })}
+    >
       <Image source={{ uri: item.profilePicture }} style={styles.profilePicture} />
       <View style={styles.notificationText}>
         <Text style={[styles.title, { fontFamily: 'Montserrat-Medium' }]}>{item.message}</Text>
         <Text style={[styles.timestamp, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(item.timestamp)}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -109,7 +114,7 @@ const styles = StyleSheet.create({
   profilePicture: {
     width: 40,
     height: 40,
-    borderRadius: 10,
+    borderRadius: 20,
     marginRight: 16,
   },
   notificationText: {
