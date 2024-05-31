@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import { getUserByUsername } from '../services/userService';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
 import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
+const screenWidth = Dimensions.get('window').width; // Get screen width
 
 const likeIcon = require('../assets/Icons/heart.png');
 const welcome = require('../assets/Images/Welcome.png');
@@ -211,6 +212,7 @@ const FirstTimeDonationCard = ({ data }) => {
 
 const styles = StyleSheet.create({
     card: {
+        width: screenWidth - 20,
         backgroundColor: '#fff',
         borderRadius: 10,
         padding: 15,

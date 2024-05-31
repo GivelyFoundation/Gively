@@ -23,6 +23,7 @@ import FavoriteScreen from './Screens/FavoritesScareen';
 import EditProfileScreen from './Screens/EditProfileScreen';
 import UserScreen from './Screens/UserScreen';
 import CharityDetailedScreen from './Screens/ChairtyDetailedScreen';
+import SinglePostScreen from './Screens/SinglePostScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -204,6 +205,7 @@ function RootNavigator() {
           <Stack.Screen name="UserScreen" component={UserScreen} /> 
           <Stack.Screen name="CharityDetailedScreen" component={CharityDetailedScreen} /> 
           <Stack.Screen name= "Nofications" component={NotificationsScreen}/>
+          <Stack.Screen name="SinglePostScreen" component={SinglePostScreen}/>
         </>
         
       ) : (
