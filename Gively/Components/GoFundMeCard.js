@@ -5,7 +5,7 @@ import { LinkPreview } from '@flyerhq/react-native-link-preview';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
-import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, addDoc, serverTimestamp } from 'firebase/firestore';
 
 import { getUserByUsername } from '../services/userService';
 
@@ -37,16 +37,32 @@ const unlikePost = async (postId, userId) => {
     });
 };
 
-const likePost = async (postId, userId, username) => {
+const likePost = async (postId, userId, username, postOwnerId) => {
     const postRef = doc(firestore, 'Posts', postId);
-    console.log("Liking post for user:", userId, "with username:", username);
+    console.log("Liking post for user:", userId);
     await updateDoc(postRef, {
         Likers: arrayUnion(userId)
     });
+
+    // Add notification
+    console.log("postOwnerId: " + postOwnerId)
+    console.log("username: " + username)
+    console.log("userId: " + userId)
+    console.log("postId: " + postId)
+    const notification = {
+        message: `${username} liked your post!`,
+        timestamp: serverTimestamp(),
+        postId: postId
+    }
+    await addDoc(collection(firestore, 'users', postOwnerId, 'notifications'), notification);
+    console.log("notification sent")
+
     console.log("Post liked successfully for user:", userId);
 };
 
 export const GoFundMeCard = ({ data = {} }) => {
+
+    const [postOwnerId, setPostOwnerId] = useState(null);
     const [user, setUser] = useState(null);
     const { userData, loading } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
@@ -62,6 +78,9 @@ export const GoFundMeCard = ({ data = {} }) => {
             querySnapshot.forEach(doc => {
                 console.log('Document ID:', doc.id);
                 setPostId(doc.id);
+                const postData = doc.data();
+                setPostOwnerId(postData.uid);  // Set the post owner ID from the post data
+                setLikesCount(postData.Likers.length);
             });
         } else {
             console.log('No matching documents.');
@@ -80,8 +99,13 @@ export const GoFundMeCard = ({ data = {} }) => {
 
     useEffect(() => {
         getPostDocumentIdById(data.id);
-        getUserDocumentById(data.uid);
-    }, [data.id, data.uid]);
+    }, [data.id]);
+
+    useEffect(() => {
+        if (postOwnerId) {
+            getUserDocumentById(postOwnerId);
+        }
+    }, [postOwnerId]);
 
     useEffect(() => {
         const checkIfLiked = async () => {
@@ -112,7 +136,7 @@ export const GoFundMeCard = ({ data = {} }) => {
                 console.log("Post unliked successfully");
             } else {
                 console.log("Like post initiated");
-                await likePost(postId, userData.uid, userData.username);
+                await likePost(postId, userData.uid, userData.username, postOwnerId);
                 setIsLiked(true);
                 setLikesCount(likesCount + 1);
                 console.log("Post liked successfully");
