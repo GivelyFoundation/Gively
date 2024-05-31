@@ -106,7 +106,6 @@ const SinglePostScreen = () => {
       alignItems: 'center',
       backgroundColor: '#fff',
     },
-    
   });
   
   export default SinglePostScreen;

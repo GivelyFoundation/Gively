@@ -4,8 +4,8 @@ import * as SMS from 'expo-sms';
 import styles from '../Styles.js/Styles';
 import { FriendCard } from '../Components/FriendCard';
 import { fakeFriends, fakeFriendReccomendations } from '../MockData';
+const noFriends = require('../assets/Images/NoFriendsYet.png');
 
-const GoFundMeLogo = require('../assets/Images/GoFundMeLogo.jpg');
 import notificationIcon from '../assets/Icons/notificationIcon.png';
 
 export default function FriendsListScreen({ navigation }) {
@@ -50,11 +50,10 @@ export default function FriendsListScreen({ navigation }) {
   return (
     <View style={[styles.page, friendStyles.container]}>
       <View style={friendStyles.headerContainer}>
+        
         <Text style={[friendStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Friends</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
         <TouchableOpacity  onPress={() => navigation.navigate('Nofications')}>
-          <Image source={notificationIcon} style={friendStyles.notificationIcon} />
-          </TouchableOpacity>
+        <Image source={notificationIcon} style={friendStyles.notificationIcon} />
         </TouchableOpacity>
       </View>
       <TextInput
@@ -76,12 +75,18 @@ export default function FriendsListScreen({ navigation }) {
             <FriendCard key={friend.id} friend={friend} areFollow={friend.areFollowing} />
           ))}
         </ScrollView>
+        
         <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Medium' }]}>Following</Text>
-        <ScrollView>
+        {/* <ScrollView>
           {fakeFriendReccomendations.map(friend => (
             <FriendCard key={friend.id} friend={friend} areFollowing={friend.areFollowing} />
           ))}
-        </ScrollView>
+        </ScrollView> */}
+        <Image source={noFriends} style={friendStyles.noFriends} resizeMode="contain" />
+
+        <Text style={[friendStyles.addFriends, { fontFamily: 'Montserrat-Medium' }]}>Add friends to see them here!</Text>
+       
+        <View style={friendStyles.spacer} />
       </ScrollView>
     </View>
   );
@@ -148,4 +153,16 @@ const friendStyles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  noFriends:{
+      width: 350,
+      height: 350,
+      alignSelf: 'center'
+  },
+  spacer:{
+    height: 200
+  },
+  addFriends:{
+    alignSelf: 'center',
+    fontSize: 18
+  }
 });
