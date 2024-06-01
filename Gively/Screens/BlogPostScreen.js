@@ -12,13 +12,13 @@ const BlogPostScreen = ({ route }) => {
                 <Icon name="arrow-back" size={30} color="#000" />
             </TouchableOpacity>
             <ScrollView style={styles.container}>
-      <Text style={styles.title}>{post.title}</Text>
+      <Text style={[styles.title,{fontFamily: 'Montserrat-Medium'}]}>{post.title}</Text>
       {post.contents.map((section, index) => (
         <View key={index} style={styles.section}>
-          {section.subtitle ? <Text style={styles.subtitle}>{section.subtitle}</Text> : null}
+          {section.subtitle ? <Text style={[styles.subtitle,{fontFamily: 'Montserrat-Medium'}]}>{section.subtitle}</Text> : null}
           {Array.isArray(section.text)
-            ? section.text.map((paragraph, pIndex) => <Text key={pIndex} style={styles.text}>{paragraph}</Text>)
-            : <Text style={styles.text}>{section.text}</Text>}
+            ? section.text.map((paragraph, pIndex) => <Text key={pIndex} style={[styles.text, {fontFamily: 'Montserrat-Medium'}]}>{paragraph}</Text>)
+            : <Text style={[styles.text,{fontFamily: 'Montserrat-Medium'}]}>{section.text}</Text>}
         </View>
       ))}
     </ScrollView>
