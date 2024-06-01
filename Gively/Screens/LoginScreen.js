@@ -4,7 +4,6 @@ import { View, Text, TextInput, Pressable, Image, StyleSheet, Alert } from 'reac
 import { CommonActions } from '@react-navigation/native';
 import { auth } from '../services/firebaseConfig';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -72,11 +71,11 @@ export default function LoginScreen({ navigation }) {
 
       <View style={styles.socialLoginContainer}>
         <Pressable style={styles.socialButton}>
-          <FontAwesome name="google" size={20} color="#DB4437" />
+          <Image source={require('../assets/Icons/google-icon.png')} style={styles.socialLogo} />
           <Text style={styles.socialButtonText}>Login with Google</Text>
         </Pressable>
         <Pressable style={styles.socialButton}>
-          <FontAwesome name="facebook" size={20} color="#4267B2" />
+          <Image source={require('../assets/Icons/facebook-icon.png')} style={styles.socialLogo} />
           <Text style={styles.socialButtonText}>Login with Facebook</Text>
         </Pressable>
       </View>
@@ -165,13 +164,14 @@ const styles = StyleSheet.create({
   socialLoginContainer: {
     width: '100%',
     alignItems: 'center',
+    paddingHorizontal: 20,
   },
   orText: {
     color: '#A9A9A9',
     marginBottom: 10,
   },
   socialButton: {
-    width: '70%',
+    width: '90%',
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 15,
@@ -180,6 +180,11 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     justifyContent: 'center',
     marginBottom: 10,
+  },
+  socialLogo: {
+    width: 24,
+    height: 24,
+    marginRight: 10,
   },
   socialButtonText: {
     fontSize: 16,

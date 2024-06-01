@@ -49,6 +49,8 @@ const CreateAccountScreen = ({ navigation }) => {
     followers: []
   });
 
+  const { endSignUp } = useAuth();
+
   const nextStep = () => {
     setCurrentStep((prevStep) => (prevStep < 3 ? prevStep + 1 : prevStep));
   };
@@ -67,7 +69,10 @@ const CreateAccountScreen = ({ navigation }) => {
       "Are you sure you want to go back to the main menu? Any unsaved changes will be lost.",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Confirm", onPress: () => navigation.navigate('Splash') },
+        { text: "Confirm", onPress: () => {
+          endSignUp()  
+          navigation.navigate('Splash')
+        } },
       ],
       { cancelable: false }
     );
@@ -122,12 +127,12 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 40,
+    top: '7%',
     left: 20,
     zIndex: 10,
   },
   stepIndicatorContainer: {
-    marginTop: 100,
+    marginTop: 125,
   },
   formContainer: {
     marginTop: 20,
