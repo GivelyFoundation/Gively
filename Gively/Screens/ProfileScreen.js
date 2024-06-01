@@ -8,9 +8,8 @@ import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
 import { useAuth } from '../services/AuthContext';
-import { collection, query, where, getDocs, doc, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, getDocs, onSnapshot } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig';
-import { followUser, unfollowUser } from '../services/followService';
 
 const pieChartPlaceHolder = require('../assets/Images/pieChartPlaceHolder.png');
 
@@ -116,7 +115,6 @@ const CategoryScroll = () => {
 export default function ProfileScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Portfolio');
   const { userData } = useAuth();
-  const [isFollowing, setIsFollowing] = useState(false);
   const [followersCount, setFollowersCount] = useState(null);
   const [followingCount, setFollowingCount] = useState(null);
 
@@ -144,6 +142,17 @@ export default function ProfileScreen({ navigation }) {
     fetchFollowCounts();
   }, [userData]);
 
+  const handleTabPress = (tab) => {
+    setActiveTab(tab);
+  };
+
+  const handleFollowersPress = () => {
+    navigation.navigate('FollowersList', { userId: userData.uid });
+  };
+
+  const handleFollowingPress = () => {
+    navigation.navigate('FollowingList', { userId: userData.uid });
+  };
 
   return (
     <View style={styles.page}>
@@ -164,7 +173,7 @@ export default function ProfileScreen({ navigation }) {
           <Text style={[profileStyles.userNameText, { fontFamily: 'Montserrat-Medium' }]}> {userData.username}</Text>
           <View style={[profileStyles.followRow]}>
             <View style={[profileStyles.column]}>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={handleFollowersPress}>
                 <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>
                   {followersCount !== null ? followersCount : 0}
                 </Text>
@@ -173,7 +182,7 @@ export default function ProfileScreen({ navigation }) {
             </View>
             <View style={profileStyles.verticalLine} />
             <View style={[profileStyles.column]}>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={handleFollowingPress}>
                 <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>
                   {followingCount !== null ? followingCount : 0}
                 </Text>
