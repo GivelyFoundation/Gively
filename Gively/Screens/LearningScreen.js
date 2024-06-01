@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { earningToGiveContent,  goFundMeChangeOrgContent, effectiveAltruismContent, pondAnalogyContent } from '../assets/articles';
+
 const LearningScreen = () => {
   const navigation = useNavigation();
 
@@ -20,7 +21,7 @@ const LearningScreen = () => {
           style={[styles.card, { backgroundColor: index % 2 === 0 ? '#3FC032' : '#1C5AA3' }]}
           onPress={() =>  navigation.navigate('BlogPostScreen', { post})}
         >
-          <Text style={styles.cardText}>{post.title}</Text>
+          <Text style={[styles.cardText, {fontFamily: 'Montserrat-Medium'}]}>{post.title}</Text>
         </TouchableOpacity>
       ))}
     </ScrollView>
