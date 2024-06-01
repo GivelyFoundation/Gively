@@ -3,7 +3,7 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from 'react
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
-import { collection, query, orderBy, onSnapshot, getDoc, doc } from 'firebase/firestore';
+import {  collection, query, where, getDocs, doc, onSnapshot, serverTimestamp ,addDoc, deleteDoc , getDoc,orderBy } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import { followUser, unfollowUser } from '../services/followService';
 
@@ -16,6 +16,45 @@ const formatDate = (timestamp) => {
     const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
     return `${formattedDate} • ${formattedTime}`;
   };
+
+  const removeFollowNotification = async (userId, followedId) => {
+    try {
+   
+
+        const notificationsRef = collection(firestore, 'users', followedId, 'notifications');
+        console.log("Querying notifications for userId:", userId, "with followedId:", followedId);
+        const q = query(notificationsRef, where("notificationId", "==", userId + followedId));
+
+        const querySnapshot = await getDocs(q);
+        console.log("Query executed, number of documents found:", querySnapshot.size);
+
+        if (!querySnapshot.empty) {
+            for (const doc of querySnapshot.docs) {
+                console.log("Removing follow notification with ID:", userId + followedId);
+                await deleteDoc(doc.ref);
+                console.log("Follow notification removed successfully");
+            }
+        } else {
+            console.log("No follow notification found with ID:", userId + followedId);
+        }
+    } catch (error) {
+        console.error("Failed to remove follow notification:", error.code, error.message);
+    }
+};
+
+const sendFollowNotification = async (userId, username, followedId) => {
+    console.log("here")
+    const notification = {
+        message: `${username} followed you!`,
+        timestamp: serverTimestamp(),
+        user: userId,
+        type: "follow",
+        notificationId: userId + followedId
+    }
+    console.log(notification)
+    await addDoc(collection(firestore, 'users', followedId, 'notifications'), notification);
+    console.log("notification sent")
+};
 
 const NotificationItem = ({ item, navigation, isFollowing, handleFollowPress }) => {
     const handleNamePress = async () => {
@@ -125,8 +164,10 @@ const NotificationsScreen = () => {
     const currentStatus = followingState[userId];
     if (currentStatus) {
       await unfollowUser(userData.uid, userId);
+      removeFollowNotification(userData.uid, userId)
     } else {
       await followUser(userData.uid, userId);
+      sendFollowNotification(userData.uid, userData.username, userId)
     }
     setFollowingState((prev) => ({ ...prev, [userId]: !currentStatus }));
   };
