@@ -24,6 +24,8 @@ import EditProfileScreen from './Screens/EditProfileScreen';
 import UserScreen from './Screens/UserScreen';
 import CharityDetailedScreen from './Screens/ChairtyDetailedScreen';
 import SinglePostScreen from './Screens/SinglePostScreen';
+import LearningScreen from './Screens/LearningScreen';
+import BlogPostScreen from './Screens/BlogPostScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -174,6 +176,7 @@ function HomeScreenDrawer() {
   return (
     <Drawer.Navigator initialRouteName="Home " drawerContent={(props) => <CustomDrawerContent {...props} />}>
       <Drawer.Screen name="Home" component={HomeScreen} />
+      <Drawer.Screen name="Learning" component={LearningScreen} />
       <Drawer.Screen name="Favorites" component={FavoriteScreen} />
       <Drawer.Screen name="Donation History & Tax Form" component={DonationHistoryScreen} />
       <Drawer.Screen name="About Us" component={AboutUsScreen} />
@@ -206,6 +209,9 @@ function RootNavigator() {
           <Stack.Screen name="CharityDetailedScreen" component={CharityDetailedScreen} /> 
           <Stack.Screen name= "Nofications" component={NotificationsScreen}/>
           <Stack.Screen name="SinglePostScreen" component={SinglePostScreen}/>
+          <Stack.Screen name="LearningScreen" component={LearningScreen} />
+          <Stack.Screen name="BlogPostScreen" component={BlogPostScreen} />
+     
         </>
         
       ) : (
