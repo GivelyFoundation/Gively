@@ -35,6 +35,33 @@ const unlikePost = async (postId, userId) => {
     await updateDoc(postRef, {
         Likers: arrayRemove(userId)
     });
+    console.log("Post unliked successfully for user:", userId);
+};
+
+const removeNotification = async (postOwnerId, notificationId) => {
+    const notificationsRef = collection(firestore, 'users', postOwnerId, 'notifications');
+    const q = query(notificationsRef, where("notificationId", "==", notificationId));
+
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+        querySnapshot.forEach(async (doc) => {
+            console.log("Removing notification with ID:", notificationId);
+            await deleteDoc(doc.ref);
+            console.log("Notification removed successfully");
+        });
+    } else {
+        console.log("No notification found with ID:", notificationId);
+    }
+};
+
+const handleUnlikePost = async (postId, userId, notificationId, postOwnerId) => {
+    try {
+        await unlikePost(postId, userId);
+        await removeNotification(postOwnerId, notificationId);
+        console.log("Post unliked and notification removed for user:", userId);
+    } catch (error) {
+        console.error("Failed to unlike post and remove notification:", error);
+    }
 };
 
 const likePost = async (postId, userId, username, postOwnerId) => {
@@ -48,7 +75,8 @@ const likePost = async (postId, userId, username, postOwnerId) => {
         timestamp: serverTimestamp(),
         postId: postId,
         user: userId,
-        type: "like"
+        type: "like",
+        notificationId: postId+userId
     }
     await addDoc(collection(firestore, 'users', postOwnerId, 'notifications'), notification);
     console.log("notification sent")
@@ -127,7 +155,8 @@ export const GoFundMeCard = ({ data = {} }) => {
 
             if (isLiked) {
                 console.log("Unlike post initiated");
-                await unlikePost(postId, userData.uid);
+                const notId = postId+userData.uid
+                await handleUnlikePost(postId, userData.uid, notId,postOwnerId )
                 setIsLiked(false);
                 setLikesCount(likesCount - 1);
                 console.log("Post unliked successfully");

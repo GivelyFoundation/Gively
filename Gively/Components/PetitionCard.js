@@ -4,7 +4,7 @@ import { LinkPreview } from '@flyerhq/react-native-link-preview';
 import { getUserByUsername } from '../services/userService';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
-import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, addDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 
 const likeIcon = require('../assets/Icons/heart.png');
@@ -28,14 +28,50 @@ const hasUserLikedPost = async (postId, userId) => {
     return likers.includes(userId);
 };
 
+
 const unlikePost = async (postId, userId) => {
-    const postRef = doc(firestore, 'Posts', postId);
-    console.log("Unliking post for user:", userId);
-    await updateDoc(postRef, {
-        Likers: arrayRemove(userId)
-    });
+    try {
+        const postRef = doc(firestore, 'Posts', postId);
+        console.log("Unliking post for user:", userId);
+        await updateDoc(postRef, {
+            Likers: arrayRemove(userId)
+        });
+        console.log("Post unliked successfully for user:", userId);
+    } catch (error) {
+        console.error("Failed to unlike post:", error);
+    }
 };
 
+const removeNotification = async (postOwnerId, notificationId) => {
+    try {
+        const notificationsRef = collection(firestore, 'users', postOwnerId, 'notifications');
+        const q = query(notificationsRef, where("notificationId", "==", notificationId));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            for (const doc of querySnapshot.docs) {
+                console.log("Removing notification with ID:", notificationId);
+                await deleteDoc(doc.ref);
+                console.log("Notification removed successfully");
+            }
+        } else {
+            console.log("No notification found with ID:", notificationId);
+        }
+    } catch (error) {
+        console.error("Failed to remove notification:", error.code, error.message);
+    }
+};
+
+
+const handleUnlikePost = async (postId, userId, notificationId, postOwnerId) => {
+    try {
+        await unlikePost(postId, userId);
+        await removeNotification(postOwnerId, notificationId);
+        console.log("Post unliked and notification removed for user:", userId);
+    } catch (error) {
+        console.error("Failed to unlike post and remove notification:", error);
+    }
+};
 const likePost = async (postId, userId, username, postOwnerId) => {
     const postRef = doc(firestore, 'Posts', postId);
     console.log("Liking post for user:", userId);
@@ -47,7 +83,8 @@ const likePost = async (postId, userId, username, postOwnerId) => {
         timestamp: serverTimestamp(),
         postId: postId,
         user: userId,
-        type: "like"
+        type: "like",
+        notificationId: postId+userId
     }
     await addDoc(collection(firestore, 'users', postOwnerId, 'notifications'), notification);
     console.log("notification sent")
@@ -123,7 +160,8 @@ export const PetitionCard = ({ data = {} }) => {
 
             if (isLiked) {
                 console.log("Unlike post initiated");
-                await unlikePost(postId, userData.uid);
+                const notId = postId+userData.uid
+                await handleUnlikePost(postId, userData.uid, notId,postOwnerId )
                 setIsLiked(false);
                 setLikesCount(likesCount - 1);
                 console.log("Post unliked successfully");
