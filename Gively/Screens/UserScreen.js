@@ -9,13 +9,11 @@ import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
 import { useAuth } from '../services/AuthContext';
-import { collection, query, where, getDocs, doc, onSnapshot, serverTimestamp ,addDoc, deleteDoc} from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, onSnapshot, serverTimestamp, addDoc, deleteDoc } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig';
 import { followUser, unfollowUser } from '../services/followService';
 
 const pieChartPlaceHolder = require('../assets/Images/pieChartPlaceHolder.png');
-
-
 
 const CharityInfoComponent = ({ charityName, color, percentage }) => {
     return (
@@ -107,7 +105,7 @@ const Posts = ({ user }) => {
     );
 };
 
-const CategoryScroll = ({ }) => {
+const CategoryScroll = ({ user }) => {
     return (
         <ScrollView
             horizontal={true}
@@ -125,8 +123,6 @@ const CategoryScroll = ({ }) => {
 
 const removeFollowNotification = async (userId, followedId) => {
     try {
-   
-
         const notificationsRef = collection(firestore, 'users', followedId, 'notifications');
         console.log("Querying notifications for userId:", userId, "with followedId:", followedId);
         const q = query(notificationsRef, where("notificationId", "==", userId + followedId));
@@ -171,19 +167,17 @@ export default function UserScreen({ route, navigation }) {
     const [followersCount, setFollowersCount] = useState(null);
     const [followingCount, setFollowingCount] = useState(null);
 
-
-
     useEffect(() => {
         const checkIfFollowing = async () => {
-          if (userData && user) {
-            const followingRef = collection(firestore, `users/${userData.uid}/following`);
-            const q = query(followingRef, where('followedUserId', '==', followedID));
-            const querySnapshot = await getDocs(q);
-            setIsFollowing(!querySnapshot.empty);
-          }
+            if (userData && user) {
+                const followingRef = collection(firestore, `users/${userData.uid}/following`);
+                const q = query(followingRef, where('followedUserId', '==', followedID));
+                const querySnapshot = await getDocs(q);
+                setIsFollowing(!querySnapshot.empty);
+            }
         };
         checkIfFollowing();
-      }, [userData, user, followedID]);
+    }, [userData, user, followedID]);
 
     const handleTabPress = (tab) => {
         setActiveTab(tab);
@@ -192,7 +186,7 @@ export default function UserScreen({ route, navigation }) {
     useEffect(() => {
         const fetchUserDocId = async () => {
             const userDocId = await getUserDocIdByUsername(user.username);
-            setFollowedID(userDocId)
+            setFollowedID(userDocId);
         };
 
         fetchUserDocId();
@@ -237,19 +231,18 @@ export default function UserScreen({ route, navigation }) {
         }
     }, [followedID, userData.uid]); // Added 
 
-
     const handleFollowPress = async () => {
-        console.log("userID: " + userData.uid)
-        console.log("user " + user.username)
-        console.log("followedID: " + followedID)
+        console.log("userID: " + userData.uid);
+        console.log("user " + user.username);
+        console.log("followedID: " + followedID);
         if (isFollowing) {
             await unfollowUser(userData.uid, followedID);
             setIsFollowing(false);
-            removeFollowNotification(userData.uid, followedID)
+            removeFollowNotification(userData.uid, followedID);
         } else {
             await followUser(userData.uid, followedID);
             setIsFollowing(true);
-            sendFollowNotification(userData.uid, userData.username, followedID)
+            sendFollowNotification(userData.uid, userData.username, followedID);
         }
     };
 
@@ -269,7 +262,7 @@ export default function UserScreen({ route, navigation }) {
 
                     <View style={[profileStyles.followRow]}>
                         <View style={[profileStyles.column]}>
-                            <TouchableOpacity>
+                            <TouchableOpacity onPress={() => navigation.navigate('FollowersList', { userId: followedID })}>
                                 <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>
                                     {followersCount !== null ? followersCount : 0}
                                 </Text>
@@ -278,7 +271,7 @@ export default function UserScreen({ route, navigation }) {
                         </View>
                         <View style={profileStyles.verticalLine} />
                         <View style={[profileStyles.column]}>
-                            <TouchableOpacity>
+                            <TouchableOpacity onPress={() => navigation.navigate('FollowingList', { userId: followedID })}>
                                 <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>
                                     {followingCount !== null ? followingCount : 0}
                                 </Text>
@@ -288,12 +281,12 @@ export default function UserScreen({ route, navigation }) {
                     </View>
 
                     {userData.uid !== followedID && (
-  <TouchableOpacity style={profileStyles.followButton} onPress={handleFollowPress}>
-    <Text style={profileStyles.followButtonText}>
-      {isFollowing ? 'Unfollow' : 'Follow'}
-    </Text>
-  </TouchableOpacity>
-)}
+                        <TouchableOpacity style={profileStyles.followButton} onPress={handleFollowPress}>
+                            <Text style={profileStyles.followButtonText}>
+                                {isFollowing ? 'Unfollow' : 'Follow'}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
 

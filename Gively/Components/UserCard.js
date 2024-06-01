@@ -7,7 +7,7 @@ import { collection, query, where, getDocs, addDoc, deleteDoc } from 'firebase/f
 import { firestore } from '../services/firebaseConfig';
 import { serverTimestamp } from 'firebase/firestore';
 
-const UserCard = ({ user, onUnfollow }) => {
+const UserCard = ({ user, onUnfollow, isCurrentUser }) => {
     const navigation = useNavigation();
     const { userData } = useAuth();
     const [isFollowing, setIsFollowing] = useState(false);
@@ -80,12 +80,14 @@ const UserCard = ({ user, onUnfollow }) => {
                 <Image source={{ uri: user.profilePicture }} style={styles.profilePicture} />
                 <Text style={styles.username}>{user.username}</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-                style={styles.followButton}
-                onPress={handleFollowPress}
-            >
-                <Text style={styles.followButtonText}>{isFollowing ? 'Unfollow' : 'Follow'}</Text>
-            </TouchableOpacity>
+            {!isCurrentUser && (
+                <TouchableOpacity
+                    style={styles.followButton}
+                    onPress={handleFollowPress}
+                >
+                    <Text style={styles.followButtonText}>{isFollowing ? 'Unfollow' : 'Follow'}</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 };
