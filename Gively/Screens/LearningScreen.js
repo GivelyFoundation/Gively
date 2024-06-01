@@ -1,20 +1,21 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { earningToGiveContent,  goFundMeChangeOrgContent, effectiveAltruismContent, pondAnalogyContent } from '../assets/articles';
+import { howTaxesWorkWhenDonatingContent,  goFundMeChangeOrgContent, effectiveAltruismContent, pondAnalogyContent } from '../assets/articles';
 
 const LearningScreen = () => {
   const navigation = useNavigation();
 
   const blogPosts = [
-    earningToGiveContent,
     goFundMeChangeOrgContent,
     effectiveAltruismContent,
-    pondAnalogyContent
+    pondAnalogyContent,
+    howTaxesWorkWhenDonatingContent
   ];
 
   return (
     <ScrollView style={styles.container}>
+        <Text style={[styles.read,{fontFamily: 'Montserrat-Medium'}]}>Read the blogs below to learn more about how to be a better giver and maximize the impact of your charitable donations.</Text>
       {blogPosts.map((post, index) => (
         <TouchableOpacity
           key={index}
@@ -44,6 +45,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
+  read: {
+    paddingBottom: 20
+  }
 });
 
 export default LearningScreen;

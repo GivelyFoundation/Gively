@@ -177,3 +177,50 @@ export const pondAnalogyContent = {
     }
   ]
 };
+
+export const howTaxesWorkWhenDonatingContent = {
+    title: "Understanding How Taxes Work When Donating to Charity and How Gively Helps",
+    contents: [
+        {
+            subtitle: "Introduction",
+            text: "Donating to charity not only supports important causes but can also provide tax benefits. Understanding how taxes work when donating to charity can help you maximize your contributions and reduce your taxable income. In this blog post, we’ll explore the tax benefits of charitable giving and how Gively makes the process easier and more efficient."
+        },
+        {
+            subtitle: "Tax Deductions for Charitable Donations",
+            text: "Charitable donations can be deducted from your taxable income, reducing the amount of taxes you owe. To qualify for a tax deduction, the donation must be made to a qualified charitable organization. Here’s how it works:"
+        },
+        {
+            subtitle: "",
+            text: [
+                "1. Qualified Organizations: Only donations to organizations that have been granted tax-exempt status by the IRS, typically 501(c)(3) organizations, are eligible for tax deductions.",
+                "2. Itemized Deductions: To claim a charitable deduction, you must itemize your deductions on your tax return. This means listing all your deductible expenses, including charitable contributions, on Schedule A of Form 1040.",
+                "3. Deduction Limits: Generally, you can deduct cash contributions up to 60% of your adjusted gross income (AGI). For donations of appreciated assets like stocks, the limit is typically 30% of your AGI. Any excess can be carried forward and deducted over the next five years.",
+                "4. Documentation: Keep records of your donations, including receipts, bank statements, and written communication from the charity. For donations over $250, you must obtain a written acknowledgment from the charity."
+            ]
+        },
+        {
+            subtitle: "Special Tax Provisions",
+            text: [
+                "1. Standard Deduction and Above-the-Line Deduction: For taxpayers who do not itemize, there is often a special above-the-line deduction for charitable contributions. This provision was temporarily expanded during the COVID-19 pandemic to encourage charitable giving.",
+                "2. Qualified Charitable Distributions (QCDs): For individuals aged 70½ or older, QCDs allow you to donate up to $100,000 directly from your IRA to a qualified charity, excluding the donated amount from taxable income."
+            ]
+        },
+        {
+            subtitle: "Maximizing Your Tax Benefits with Gively",
+            text: "Gively simplifies the process of donating to charity and helps you maximize your tax benefits. Here’s how Gively can assist you:"
+        },
+        {
+            subtitle: "",
+            text: [
+                "1. Comprehensive Database of Qualified Charities: Gively provides a curated list of qualified charities, ensuring that your donations are eligible for tax deductions.",
+                "2. Donation Tracking and Documentation: Gively tracks your donations and provides detailed records and receipts, making it easy to document your charitable contributions for tax purposes.",
+                "3. Tax Optimization Tips: Gively offers tips and resources to help you understand the tax implications of your donations and optimize your giving strategy for maximum tax benefits.",
+                "4. Simplified Giving: With Gively, you can easily find, donate to, and share impactful charities, ensuring that your contributions make a meaningful difference while taking advantage of available tax benefits."
+            ]
+        },
+        {
+            subtitle: "Conclusion",
+            text: "Understanding how taxes work when donating to charity can help you make the most of your contributions and reduce your taxable income. By using Gively, you can streamline the donation process, ensure your donations are tax-deductible, and maximize the impact of your giving. Join Gively today and start making a difference in the most effective way possible."
+        }
+    ]
+};
