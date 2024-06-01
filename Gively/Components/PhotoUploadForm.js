@@ -6,6 +6,7 @@ import { storage, firestore } from '../services/firebaseConfig';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../services/AuthContext';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -85,8 +86,6 @@ export default function PhotoUploadForm({ userData, handleChange, nextStep }) {
             await updateDoc(userDocRef, {
               profilePicture: downloadURL
             });
-
-            Alert.alert('Success', 'Profile picture uploaded successfully.');
             nextStep();
           } catch (error) {
             console.error('Error getting download URL or updating document:', error);
@@ -104,49 +103,104 @@ export default function PhotoUploadForm({ userData, handleChange, nextStep }) {
   };
 
   return (
-    <View className="flex-2">
-      <View className="flex-1 bg-white rounded-t-3xl px-6 items-center justify-center" style={styles.loginForm}>
+    <View style={styles.container}>
+      <Text style={styles.title}>Upload Profile Picture</Text>
+      <View style={styles.imageWrapper}>
         {loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
         ) : (
           <>
             {image ? (
-              <Image source={{ uri: image.uri }} style={styles.imagePreview} />
+              <View style={styles.imageContainer}>
+                <Image source={{ uri: image.uri }} style={styles.imagePreview} />
+                <Pressable style={styles.editIcon} onPress={handleImagePick}>
+                  <Icon name="edit" size={20} color="#fff" />
+                </Pressable>
+              </View>
             ) : (
-              <Text>No image selected</Text>
+              <View style={styles.placeholderContainer}>
+                <Icon name="person" size={80} color="#A9A9A9" />
+                <Pressable style={styles.editIcon} onPress={handleImagePick}>
+                  <Icon name="edit" size={20} color="#fff" />
+                </Pressable>
+              </View>
             )}
-            <Pressable className="bg-blue-600 w-full py-3 rounded-full items-center mb-4" onPress={handleImagePick}>
-              <Text className="text-white text-lg">Pick an Image</Text>
-            </Pressable>
-            <Pressable
-              className={`bg-green-500 w-full py-3 rounded-full items-center mb-4 ${!image ? 'opacity-50' : ''}`}
-              onPress={handleUpload}
-              disabled={uploading || !image}
-            >
-              <Text className="text-white text-lg">{uploading ? 'Uploading...' : 'Upload Image'}</Text>
-            </Pressable>
-            {uploading && <ActivityIndicator size="small" color="#0000ff" />}
           </>
         )}
       </View>
+      <Pressable
+        style={[styles.uploadButton, !image ? styles.disabledButton : null]}
+        onPress={handleUpload}
+        disabled={uploading || !image}
+      >
+        <Text style={styles.uploadButtonText}>{uploading ? 'Uploading...' : 'Upload Image'}</Text>
+      </Pressable>
+      {uploading && <ActivityIndicator size="small" color="#0000ff" />}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  loginForm: {
-    marginTop: '40%',
-    minHeight: '70%',
+  container: {
+    flex: 1,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    paddingHorizontal: 30,
+    paddingVertical: 40,
+  },
+  title: {
+    fontSize: 28,
+    color: '#000',
+    marginBottom: 20,
+    // alignSelf: 'flex-start',
+  },
+  imageWrapper: {
     width: '100%',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 30,
-    paddingBottom: 30,
+    marginBottom: 20,
+  },
+  imageContainer: {
+    position: 'relative',
   },
   imagePreview: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 150,
+    height: 150,
+    borderRadius: 10,
     marginBottom: 20,
+  },
+  placeholderContainer: {
+    width: 150,
+    height: 150,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F8F8F8',
+    marginBottom: 20,
+  },
+  editIcon: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    backgroundColor: '#000',
+    borderRadius: 10,
+    padding: 5,
+  },
+  uploadButton: {
+    width: '100%',
+    paddingVertical: 20,
+    borderRadius: 12,
+    backgroundColor: '#3FC032',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  uploadButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });

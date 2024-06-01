@@ -4,6 +4,7 @@ import { firestore } from '../services/firebaseConfig';
 import { query, collection, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import debounce from 'lodash.debounce';
 import { useAuth } from '../services/AuthContext';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const MAX_USERNAME_LENGTH = 15;
 const MAX_DISPLAYNAME_LENGTH = 30;
@@ -37,8 +38,8 @@ export default function ProfileDetailsForm({ userData, handleChange, nextStep })
 
   const checkUsernameAvailability = async (username) => {
     setCheckingAvailability(true);
-    if (username.trim() === '') {
-      setUsernameAvailable(true);
+    if (username.trim() === '' || !validateUsername(username)) {
+      setUsernameAvailable(false);
       setCheckingAvailability(false);
       return;
     }
@@ -89,7 +90,7 @@ export default function ProfileDetailsForm({ userData, handleChange, nextStep })
 
   const handleSubmit = async () => {
     if (!usernameAvailable) {
-      Alert.alert('Error', 'The username is already taken. Please choose another one.');
+      Alert.alert('Error', 'The username is already taken or invalid. Please choose another one.');
       return;
     }
 
@@ -113,62 +114,131 @@ export default function ProfileDetailsForm({ userData, handleChange, nextStep })
   };
 
   return (
-    <View className="flex-2">
-      <View className="flex-1 bg-white rounded-t-3xl px-6 items-center justify-center" style={styles.loginForm}>
-        <View className="w-full mb-4 mt-8">
+    <View style={styles.container}>
+      <Text style={styles.title}>Profile Details</Text>
+      <View style={styles.inputWrapper}>
+        <View style={styles.inputContainer}>
+          <Icon name="person" size={20} color="#A9A9A9" />
           <TextInput
-            className="bg-gray-200 w-full rounded-full px-4 py-2"
+            style={styles.input}
             placeholder="Username"
             value={username}
             onChangeText={handleUsernameChange}
           />
-          {usernameError ? <Text className="text-red-500">{usernameError}</Text> : null}
           {checkingAvailability ? (
-            <ActivityIndicator size="small" color="#0000ff" />
+            <ActivityIndicator size="small" color="#0000ff" style={styles.availabilityIndicator} />
           ) : username.trim() !== '' && (
-            <View className="flex-row items-center mt-1">
-              <Text className={usernameAvailable ? "text-green-500" : "text-red-500"}>
-                {usernameAvailable ? 'Username is available' : 'Username is taken'}
-              </Text>
-              {usernameAvailable ? (
-                <Text className="ml-2 text-green-500">✔</Text>
-              ) : (
-                <Text className="ml-2 text-red-500">✘</Text>
-              )}
-            </View>
+            <Icon
+              name={usernameAvailable && !usernameError ? "check" : "close"}
+              size={20}
+              color={usernameAvailable && !usernameError ? "green" : "red"}
+              style={styles.availabilityIndicator}
+            />
           )}
         </View>
-        <TextInput
-          className="bg-gray-200 w-full rounded-full px-4 py-2 mb-4"
-          placeholder="Display Name"
-          value={displayName}
-          onChangeText={handleDisplayNameChange}
-        />
-        {displayNameError ? <Text className="text-red-500">{displayNameError}</Text> : null}
-        <TextInput
-          className="bg-gray-200 w-full rounded-full px-4 py-2 mb-8"
-          placeholder="Bio"
-          value={bio}
-          onChangeText={handleBioChange}
-          multiline
-        />
-        {bioError ? <Text className="text-red-500">{bioError}</Text> : null}
-        <Pressable className="bg-green-500 w-full py-3 rounded-full items-center mb-4" onPress={handleSubmit}>
-          <Text className="text-white text-lg">Add Profile Details</Text>
-        </Pressable>
+        {usernameError && <Text style={styles.errorText}>{usernameError}</Text>}
+        {!usernameAvailable && !usernameError && <Text style={styles.errorText}>Username is taken</Text>}
       </View>
+      <View style={styles.inputWrapper}>
+        <View style={styles.inputContainer}>
+          <Icon name="person" size={20} color="#A9A9A9" />
+          <TextInput
+            style={styles.input}
+            placeholder="Display Name"
+            value={displayName}
+            onChangeText={handleDisplayNameChange}
+          />
+        </View>
+        {displayNameError && <Text style={styles.errorText}>{displayNameError}</Text>}
+      </View>
+      <View style={styles.inputWrapper}>
+        <View style={[styles.inputContainer, styles.textAreaContainer]}>
+          <Icon name="info" size={20} color="#A9A9A9" />
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Bio"
+            value={bio}
+            onChangeText={handleBioChange}
+            multiline
+            numberOfLines={5}
+          />
+        </View>
+        <Text style={styles.charCount}>{bio.length}/{MAX_BIO_LENGTH}</Text>
+        {bioError && <Text style={styles.errorText}>{bioError}</Text>}
+      </View>
+      <Pressable style={styles.submitButton} onPress={handleSubmit}>
+        <Text style={styles.submitButtonText}>Add Profile Details</Text>
+      </Pressable>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  loginForm: {
-    marginTop: '40%',
-    minHeight: '70%',
-    width: '100%',
+  container: {
+    flex: 1,
+    justifyContent: 'center', // Ensure center alignment to avoid shifting
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 30,
-    paddingBottom: 30,
+    backgroundColor: 'white',
+    paddingHorizontal: 30,
+    paddingVertical: 40,
+  },
+  title: {
+    fontSize: 28,
+    color: '#000',
+    marginBottom: 20,
+    alignSelf: 'flex-start',
+  },
+  inputWrapper: {
+    width: '100%',
+    marginBottom: 10, // Ensure space for error messages
+    minHeight: 100, // Set a minimum height to prevent shifting
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    backgroundColor: '#F8F8F8',
+  },
+  textAreaContainer: {
+    height: 100, // Fixed height for text area container
+  },
+  input: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  textArea: {
+    textAlignVertical: 'top',
+    paddingVertical: 5,
+    height: '100%', // Ensure the TextInput takes the full height of the container
+  },
+  charCount: {
+    alignSelf: 'flex-end',
+    marginTop: 5,
+    color: '#A9A9A9',
+  },
+  availabilityIndicator: {
+    marginLeft: 10,
+  },
+  errorText: {
+    color: 'red',
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+  },
+  submitButton: {
+    width: '100%',
+    paddingVertical: 20,
+    borderRadius: 12,
+    backgroundColor: '#3FC032',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  submitButtonText: {
+    color: 'white',
+    fontSize: 16,
   },
 });

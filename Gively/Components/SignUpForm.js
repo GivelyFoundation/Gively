@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Alert, Image } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useAuth } from '../services/AuthContext';
 import { auth, firestore } from '../services/firebaseConfig';
 import { doc, setDoc } from 'firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 export default function SignUpForm({ navigation, userData, nextStep, handleChange, accountCreated, setAccountCreated }) {
-  const { startSignUp } = useAuth();
+  const { startSignUp, endSignUp } = useAuth();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
@@ -27,6 +26,7 @@ export default function SignUpForm({ navigation, userData, nextStep, handleChang
       return;
     }
     try {
+      startSignUp();
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       await setDoc(doc(firestore, "users", user.uid), {
@@ -37,10 +37,7 @@ export default function SignUpForm({ navigation, userData, nextStep, handleChang
         profilePicture: '',
         pinnedCharity: null,
         interests: [],
-        following: [],
-        followers: []
       });
-      startSignUp();
       setAccountCreated(true);
       nextStep(); // Move to the next step in the account creation process
     } catch (error) {
@@ -92,17 +89,21 @@ export default function SignUpForm({ navigation, userData, nextStep, handleChang
       <Pressable style={styles.signUpButton} onPress={handleSignUp}>
         <Text style={styles.signUpButtonText}>SIGN UP</Text>
       </Pressable>
+      <Text style={styles.orText}>OR</Text>
       <View style={styles.socialLoginContainer}>
         <Pressable style={styles.socialButton}>
-          <FontAwesome name="google" size={20} color="#DB4437" />
+          <Image source={require('../assets/Icons/google-icon.png')} style={styles.socialLogo} />
           <Text style={styles.socialButtonText}>Sign up with Google</Text>
         </Pressable>
         <Pressable style={styles.socialButton}>
-          <FontAwesome name="facebook" size={20} color="#4267B2" />
+          <Image source={require('../assets/Icons/facebook-icon.png')} style={styles.socialLogo} />
           <Text style={styles.socialButtonText}>Sign up with Facebook</Text>
         </Pressable>
       </View>
-      <Pressable onPress={() => navigation.navigate('Login')}>
+      <Pressable onPress={() => {
+        endSignUp();
+        navigation.navigate('Login');
+      }}>
         <Text style={styles.signInText}>
           ALREADY HAVE AN ACCOUNT? <Text style={styles.signInLink}>SIGN IN</Text>
         </Text>
@@ -124,6 +125,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     color: '#000',
     marginBottom: 20,
+    alignSelf: 'flex-start',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -153,12 +155,16 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
   },
+  orText: {
+    color: '#A9A9A9',
+    marginBottom: 10,
+  },
   socialLoginContainer: {
     width: '100%',
     alignItems: 'center',
   },
   socialButton: {
-    width: '70%',
+    width: '90%',
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 15,
@@ -167,6 +173,11 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     justifyContent: 'center',
     marginBottom: 10,
+  },
+  socialLogo: {
+    width: 24,
+    height: 24,
+    marginRight: 10,
   },
   socialButtonText: {
     fontSize: 16,
