@@ -26,6 +26,8 @@ import CharityDetailedScreen from './Screens/ChairtyDetailedScreen';
 import SinglePostScreen from './Screens/SinglePostScreen';
 import LearningScreen from './Screens/LearningScreen';
 import BlogPostScreen from './Screens/BlogPostScreen';
+import FollowersList from './Screens/FollowersList';
+import FollowingList from './Screens/FollowingList';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -211,6 +213,16 @@ function RootNavigator() {
           <Stack.Screen name="SinglePostScreen" component={SinglePostScreen}/>
           <Stack.Screen name="LearningScreen" component={LearningScreen} />
           <Stack.Screen name="BlogPostScreen" component={BlogPostScreen} />
+          <Stack.Screen
+                name="FollowersList"
+                component={FollowersList}
+                options={{ title: 'Followers' }}
+            />
+            <Stack.Screen
+                name="FollowingList"
+                component={FollowingList}
+                options={{ title: 'Following' }}
+            />
      
         </>
         
