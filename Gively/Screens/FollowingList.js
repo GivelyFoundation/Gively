@@ -4,11 +4,13 @@ import { collection, query, getDocs, doc, getDoc } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig'; // Adjust the import based on your actual firebase configuration file
 import UserCard from '../Components/UserCard'; // Adjust the import based on your actual file structure
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useAuth } from '../services/AuthContext';
 
 const FollowingList = ({ navigation, route }) => {
     const { userId } = route.params;
     const [following, setFollowing] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { userData } = useAuth();
 
     useEffect(() => {
         const fetchFollowing = async () => {
@@ -34,8 +36,8 @@ const FollowingList = ({ navigation, route }) => {
         fetchFollowing();
     }, [userId]);
 
-    const handleUnfollow = (unfollowedUserId) => {
-        setFollowing(following.filter(user => user.id !== unfollowedUserId));
+    const handleUnfollow = (unfollowedId) => {
+        setFollowing((prevFollowing) => prevFollowing.filter((user) => user.id !== unfollowedId));
     };
 
     if (loading) {
@@ -49,7 +51,7 @@ const FollowingList = ({ navigation, route }) => {
             </TouchableOpacity>
             <ScrollView>
                 {following.map((item) => (
-                    <UserCard key={item.id} user={item} onUnfollow={handleUnfollow} />
+                    <UserCard key={item.id} user={item} isCurrentUser={item.id === userData.uid} onUnfollow={handleUnfollow} />
                 ))}
             </ScrollView>
         </View>

@@ -4,11 +4,13 @@ import { collection, query, getDocs, doc, getDoc } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig'; // Adjust the import based on your actual firebase configuration file
 import UserCard from '../Components/UserCard'; // Adjust the import based on your actual file structure
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useAuth } from '../services/AuthContext';
 
 const FollowersList = ({ navigation, route }) => {
     const { userId } = route.params;
     const [followers, setFollowers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { userData } = useAuth();
 
     useEffect(() => {
         const fetchFollowers = async () => {
@@ -45,7 +47,7 @@ const FollowersList = ({ navigation, route }) => {
             </TouchableOpacity>
             <ScrollView>
                 {followers.map((item) => (
-                    <UserCard key={item.id} user={item} />
+                    <UserCard key={item.id} user={item} isCurrentUser={item.id === userData.uid} />
                 ))}
             </ScrollView>
         </View>
