@@ -47,7 +47,8 @@ const likePost = async (postId, userId, username, postOwnerId) => {
         message: `${username} liked your post!`,
         timestamp: serverTimestamp(),
         postId: postId,
-        user: userId
+        user: userId,
+        type: "like"
     }
     await addDoc(collection(firestore, 'users', postOwnerId, 'notifications'), notification);
     console.log("notification sent")
@@ -73,6 +74,9 @@ export const GoFundMeCard = ({ data = {} }) => {
                 console.log('Document ID:', doc.id);
                 setPostId(doc.id);
                 const postData = doc.data();
+                console.log("___________________________")
+                console.log(postData)
+                console.log("___________________________")
                 setPostOwnerId(postData.uid);  // Set the post owner ID from the post data
                 setLikesCount(postData.Likers.length);
             });
@@ -100,7 +104,6 @@ export const GoFundMeCard = ({ data = {} }) => {
             getUserDocumentById(postOwnerId);
         }
     }, [postOwnerId]);
-
     useEffect(() => {
         const checkIfLiked = async () => {
             if (userData && postId) {
@@ -130,6 +133,11 @@ export const GoFundMeCard = ({ data = {} }) => {
                 console.log("Post unliked successfully");
             } else {
                 console.log("Like post initiated");
+                console.log("postId: "+postId )
+                console.log("userData.uid: "+userData.uid )
+                console.log("userData.username: "+ userData.username )
+                console.log("postOwnerId "+postOwnerId)
+
                 await likePost(postId, userData.uid, userData.username, postOwnerId);
                 setIsLiked(true);
                 setLikesCount(likesCount + 1);

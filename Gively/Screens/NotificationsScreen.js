@@ -5,10 +5,72 @@ import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
 import { collection, query, orderBy, onSnapshot, getDoc, doc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
+import { followUser, unfollowUser } from '../services/followService';
+
+
+const formatDate = (timestamp) => {
+    const date = new Date(timestamp.toDate());
+    const optionsDate = { weekday: 'short', month: 'short', day: 'numeric' };
+    const formattedDate = date.toLocaleDateString('en-US', optionsDate);
+    const optionsTime = { hour: 'numeric', minute: 'numeric', hour12: true };
+    const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
+    return `${formattedDate} • ${formattedTime}`;
+  };
+
+const NotificationItem = ({ item, navigation, isFollowing, handleFollowPress }) => {
+    const handleNamePress = async () => {
+        if (item.user) {
+          try {
+            const userRef = doc(firestore, 'users', item.user);
+            const userDoc = await getDoc(userRef);
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              navigation.navigate('UserScreen', { user: userData });
+            } else {
+              console.log('User data is not available.');
+            }
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+          }
+        }
+      };
+
+
+  if (item.type === 'like') {
+    return (
+      <TouchableOpacity
+        style={styles.notificationItem}
+        onPress={() => navigation.navigate('SinglePostScreen', { postId: item.postId })}
+      >
+        <Image source={{ uri: item.profilePicture }} style={styles.profilePicture} />
+        <View style={styles.notificationText}>
+          <Text style={[styles.title, { fontFamily: 'Montserrat-Medium' }]}>{item.message}</Text>
+          <Text style={[styles.timestamp, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(item.timestamp)}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  } else if (item.type === 'follow') {
+    return (
+      <View style={styles.notificationItem}>
+        <TouchableOpacity onPress={handleNamePress} style={{ flexDirection: 'row', flex: 1 }}>
+          <Image source={{ uri: item.profilePicture }} style={styles.profilePicture} />
+          <View style={styles.notificationText}>
+            <Text style={[styles.title, { fontFamily: 'Montserrat-Medium' }]}>{item.message}</Text>
+            <Text style={[styles.timestamp, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(item.timestamp)}</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.followButton} onPress={handleFollowPress}>
+          <Text style={[styles.followButtonText, { fontFamily: 'Montserrat-Medium' }]}>{isFollowing ? 'Unfollow' : 'Follow'}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+};
 
 const NotificationsScreen = () => {
   const { userData } = useAuth();
   const [notifications, setNotifications] = useState([]);
+  const [followingState, setFollowingState] = useState({});
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -42,27 +104,43 @@ const NotificationsScreen = () => {
     fetchNotifications();
   }, [userData]);
 
-  const formatDate = (timestamp) => {
-    const date = new Date(timestamp.toDate());
-    const optionsDate = { weekday: 'short', month: 'short', day: 'numeric' };
-    const formattedDate = date.toLocaleDateString('en-US', optionsDate);
-    const optionsTime = { hour: 'numeric', minute: 'numeric', hour12: true };
-    const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
-    return `${formattedDate} • ${formattedTime}`;
+  useEffect(() => {
+    const checkFollowingStatus = async () => {
+      const followingStatus = {};
+      for (const notification of notifications) {
+        if (notification.type === 'follow') {
+          const followingRef = doc(firestore, 'users', userData.uid, 'following', notification.user);
+          const followingSnapshot = await getDoc(followingRef);
+          followingStatus[notification.user] = followingSnapshot.exists();
+        }
+      }
+      setFollowingState(followingStatus);
+    };
+    if (notifications.length > 0) {
+      checkFollowingStatus();
+    }
+  }, [notifications]);
+
+  const handleFollowPress = async (userId) => {
+    const currentStatus = followingState[userId];
+    if (currentStatus) {
+      await unfollowUser(userData.uid, userId);
+    } else {
+      await followUser(userData.uid, userId);
+    }
+    setFollowingState((prev) => ({ ...prev, [userId]: !currentStatus }));
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.notificationItem}
-      onPress={() => navigation.navigate('SinglePostScreen', { postId: item.postId })}
-    >
-      <Image source={{ uri: item.profilePicture }} style={styles.profilePicture} />
-      <View style={styles.notificationText}>
-        <Text style={[styles.title, { fontFamily: 'Montserrat-Medium' }]}>{item.message}</Text>
-        <Text style={[styles.timestamp, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(item.timestamp)}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const renderItem = ({ item }) => {
+    return (
+      <NotificationItem
+        item={item}
+        navigation={navigation}
+        isFollowing={followingState[item.user] || false}
+        handleFollowPress={() => handleFollowPress(item.user)}
+      />
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -72,7 +150,7 @@ const NotificationsScreen = () => {
         </TouchableOpacity>
         <Text style={[styles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Notifications</Text>
       </View>
-      
+
       <FlatList
         data={notifications}
         renderItem={renderItem}
@@ -130,6 +208,16 @@ const styles = StyleSheet.create({
     color: '#999',
     marginTop: 4,
   },
+  followButton: {
+    backgroundColor: '#3FC032',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  followButtonText: {
+    color: '#fff',
+    fontSize: 14,
+  }
 });
 
 export default NotificationsScreen;
