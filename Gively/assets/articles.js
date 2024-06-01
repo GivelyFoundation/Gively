@@ -1,5 +1,6 @@
 export const earningToGiveContent = {
     title: "Earning to Give: Maximizing Your Impact Through a High-Earning Career",
+    tldr: "Pursue a high-earning career to maximize your charitable donations and impact.",
     contents: [
       {
         subtitle: "What is Earning to Give?",
@@ -50,6 +51,7 @@ export const earningToGiveContent = {
   
 export const goFundMeChangeOrgContent = {
   title: "The Importance of GoFundMe and Change.org Petitions: Amplifying Voices and Creating Change",
+  tldr: "GoFundMe and Change.org enable direct support and advocacy for personal and social causes.",
   contents: [
     {
       subtitle: "GoFundMe: Personal Fundraising for Immediate Needs",
@@ -88,6 +90,7 @@ export const goFundMeChangeOrgContent = {
 
 export const effectiveAltruismContent = {
   title: "Understanding Effective Altruism and Its Application in Choosing a Charity",
+  tldr: "Effective altruism uses evidence and reasoning to maximize the impact of charitable giving.",
   contents: [
     {
       subtitle: "What is Effective Altruism?",
@@ -140,6 +143,7 @@ export const effectiveAltruismContent = {
 
 export const pondAnalogyContent = {
   title: "Peter Singer's Pond Analogy: A Call to Modern Philanthropy",
+  tldr: "Peter Singer's Pond Analogy emphasizes our moral duty to help those in need.",
   contents: [
     {
       subtitle: "Understanding Peter Singer's Pond Analogy",
@@ -180,6 +184,7 @@ export const pondAnalogyContent = {
 
 export const howTaxesWorkWhenDonatingContent = {
     title: "Understanding How Taxes Work When Donating to Charity and How Gively Helps",
+    tldr: "Donating to charity can provide tax benefits; Gively simplifies and maximizes these benefits.",
     contents: [
         {
             subtitle: "Introduction",
