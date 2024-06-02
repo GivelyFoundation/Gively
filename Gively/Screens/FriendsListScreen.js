@@ -50,7 +50,7 @@ export default function FriendsListScreen({ navigation }) {
     <View style={[styles.page, friendStyles.container]}>
       <View style={friendStyles.headerContainer}>
         
-        <Text style={[friendStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Friends</Text>
+        <Text style={[friendStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Connect</Text>
         <TouchableOpacity  onPress={() => navigation.navigate('Nofications')}>
         <Icon name="notifications" size={30} color='#1C5AA3' />
         </TouchableOpacity>
@@ -74,17 +74,6 @@ export default function FriendsListScreen({ navigation }) {
             <FriendCard key={friend.id} friend={friend} areFollow={friend.areFollowing} />
           ))}
         </ScrollView>
-        
-        <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Bold' }]}>Following</Text>
-        {/* <ScrollView>
-          {fakeFriendReccomendations.map(friend => (
-            <FriendCard key={friend.id} friend={friend} areFollowing={friend.areFollowing} />
-          ))}
-        </ScrollView> */}
-        <Image source={noFriends} style={friendStyles.noFriends} resizeMode="contain" />
-
-        <Text style={[friendStyles.addFriends, { fontFamily: 'Montserrat-Medium' }]}>Add friends to see them here!</Text>
-       
         <View style={friendStyles.spacer} />
       </ScrollView>
     </View>
@@ -132,7 +121,7 @@ const friendStyles = StyleSheet.create({
   title: {
     fontSize: 16,
     paddingLeft: 20,
-    paddingTop: 10,
+    paddingTop: 20,
     paddingBottom: 20,
   },
   inviteFriendsButton: {
