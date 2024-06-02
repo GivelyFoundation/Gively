@@ -82,7 +82,7 @@ const UserCard = ({ user, onUnfollow, isCurrentUser }) => {
             </TouchableOpacity>
             {!isCurrentUser && (
                 <TouchableOpacity
-                    style={styles.followButton}
+                    style={[styles.followButton, isFollowing && styles.followingButton]}
                     onPress={handleFollowPress}
                 >
                     <Text style={styles.followButtonText}>{isFollowing ? 'Unfollow' : 'Follow'}</Text>
@@ -126,6 +126,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         borderRadius: 5,
         backgroundColor: '#3FC032',
+    },
+    followingButton: {
+        backgroundColor: '#1C5AA3',
     },
     followButtonText: {
         color: '#fff',
