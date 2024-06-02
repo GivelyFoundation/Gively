@@ -281,7 +281,10 @@ export default function UserScreen({ route, navigation }) {
                     </View>
 
                     {userData.uid !== followedID && (
-                        <TouchableOpacity style={profileStyles.followButton} onPress={handleFollowPress}>
+                        <TouchableOpacity
+                            style={[profileStyles.followButton, isFollowing && profileStyles.followingButton]}
+                            onPress={handleFollowPress}
+                        >
                             <Text style={profileStyles.followButtonText}>
                                 {isFollowing ? 'Unfollow' : 'Follow'}
                             </Text>
@@ -475,6 +478,9 @@ const profileStyles = StyleSheet.create({
         width: '50%',
         marginTop: 10,
         alignSelf: 'center'
+    },
+    followingButton: {
+        backgroundColor: '#1C5AA3',
     },
     followButtonText: {
         color: '#fff',
