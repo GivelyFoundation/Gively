@@ -368,3 +368,19 @@ const profileStyles = StyleSheet.create({
     height: 700
   },
 });
+
+function serializeData(data) {
+  const serializedData = {};
+  for (const key in data) {
+    if (data[key] && typeof data[key] === 'object' && !Array.isArray(data[key])) {
+      if (data[key].seconds) {
+        serializedData[key] = new Date(data[key].seconds * 1000).toISOString();
+      } else {
+        serializedData[key] = serializeData(data[key]);
+      }
+    } else {
+      serializedData[key] = data[key];
+    }
+  }
+  return serializedData;
+}
