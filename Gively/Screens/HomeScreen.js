@@ -5,7 +5,7 @@ import styles from '../Styles.js/Styles';
 import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
-import { collection, query, getDocs, limit, startAfter, orderBy } from 'firebase/firestore';
+import { collection, query, getDocs, limit, startAfter, orderBy, where } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig';
 import { useAuth } from '../services/AuthContext';
 import WelcomeCard from '../Components/WelcomeCard';
@@ -96,13 +96,29 @@ const FriendsFeed = ({ posts, refreshing, onRefresh, fetchMorePosts }) => {
 export default function HomeFeedScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('For You');
   const [posts, setPosts] = useState([]);
+  const [friendsPosts, setFriendsPosts] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [lastVisible, setLastVisible] = useState(null);
+  const [lastVisibleFriends, setLastVisibleFriends] = useState(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadingMoreFriends, setLoadingMoreFriends] = useState(false);
+  const [followedUsers, setFollowedUsers] = useState([]);
   const { userData } = useAuth();
 
   const handleTabPress = (tab) => {
     setActiveTab(tab);
+  };
+
+  const fetchFollowedUsers = async () => {
+    if (!userData) return;
+    try {
+      const followingCollection = collection(firestore, `users/${userData.uid}/following`);
+      const followingSnapshot = await getDocs(followingCollection);
+      const followedUsersList = followingSnapshot.docs.map(doc => doc.data().followedUserId);
+      setFollowedUsers(followedUsersList);
+    } catch (error) {
+      console.error('Error fetching followed users:', error);
+    }
   };
 
   const fetchPosts = async () => {
@@ -129,6 +145,34 @@ export default function HomeFeedScreen({ navigation }) {
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
+    }
+  };
+
+  const fetchFriendsPosts = async () => {
+    if (followedUsers.length === 0) return;
+    try {
+      const postsCollection = collection(firestore, 'Posts');
+      const q = query(postsCollection, where('uid', 'in', followedUsers), orderBy('date', 'desc'), limit(POSTS_LIMIT));
+      const postsSnapshot = await getDocs(q);
+      const lastVisibleDoc = postsSnapshot.docs[postsSnapshot.docs.length - 1];
+      setLastVisibleFriends(lastVisibleDoc);
+
+      const postsList = postsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        const serializedData = serializeData(data);
+        return { id: doc.id, ...serializedData };
+      });
+
+      const cleanedPostsList = postsList.map(post => JSON.parse(JSON.stringify(post)));
+      const validPosts = cleanedPostsList.filter(post => post !== null);
+
+      if (validPosts.length > 0) {
+        setFriendsPosts(validPosts);
+      } else {
+        console.error('No valid posts found');
+      }
+    } catch (error) {
+      console.error('Error fetching friends posts:', error);
     }
   };
 
@@ -164,14 +208,59 @@ export default function HomeFeedScreen({ navigation }) {
     }
   };
 
+  const fetchMoreFriendsPosts = async () => {
+    if (loadingMoreFriends || !lastVisibleFriends || followedUsers.length === 0) return;
+    setLoadingMoreFriends(true);
+
+    try {
+      const postsCollection = collection(firestore, 'Posts');
+      const q = query(postsCollection, where('uid', 'in', followedUsers), orderBy('date', 'desc'), startAfter(lastVisibleFriends), limit(POSTS_LIMIT));
+      const postsSnapshot = await getDocs(q);
+      const lastVisibleDoc = postsSnapshot.docs[postsSnapshot.docs.length - 1];
+      setLastVisibleFriends(lastVisibleDoc);
+
+      const postsList = postsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        const serializedData = serializeData(data);
+        return { id: doc.id, ...serializedData };
+      });
+
+      const cleanedPostsList = postsList.map(post => JSON.parse(JSON.stringify(post)));
+      const validPosts = cleanedPostsList.filter(post => post !== null);
+
+      if (validPosts.length > 0) {
+        setFriendsPosts(prevPosts => [...prevPosts, ...validPosts]);
+      } else {
+        console.error('No valid posts found');
+      }
+    } catch (error) {
+      console.error('Error fetching more friends posts:', error);
+    } finally {
+      setLoadingMoreFriends(false);
+    }
+  };
+
   useEffect(() => {
-    fetchPosts();
-  }, []);
+    fetchFollowedUsers();
+  }, [userData]);
+
+  useEffect(() => {
+    if (activeTab === 'For You') {
+      fetchPosts();
+    } else {
+      fetchFriendsPosts();
+    }
+  }, [activeTab, followedUsers]);
 
   const onRefresh = async () => {
     setRefreshing(true);
     setLastVisible(null);
-    await fetchPosts();
+    setLastVisibleFriends(null);
+    if (activeTab === 'For You') {
+      await fetchPosts();
+    } else {
+      await fetchFriendsPosts();
+    }
     setRefreshing(false);
   };
 
@@ -203,9 +292,10 @@ export default function HomeFeedScreen({ navigation }) {
       />
       {activeTab === 'For You' ?
         <ForYouFeed posts={posts} refreshing={refreshing} onRefresh={onRefresh} fetchMorePosts={fetchMorePosts} /> :
-        <FriendsFeed posts={posts} refreshing={refreshing} onRefresh={onRefresh} fetchMorePosts={fetchMorePosts} />
+        <FriendsFeed posts={friendsPosts} refreshing={refreshing} onRefresh={onRefresh} fetchMorePosts={fetchMoreFriendsPosts} />
       }
       {loadingMore && <ActivityIndicator size="large" color="#3FC032" />}
+      {loadingMoreFriends && <ActivityIndicator size="large" color="#3FC032" />}
     </View>
   );
 }
