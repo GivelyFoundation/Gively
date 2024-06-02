@@ -110,7 +110,7 @@ function MainApp() {
             );
           }
         }} />
-      <Tab.Screen name="Friends"
+      <Tab.Screen name="Connect"
         component={FriendsListScreen}
         options={{
           tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
