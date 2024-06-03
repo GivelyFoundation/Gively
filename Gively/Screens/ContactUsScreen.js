@@ -11,7 +11,6 @@ const ContactUsScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={[styles.header, {fontFamily: 'Montserrat-Medium'}]}>Contact Us</Text>
-
       <TouchableOpacity style={styles.button} onPress={handleEmailPress}>
         <Text style={[styles.buttonText,{fontFamily: 'Montserrat-Medium'}]}>Email Us: support@gively.com</Text>
       </TouchableOpacity>
