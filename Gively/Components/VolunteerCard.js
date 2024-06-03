@@ -4,7 +4,7 @@ import MapView, { Marker } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
-import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, addDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 
 const screenWidth = Dimensions.get('window').width; // Get screen width
 
@@ -34,18 +34,22 @@ const unlikePost = async (postId, userId) => {
 };
 
 const removeNotification = async (postOwnerId, notificationId) => {
-    const notificationsRef = collection(firestore, 'users', postOwnerId, 'notifications');
-    const q = query(notificationsRef, where("notificationId", "==", notificationId));
+    try {
+        const notificationsRef = collection(firestore, 'users', postOwnerId, 'notifications');
+        const q = query(notificationsRef, where("notificationId", "==", notificationId));
 
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-        querySnapshot.forEach(async (doc) => {
-            console.log("Removing notification with ID:", notificationId);
-            await deleteDoc(doc.ref);
-            console.log("Notification removed successfully");
-        });
-    } else {
-        console.log("No notification found with ID:", notificationId);
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            for (const doc of querySnapshot.docs) {
+                console.log("Removing notification with ID:", notificationId);
+                await deleteDoc(doc.ref);
+                console.log("Notification removed successfully");
+            }
+        } else {
+            console.log("No notification found with ID:", notificationId);
+        }
+    } catch (error) {
+        console.error("Failed to remove notification:", error);
     }
 };
 
@@ -74,7 +78,7 @@ const likePost = async (postId, userId, username, postOwnerId) => {
         notificationId: postId + userId
     }
     await addDoc(collection(firestore, 'users', postOwnerId, 'notifications'), notification);
-    console.log("notification sent")
+    console.log("Notification sent");
 
     console.log("Post liked successfully for user:", userId);
 };
@@ -124,6 +128,7 @@ export const VolunteerCard = ({ data = {} }) => {
             getUserDocumentById(postOwnerId);
         }
     }, [postOwnerId]);
+    
     useEffect(() => {
         const checkIfLiked = async () => {
             if (userData && postId) {
@@ -147,17 +152,17 @@ export const VolunteerCard = ({ data = {} }) => {
 
             if (isLiked) {
                 console.log("Unlike post initiated");
-                const notId = postId + userData.uid
-                await handleUnlikePost(postId, userData.uid, notId, postOwnerId)
+                const notId = postId + userData.uid;
+                await handleUnlikePost(postId, userData.uid, notId, postOwnerId);
                 setIsLiked(false);
                 setLikesCount(likesCount - 1);
                 console.log("Post unliked successfully");
             } else {
                 console.log("Like post initiated");
-                console.log("postId: " + postId)
-                console.log("userData.uid: " + userData.uid)
-                console.log("userData.username: " + userData.username)
-                console.log("postOwnerId " + postOwnerId)
+                console.log("postId:", postId);
+                console.log("userData.uid:", userData.uid);
+                console.log("userData.username:", userData.username);
+                console.log("postOwnerId:", postOwnerId);
 
                 await likePost(postId, userData.uid, userData.username, postOwnerId);
                 setIsLiked(true);
@@ -223,6 +228,7 @@ export const VolunteerCard = ({ data = {} }) => {
                     </View>
                 </View>
                 <Text style={[styles.postText, { fontFamily: 'Montserrat-Medium' }]}>{data.description}</Text>
+                <Text style={[styles.dateTimeText, { fontFamily: 'Montserrat-Medium' }]}>Date and Time: {formatDate(data.date)}</Text>
                 <View style={styles.mapView}>
                     <MapView
                         style={styles.map}
@@ -245,7 +251,7 @@ export const VolunteerCard = ({ data = {} }) => {
                         <Text style={[styles.likes, { fontFamily: 'Montserrat-Medium', color: isLiked ? '#EB5757' : '#8484A9' }]}>{likesCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.button}>
-                        <Text style={styles.buttonText}>View Details</Text>
+                        <Text style={styles.buttonText}>Share</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -295,6 +301,11 @@ const styles = StyleSheet.create({
         paddingTop: 5,
     },
     postText: {
+        fontSize: 14,
+        marginBottom: 10,
+        lineHeight: 24,
+    },
+    dateTimeText: {
         fontSize: 14,
         marginBottom: 10,
         lineHeight: 24,

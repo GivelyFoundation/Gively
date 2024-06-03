@@ -115,7 +115,7 @@ const CategoryScroll = ({ user }) => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={profileStyles.interestContainer}
         >
-            {user.interests.map((category, index) => (
+            {user.interests && user.interests.map((category, index) => (
                 <TouchableOpacity key={index} style={profileStyles.interestButton}>
                     <Text style={[profileStyles.interestButtonText, { fontFamily: 'Montserrat-Medium' }]}>{category}</Text>
                 </TouchableOpacity>
@@ -123,7 +123,6 @@ const CategoryScroll = ({ user }) => {
         </ScrollView>
     );
 };
-
 const removeFollowNotification = async (userId, followedId) => {
     try {
         const notificationsRef = collection(firestore, 'users', followedId, 'notifications');
