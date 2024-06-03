@@ -5,6 +5,7 @@ import styles from '../Styles.js/Styles';
 import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
+import { VolunteerCard } from '../Components/VolunteerCard'; // Import VolunteerCard
 import { collection, query, getDocs, limit, startAfter, orderBy, where } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig';
 import { useAuth } from '../services/AuthContext';
@@ -25,6 +26,8 @@ const ForYouFeed = ({ posts, refreshing, onRefresh, fetchMorePosts }) => {
         return <PetitionCard key={item.id} data={item} />;
       case 'gofundme':
         return <GoFundMeCard key={item.id} data={item} />;
+      case 'volunteer': // Add case for volunteer
+        return <VolunteerCard key={item.id} data={item} />;
       case 'firstTime':
         return <FirstTimeDonationCard key={item.id} data={item} />;
       default:
@@ -65,6 +68,8 @@ const FriendsFeed = ({ posts, refreshing, onRefresh, fetchMorePosts }) => {
         return <PetitionCard key={item.id} data={item} />;
       case 'gofundme':
         return <GoFundMeCard key={item.id} data={item} />;
+      case 'volunteer': // Add case for volunteer
+        return <VolunteerCard key={item.id} data={item} />;
       case 'firstTime':
         return <FirstTimeDonationCard key={item.id} data={item} />;
       default:
