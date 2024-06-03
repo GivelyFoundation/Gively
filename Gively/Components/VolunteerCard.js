@@ -229,6 +229,7 @@ export const VolunteerCard = ({ data = {} }) => {
                 </View>
                 <Text style={[styles.postText, { fontFamily: 'Montserrat-Medium' }]}>{data.description}</Text>
                 <Text style={[styles.dateTimeText, { fontFamily: 'Montserrat-Medium' }]}>Date and Time: {formatDate(data.date)}</Text>
+                <Text style={[styles.addressText, { fontFamily: 'Montserrat-Medium' }]}>Address: {data.address}</Text>
                 <View style={styles.mapView}>
                     <MapView
                         style={styles.map}
@@ -306,6 +307,11 @@ const styles = StyleSheet.create({
         lineHeight: 24,
     },
     dateTimeText: {
+        fontSize: 14,
+        marginBottom: 10,
+        lineHeight: 24,
+    },
+    addressText: {
         fontSize: 14,
         marginBottom: 10,
         lineHeight: 24,
