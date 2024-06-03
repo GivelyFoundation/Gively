@@ -1,16 +1,12 @@
-import 'react-native-gesture-handler';
-import 'react-native-get-random-values';
 import React from 'react';
 import { View, Alert, Button, Image, TouchableOpacity, Text } from 'react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
-
-
 import CreateAccountScreen from './Screens/CreateAccountScreen';
 import HomeScreen from './Screens/HomeScreen'
 import LoginScreen from './Screens/LoginScreen'
 import SplashScreen from './Screens/SplashScreen'
 import DiscoverScreen from './Screens/DiscoverScreen'
-import FriendsListScreen from './Screens/FriendsListScreen'
+import ConnectScreen from './Screens/ConnectScreen'
 import ProfileScreen from './Screens/ProfileScreen'
 import AboutUsScreen from './Screens/AboutUsScreen'
 import ContactUsScreen from './Screens/ContactUsScreen'
@@ -28,6 +24,7 @@ import LearningScreen from './Screens/LearningScreen';
 import BlogPostScreen from './Screens/BlogPostScreen';
 import FollowersList from './Screens/FollowersList';
 import FollowingList from './Screens/FollowingList';
+import CustomHeader from './Components/CustomHeader';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -111,7 +108,7 @@ function MainApp() {
           }
         }} />
       <Tab.Screen name="Connect"
-        component={FriendsListScreen}
+        component={ConnectScreen}
         options={{
           tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
           tabBarIcon: ({ size, focused }) => {
@@ -141,7 +138,6 @@ function MainApp() {
   );
 }
 
-
 //TO DO: Currently have "Home" and  "Home "(with a space) as 2 different page titles, need to find work around
 function shouldShowTabBar(route) {
   // Get the current route name
@@ -166,7 +162,7 @@ function CustomDrawerContent(props) {
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
-      <View style={{padding: 20}}>
+      <View style={{ padding: 20 }}>
         <Button title="Sign Out" onPress={handleSignOut} />
       </View>
     </DrawerContentScrollView>
@@ -174,10 +170,15 @@ function CustomDrawerContent(props) {
 }
 
 function HomeScreenDrawer() {
-  
   return (
-    <Drawer.Navigator initialRouteName="Home " drawerContent={(props) => <CustomDrawerContent {...props} />}>
-      <Drawer.Screen name="Home" component={HomeScreen} />
+    <Drawer.Navigator initialRouteName="Home" drawerContent={(props) => <CustomDrawerContent {...props} />}>
+      <Drawer.Screen 
+        name="Home" 
+        component={HomeScreen} 
+        options={{ 
+          header: () => <CustomHeader /> 
+        }} 
+      />
       <Drawer.Screen name="Learning" component={LearningScreen} />
       <Drawer.Screen name="Favorites" component={FavoriteScreen} />
       <Drawer.Screen name="Donation History & Tax Form" component={DonationHistoryScreen} />
@@ -193,12 +194,6 @@ function HomeScreenDrawer() {
 function RootNavigator() {
   const { user, loading, isSigningUp } = useAuth();
 
-
-  // if (loading) {
-  //   return null; // Or a loading spinner if you prefer
-  // }
-
-  
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user && !isSigningUp ? (
@@ -214,18 +209,16 @@ function RootNavigator() {
           <Stack.Screen name="LearningScreen" component={LearningScreen} />
           <Stack.Screen name="BlogPostScreen" component={BlogPostScreen} />
           <Stack.Screen
-                name="FollowersList"
-                component={FollowersList}
-                options={{ title: 'Followers' }}
-            />
-            <Stack.Screen
-                name="FollowingList"
-                component={FollowingList}
-                options={{ title: 'Following' }}
-            />
-     
+            name="FollowersList"
+            component={FollowersList}
+            options={{ title: 'Followers' }}
+          />
+          <Stack.Screen
+            name="FollowingList"
+            component={FollowingList}
+            options={{ title: 'Following' }}
+          />
         </>
-        
       ) : (
         <>
           <Stack.Screen name="Splash" component={SplashScreen} />
@@ -236,8 +229,6 @@ function RootNavigator() {
     </Stack.Navigator>
   );
 }
-
-
 
 function App() {
   let [fontsLoaded] = useFonts({
@@ -258,4 +249,5 @@ function App() {
     </AuthProvider>
   );
 }
+
 export default App;

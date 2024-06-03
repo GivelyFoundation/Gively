@@ -5,7 +5,6 @@ import styles from '../Styles.js/Styles';
 import { FriendCard } from '../Components/FriendCard';
 import { fakeFriends, fakeFriendReccomendations } from '../MockData';
 const noFriends = require('../assets/Images/NoFriendsYet.png');
-import Icon from 'react-native-vector-icons/MaterialIcons';
 
 export default function FriendsListScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,9 +50,7 @@ export default function FriendsListScreen({ navigation }) {
       <View style={friendStyles.headerContainer}>
         
         <Text style={[friendStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Connect</Text>
-        <TouchableOpacity  onPress={() => navigation.navigate('Nofications')}>
-        <Icon name="notifications" size={30} color='#1C5AA3' />
-        </TouchableOpacity>
+        
       </View>
       <TextInput
         style={[friendStyles.searchBox]}
