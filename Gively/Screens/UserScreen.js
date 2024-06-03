@@ -8,6 +8,7 @@ import PinnedCharityCard from '../Components/PinnedCharityCard';
 import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
+import { VolunteerCard } from '../Components/VolunteerCard'; // Import VolunteerCard
 import { useAuth } from '../services/AuthContext';
 import { collection, query, where, getDocs, doc, onSnapshot, serverTimestamp, addDoc, deleteDoc } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig';
@@ -83,6 +84,8 @@ const Posts = ({ user }) => {
                 return <PetitionCard key={item.id} data={item} user={user} />;
             case 'gofundme':
                 return <GoFundMeCard key={item.id} data={item} user={user} />;
+            case 'volunteer': // Added case for volunteer
+                return <VolunteerCard key={item.id} data={item} user={user} />;
             default:
                 return <View key={item.id}><Text>Unknown Post Type</Text></View>;
         }
