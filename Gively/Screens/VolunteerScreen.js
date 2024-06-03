@@ -9,6 +9,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
 
 const GOOGLE_MAPS_API_KEY = 'AIzaSyB3BJsdRyNl8T10Avaaz69YkKV7bkGgqoU'; // Replace with your Google Maps API key
 
@@ -54,21 +56,23 @@ export default function VolunteerScreen({ navigation }) {
             setLoading(false);
             return;
         }
-
+        const uniqueId = uuidv4();
         const newData = {
             description,
-            date: `${date}T${time}`,
+            eventDate: `${date}T${time}`,
             address,
             location: {
                 latitude: location.lat,
                 longitude: location.lng,
             },
+            date: new Date().toISOString(),
             timestamp: serverTimestamp(),
             uid: userData.uid,
-            id: userData.uid + serverTimestamp(),
+            id: uniqueId,
             originalDonationPoster: userData.username,
             originalPosterProfileImage: userData.profilePicture,
             PostType: "volunteer",
+            Likers: [],
         };
 
         setData(newData);

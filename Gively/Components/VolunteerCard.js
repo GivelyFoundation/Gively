@@ -228,7 +228,7 @@ export const VolunteerCard = ({ data = {} }) => {
                     </View>
                 </View>
                 <Text style={[styles.postText, { fontFamily: 'Montserrat-Medium' }]}>{data.description}</Text>
-                <Text style={[styles.dateTimeText, { fontFamily: 'Montserrat-Medium' }]}>Date and Time: {formatDate(data.date)}</Text>
+                <Text style={[styles.dateTimeText, { fontFamily: 'Montserrat-Medium' }]}>Date and Time: {formatDate(data.eventDate)}</Text>
                 <Text style={[styles.addressText, { fontFamily: 'Montserrat-Medium' }]}>Address: {data.address}</Text>
                 <View style={styles.mapView}>
                     <MapView
