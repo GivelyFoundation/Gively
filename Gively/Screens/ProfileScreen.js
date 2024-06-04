@@ -199,7 +199,9 @@ export default function ProfileScreen({ navigation }) {
       <Text style={[profileStyles.bioHeader, { fontFamily: 'Montserrat-Medium' }]}> {userData.displayName} </Text>
       <Text style={[profileStyles.bioMainText, { fontFamily: 'Montserrat-Medium' }]}> {userData.bio}</Text>
       <CategoryScroll />
+      
       <PinnedCharityCard username={user.username.split(" ")[0]} charity={"NAMI"} reason={"Help me raise money for mental health awareness!"} />
+     
       <SwitchSelector
         initial={0}
         onPress={value => handleTabPress(value)}
@@ -286,9 +288,9 @@ const profileStyles = StyleSheet.create({
     marginHorizontal: 30,
   },
   profilePicture: {
-    width: 100,
-    height: 100,
-    borderRadius: 25,
+    width: 80,
+    height: 80,
+    borderRadius: 10,
   },
   pieChartPlaceHolder: {
     width: 150,

@@ -11,9 +11,9 @@ const PinnedCharityCard = ({ username, charity, reason }) => {
       {reason && (
         <Text style={[styles.reasonText, { fontFamily: 'Montserrat-Regular'}]}>{reason}
         </Text>)}
-      <TouchableOpacity style={styles.donateButton}>
+      {/* <TouchableOpacity style={styles.donateButton}>
         <Text style={[styles.donateButtonText, { fontFamily: 'Montserrat-Medium' }]}>Donate</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };
