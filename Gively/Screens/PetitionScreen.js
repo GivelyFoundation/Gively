@@ -227,23 +227,19 @@ const styles = StyleSheet.create({
     card: {
         marginVertical: 50,
     },
-    backButtonText: {
-        fontSize: 20
-    },
     backButton: {
-        paddingTop: 60,
-        paddingLeft: 20
+        padding: 10,
     },
     row: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
+        justifyContent: 'space-between',
         paddingBottom: 40
     },
-    changeOrgLogo:{
+    changeOrgLogo: {
         width: 150,
-        height: 50
-    }
+        height: 50,
+    },
 });
 
 export default PetitionScreen;
