@@ -90,11 +90,13 @@ export default EditProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: "#fff"
     },
     scrollContainer: {
         padding: 20,
         alignItems: 'center',
         paddingTop: 80,
+        backgroundColor: "#fff"
     },
     backButton: {
         paddingTop: 60,
