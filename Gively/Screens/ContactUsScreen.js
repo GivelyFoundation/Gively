@@ -4,16 +4,15 @@ import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native'
 const ContactUsScreen = () => {
   // Function to handle email press
   const handleEmailPress = () => {
-    const email = "info@gively.com";
+    const email = "support@gively.com";
     Linking.openURL(`mailto:${email}`);
   };
 
   return (
     <View style={styles.container}>
       <Text style={[styles.header, {fontFamily: 'Montserrat-Medium'}]}>Contact Us</Text>
-
       <TouchableOpacity style={styles.button} onPress={handleEmailPress}>
-        <Text style={[styles.buttonText,{fontFamily: 'Montserrat-Medium'}]}>Email Us: info@gively.com</Text>
+        <Text style={[styles.buttonText,{fontFamily: 'Montserrat-Medium'}]}>Email Us: support@gively.com</Text>
       </TouchableOpacity>
     </View>
   );

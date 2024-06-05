@@ -271,11 +271,11 @@ export default function HomeFeedScreen({ navigation }) {
 
   return (
     <View style={[styles.container, styles.page]}>
-      {userData && userData.displayName ? (
+      {/* {userData && userData.displayName ? (
         <WelcomeCard username={userData.displayName.split(' ')[0]} donationAmount={2515} charityCount={25} />
       ) : (
         <Text>Loading...</Text>
-      )}
+      )} */}
       <SwitchSelector
         initial={0}
         onPress={value => handleTabPress(value)}
