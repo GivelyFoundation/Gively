@@ -78,8 +78,6 @@ const Posts = () => {
         return <GoFundMeCard key={item.id} data={item} user={user} />;
       case 'volunteer': // Add case for volunteer
         return <VolunteerCard key={item.id} data={item}  />;
-      default:
-        return <View key={item.id}><Text>Unknown Post Type</Text></View>;
     }
   };
 
@@ -199,9 +197,15 @@ export default function ProfileScreen({ navigation }) {
       <Text style={[profileStyles.bioHeader, { fontFamily: 'Montserrat-Medium' }]}> {userData.displayName} </Text>
       <Text style={[profileStyles.bioMainText, { fontFamily: 'Montserrat-Medium' }]}> {userData.bio}</Text>
       <CategoryScroll />
+
       
-      <PinnedCharityCard username={user.username.split(" ")[0]} charity={"NAMI"} reason={"Help me raise money for mental health awareness!"} />
-     
+      {activeTab === 'Portfolio' && (
+        <PinnedCharityCard 
+          username={user.username.split(" ")[0]} 
+          charity="NAMI" 
+          reason="Help me raise money for mental health awareness!" 
+        />
+      )}
       <SwitchSelector
         initial={0}
         onPress={value => handleTabPress(value)}
