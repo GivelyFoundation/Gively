@@ -5,10 +5,11 @@ import SignUpForm from '../Components/SignUpForm';
 import ProfileDetailsForm from '../Components/ProfileDetailsForm';
 import PhotoUploadForm from '../Components/PhotoUploadForm';
 import InterestsSelectionForm from '../Components/InterestsSelectionForm';
+import MastercardSignupForm from '../Components/MastercardSignupForm';
 import { useAuth } from '../services/AuthContext';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const labels = ["Sign Up", "Profile Details", "Photo Upload", "Interests"];
+const labels = ["Sign Up", "Profile Details", "Photo Upload", "Mastercard Signup", "Interests"];
 
 const customStyles = {
   stepIndicatorSize: 25,
@@ -52,7 +53,7 @@ const CreateAccountScreen = ({ navigation }) => {
   const { endSignUp } = useAuth();
 
   const nextStep = () => {
-    setCurrentStep((prevStep) => (prevStep < 3 ? prevStep + 1 : prevStep));
+    setCurrentStep((prevStep) => (prevStep < 4 ? prevStep + 1 : prevStep));
   };
 
   const prevStep = () => {
@@ -94,6 +95,8 @@ const CreateAccountScreen = ({ navigation }) => {
       case 2:
         return <PhotoUploadForm userData={userData} handleChange={handleChange} nextStep={nextStep} />;
       case 3:
+        return <MastercardSignupForm nextStep={nextStep} />;
+      case 4:
         return <InterestsSelectionForm userData={userData} navigation={navigation} handleChange={handleChange} nextStep={nextStep} />;
       default:
         return null;
@@ -110,7 +113,7 @@ const CreateAccountScreen = ({ navigation }) => {
           customStyles={customStyles}
           currentPosition={currentStep}
           labels={labels}
-          stepCount={4}
+          stepCount={5}
         />
       </View>
       <View style={styles.formContainer}>

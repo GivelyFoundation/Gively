@@ -2,6 +2,7 @@
   "expo": {
     "name": "Gively",
     "slug": "Gively",
+    "scheme": "Gively",
     "owner": "andyabebaw",
     "version": "1.0.0",
     "orientation": "portrait",
