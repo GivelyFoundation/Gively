@@ -90,11 +90,13 @@ export default EditProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: "#fff"
     },
     scrollContainer: {
         padding: 20,
         alignItems: 'center',
         paddingTop: 80,
+        backgroundColor: "#fff"
     },
     backButton: {
         paddingTop: 60,
@@ -118,7 +120,7 @@ const styles = StyleSheet.create({
     profilePic: {
         width: 100,
         height: 100,
-        borderRadius: 75,
+        borderRadius: 10,
         marginBottom: 20,
     },
     input: {

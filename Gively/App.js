@@ -1,16 +1,12 @@
-import 'react-native-gesture-handler';
-import 'react-native-get-random-values';
 import React from 'react';
 import { View, Alert, Button, Image, TouchableOpacity, Text } from 'react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
-
-
 import CreateAccountScreen from './Screens/CreateAccountScreen';
 import HomeScreen from './Screens/HomeScreen'
 import LoginScreen from './Screens/LoginScreen'
 import SplashScreen from './Screens/SplashScreen'
 import DiscoverScreen from './Screens/DiscoverScreen'
-import FriendsListScreen from './Screens/FriendsListScreen'
+import ConnectScreen from './Screens/ConnectScreen'
 import ProfileScreen from './Screens/ProfileScreen'
 import AboutUsScreen from './Screens/AboutUsScreen'
 import ContactUsScreen from './Screens/ContactUsScreen'
@@ -21,7 +17,15 @@ import PetitionScreen from './Screens/PetitionScreen';
 import GoFundMeScreen from './Screens/GoFundMeScreen';
 import FavoriteScreen from './Screens/FavoritesScareen';
 import EditProfileScreen from './Screens/EditProfileScreen';
+import UserScreen from './Screens/UserScreen';
 import CharityDetailedScreen from './Screens/ChairtyDetailedScreen';
+import SinglePostScreen from './Screens/SinglePostScreen';
+import LearningScreen from './Screens/LearningScreen';
+import BlogPostScreen from './Screens/BlogPostScreen';
+import FollowersList from './Screens/FollowersList';
+import FollowingList from './Screens/FollowingList';
+import CustomHeader from './Components/CustomHeader';
+import VolunteerScreen from './Screens/VolunteerScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -53,7 +57,7 @@ export { db };
 import notificationIcon from './assets/Icons/notificationIcon.png'
 
 import { AuthProvider, useAuth } from './services/AuthContext';
-import UserScreen from './Screens/UserScreen';
+import NotificationsScreen from './Screens/NotificationsScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -104,8 +108,8 @@ function MainApp() {
             );
           }
         }} />
-      <Tab.Screen name="Friends"
-        component={FriendsListScreen}
+      <Tab.Screen name="Connect"
+        component={ConnectScreen}
         options={{
           tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
           tabBarIcon: ({ size, focused }) => {
@@ -135,7 +139,6 @@ function MainApp() {
   );
 }
 
-
 //TO DO: Currently have "Home" and  "Home "(with a space) as 2 different page titles, need to find work around
 function shouldShowTabBar(route) {
   // Get the current route name
@@ -160,7 +163,7 @@ function CustomDrawerContent(props) {
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
-      <View style={{padding: 20}}>
+      <View style={{ padding: 20 }}>
         <Button title="Sign Out" onPress={handleSignOut} />
       </View>
     </DrawerContentScrollView>
@@ -168,10 +171,16 @@ function CustomDrawerContent(props) {
 }
 
 function HomeScreenDrawer() {
-  
   return (
-    <Drawer.Navigator initialRouteName="Home " drawerContent={(props) => <CustomDrawerContent {...props} />}>
-      <Drawer.Screen name="Home" component={HomeScreen} />
+    <Drawer.Navigator initialRouteName="Home" drawerContent={(props) => <CustomDrawerContent {...props} />}>
+      <Drawer.Screen 
+        name="Home" 
+        component={HomeScreen} 
+        options={{ 
+          header: () => <CustomHeader /> 
+        }} 
+      />
+      <Drawer.Screen name="Learning" component={LearningScreen} />
       <Drawer.Screen name="Favorites" component={FavoriteScreen} />
       <Drawer.Screen name="Donation History & Tax Form" component={DonationHistoryScreen} />
       <Drawer.Screen name="About Us" component={AboutUsScreen} />
@@ -186,12 +195,6 @@ function HomeScreenDrawer() {
 function RootNavigator() {
   const { user, loading, isSigningUp } = useAuth();
 
-
-  // if (loading) {
-  //   return null; // Or a loading spinner if you prefer
-  // }
-
-  
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user && !isSigningUp ? (
@@ -200,6 +203,23 @@ function RootNavigator() {
           <Stack.Screen name="Petition" component={PetitionScreen} />
           <Stack.Screen name="GoFundMe" component={GoFundMeScreen} />
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          <Stack.Screen name="UserScreen" component={UserScreen} /> 
+          <Stack.Screen name="CharityDetailedScreen" component={CharityDetailedScreen} /> 
+          <Stack.Screen name= "Nofications" component={NotificationsScreen}/>
+          <Stack.Screen name="SinglePostScreen" component={SinglePostScreen}/>
+          <Stack.Screen name="LearningScreen" component={LearningScreen} />
+          <Stack.Screen name="BlogPostScreen" component={BlogPostScreen} />
+          <Stack.Screen name="VolunteerScreen" component={VolunteerScreen} />
+          <Stack.Screen
+            name="FollowersList"
+            component={FollowersList}
+            options={{ title: 'Followers' }}
+          />
+          <Stack.Screen
+            name="FollowingList"
+            component={FollowingList}
+            options={{ title: 'Following' }}
+          />
         </>
       ) : (
         <>
@@ -211,8 +231,6 @@ function RootNavigator() {
     </Stack.Navigator>
   );
 }
-
-
 
 function App() {
   let [fontsLoaded] = useFonts({
@@ -233,4 +251,5 @@ function App() {
     </AuthProvider>
   );
 }
+
 export default App;

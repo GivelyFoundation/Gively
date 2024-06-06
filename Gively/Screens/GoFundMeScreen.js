@@ -59,6 +59,8 @@ const GoFundMeScreen = ({ navigation }) => {
                 originalDonationPoster: userData.username,
                 originalPosterProfileImage: userData.profilePicture,
                 postText: userText,
+                uid: userData.uid
+
             };
             setData(newData);
             setIsVisible(true);

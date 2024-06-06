@@ -1,20 +1,18 @@
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import SwitchSelector from "react-native-switch-selector";
 import { user, charityData } from '../MockData';
 import styles from '../Styles.js/Styles';
 import PinnedCharityCard from '../Components/PinnedCharityCard';
-import { postsData3 } from '../MockData';
 import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
+import { VolunteerCard } from '../Components/VolunteerCard'; // Import VolunteerCard
 import { useAuth } from '../services/AuthContext';
-import { collection, getDocs } from 'firebase/firestore';
-
+import { collection, query, where, getDocs, onSnapshot } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig';
 
-const pieChartPlaceHolder = require('../assets/Images/pieChartPlaceHolder.png')
+const pieChartPlaceHolder = require('../assets/Images/pieChartPlaceHolder.png');
 
 const CharityInfoComponent = ({ charityName, color, percentage }) => {
   return (
@@ -24,7 +22,6 @@ const CharityInfoComponent = ({ charityName, color, percentage }) => {
     </View>
   );
 };
-
 
 const Portfolio = () => {
   return (
@@ -38,49 +35,40 @@ const Portfolio = () => {
     </View>
   );
 };
+
 const Posts = () => {
   const [posts, setPosts] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const { userData } = useAuth();
 
-  const handleTabPress = (tab) => {
-    setActiveTab(tab);
-  };
-
   const fetchPosts = async () => {
     try {
       const postsCollection = collection(firestore, 'Posts');
-      const postsSnapshot = await getDocs(postsCollection);
+      const q = query(postsCollection, where('uid', '==', userData.uid));
+      const postsSnapshot = await getDocs(q);
       const postsList = postsSnapshot.docs.map(doc => {
         const data = doc.data();
         const serializedData = serializeData(data);
         return { id: doc.id, ...serializedData };
       });
-  
-      const cleanedPostsList = postsList.map(post => JSON.parse(JSON.stringify(post)));
-      const validPosts = cleanedPostsList.filter(post => post !== null);
-      const validPostsByUser = validPosts.filter(post =>  post.uid === userData.uid);
-      if (validPostsByUser.length > 0) {
-        setPosts(validPostsByUser);
-      } else {
-        console.error('No valid posts found');
-      }
+      setPosts(postsList);
     } catch (error) {
       console.error('Error fetching posts:', error);
     }
   };
-  
+
   useEffect(() => {
     fetchPosts();
-  }, []);
-  
+  }, [userData.uid]);
+
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchPosts();
     setRefreshing(false);
   };
-  
+
   const renderCard = (item) => {
+    console.log(item)
     switch (item.PostType) {
       case 'donation':
         return <DonationCard key={item.id} data={item} />;
@@ -88,10 +76,11 @@ const Posts = () => {
         return <PetitionCard key={item.id} data={item} user={user} />;
       case 'gofundme':
         return <GoFundMeCard key={item.id} data={item} user={user} />;
-      default:
-        return <View key={item.id}><Text>Unknown Post Type</Text></View>;
+      case 'volunteer': // Add case for volunteer
+        return <VolunteerCard key={item.id} data={item}  />;
     }
   };
+
   const sortedPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
@@ -103,18 +92,13 @@ const Posts = () => {
         }
       >
         {sortedPosts.map((item) => renderCard(item))}
-        <View style = {profileStyles.spacer}/>
+        <View style={profileStyles.spacer} />
       </ScrollView>
     </View>
   );
-  
 };
 
-
-
-
 const CategoryScroll = () => {
-
   return (
     <ScrollView
       horizontal={true}
@@ -130,99 +114,98 @@ const CategoryScroll = () => {
   );
 };
 
-// const [userData, setUserData] = useState({
-//   username: '',
-//   email: '',
-//   password: '',
-//   confirmPassword:'',
-//   displayName: '',
-//   bio: '',
-//   profilePicture: null,
-// });
-
 export default function ProfileScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Portfolio');
-  const { user2, userData } = useAuth();
-  // Update activeTab based on the selected value from SwitchSelector
+  const { userData } = useAuth();
+  const [followersCount, setFollowersCount] = useState(null);
+  const [followingCount, setFollowingCount] = useState(null);
+
+  useEffect(() => {
+    const fetchFollowCounts = async () => {
+      if (userData && userData.uid) {
+        const followersRef = collection(firestore, `users/${userData.uid}/followers`);
+        const followingRef = collection(firestore, `users/${userData.uid}/following`);
+
+        const unsubscribeFollowers = onSnapshot(followersRef, (snapshot) => {
+          setFollowersCount(snapshot.size);
+        });
+
+        const unsubscribeFollowing = onSnapshot(followingRef, (snapshot) => {
+          setFollowingCount(snapshot.size);
+        });
+
+        return () => {
+          unsubscribeFollowers();
+          unsubscribeFollowing();
+        };
+      }
+    };
+
+    fetchFollowCounts();
+  }, [userData]);
+
   const handleTabPress = (tab) => {
     setActiveTab(tab);
   };
 
+  const handleFollowersPress = () => {
+    navigation.navigate('FollowersList', { userId: userData.uid });
+  };
+
+  const handleFollowingPress = () => {
+    navigation.navigate('FollowingList', { userId: userData.uid });
+  };
+
   return (
     <View style={styles.page}>
-
       <View style={[profileStyles.header]}>
-
         <Text style={[profileStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Profile</Text>
-
-
         <TouchableOpacity>
-
           <Text
             style={[profileStyles.editProfile, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}
             onPress={() => navigation.navigate('EditProfile')}
-          >Edit Profile </Text>
-
+          >
+            Edit Profile
+          </Text>
         </TouchableOpacity>
-
       </View>
-
       <View style={[profileStyles.row, profileStyles.profileInfo]}>
-
         <Image source={{ uri: userData.profilePicture }} style={profileStyles.profilePicture} />
-
         <View style={[profileStyles.column]}>
           <Text style={[profileStyles.userNameText, { fontFamily: 'Montserrat-Medium' }]}> {userData.username}</Text>
-
           <View style={[profileStyles.followRow]}>
-
             <View style={[profileStyles.column]}>
-
-              <TouchableOpacity>
-
-                <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>{user.followers} </Text>
-
+              <TouchableOpacity onPress={handleFollowersPress}>
+                <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>
+                  {followersCount !== null ? followersCount : 0}
+                </Text>
               </TouchableOpacity>
-
-
               <Text style={[profileStyles.followText, { fontFamily: 'Montserrat-Medium' }]}>Followers</Text>
-
             </View>
-
             <View style={profileStyles.verticalLine} />
-
             <View style={[profileStyles.column]}>
-
-              <TouchableOpacity>
-
-                <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>{user.following} </Text>
-
+              <TouchableOpacity onPress={handleFollowingPress}>
+                <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>
+                  {followingCount !== null ? followingCount : 0}
+                </Text>
               </TouchableOpacity>
-
               <Text style={[profileStyles.followText, { fontFamily: 'Montserrat-Medium' }]}>Following</Text>
-
             </View>
-
           </View>
-
         </View>
-
-        <View style={[profileStyles.row]}>
-
-        </View>
-
       </View>
-
       <Text style={[profileStyles.bioHeader, { fontFamily: 'Montserrat-Medium' }]}> {userData.displayName} </Text>
-
       <Text style={[profileStyles.bioMainText, { fontFamily: 'Montserrat-Medium' }]}> {userData.bio}</Text>
-
       <CategoryScroll />
 
-      {/* < View style={profileStyles.horizontalLine} /> */}
-      <PinnedCharityCard username={user.username.split(" ")[0]} charity={"NAMI"} reason={"Help me raise money for mental health awareness!"} />
-
-
+      
+      {activeTab === 'Portfolio' && (
+        <PinnedCharityCard 
+          username={user.username.split(" ")[0]} 
+          charity="NAMI" 
+          reason="Help me raise money for mental health awareness!" 
+        />
+      )}
       <SwitchSelector
         initial={0}
         onPress={value => handleTabPress(value)}
@@ -242,47 +225,36 @@ export default function ProfileScreen({ navigation }) {
         fontSize={16}
         height={30}
       />
-      {activeTab === 'Portfolio' ? < Portfolio /> : <Posts />}
-      
+      {activeTab === 'Portfolio' ? <Portfolio /> : <Posts />}
     </View>
-
   );
 }
 
-// const [userData, setUserData] = useState({
-//   username: '',
-//   email: '',
-//   password: '',
-//   confirmPassword:'',
-//   displayName: '',
-//   bio: '',
-//   profilePicture: null,
-// });
 const profileStyles = StyleSheet.create({
   header: {
     paddingTop: 70,
-    flexDirection: 'row', // Align children horizontally
-    alignItems: 'center', // Align children vertically in the center
-    width: '100%', // Ensure the row takes full width of the screen
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
     justifyContent: 'space-between',
     paddingRight: 20
   },
   row: {
-    flexDirection: 'row', // Align children horizontally
-    alignItems: 'center', // Align children vertically in the center
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   followRow: {
-    flexDirection: 'row', // Align children horizontally
+    flexDirection: 'row',
     margin: 10,
     alignItems: 'center',
   },
   column: {
-    flexDirection: 'column', // Align children horizontally
-    alignItems: 'center', // Align children vertically in the center,
+    flexDirection: 'column',
+    alignItems: 'center',
   },
   followColumn: {
-    flexDirection: 'column', // Align children horizontally
-    alignItems: 'center', // Align children vertically in the center,
+    flexDirection: 'column',
+    alignItems: 'center',
     marginRight: 80
   },
   userNameText: {
@@ -307,28 +279,27 @@ const profileStyles = StyleSheet.create({
     fontSize: 16
   },
   verticalLine: {
-    height: '70%', // Adjust height to control the line's length relative to the row height
-    alignContent: 'center',
-    width: 1, // The thickness of the line
-    backgroundColor: '#DDDDDD', // Line color
-    marginHorizontal: 20, // Space around the line
+    height: '70%',
+    width: 1,
+    backgroundColor: '#DDDDDD',
+    marginHorizontal: 20,
   },
   horizontalLine: {
-    height: 1, // Line thickness
-    backgroundColor: '#cccccc', // Line color, light grey
+    height: 1,
+    backgroundColor: '#cccccc',
     marginTop: 20,
     marginBottom: 5,
     marginHorizontal: 30,
   },
   profilePicture: {
-    width: 100, // Set the width as needed
-    height: 100, // Set the height as needed
-    borderRadius: 25,
+    width: 80,
+    height: 80,
+    borderRadius: 10,
   },
   pieChartPlaceHolder: {
-    width: 150, // Set the width as needed
-    height: 150, // Set the height as needed
-    alignItems: 'center', // Center items horizontally
+    width: 150,
+    height: 150,
+    alignItems: 'center',
     alignSelf: 'center',
   },
   buttonText: {
@@ -403,9 +374,9 @@ const profileStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-  spacer:{
+  spacer: {
     height: 700
-  }
+  },
 });
 
 function serializeData(data) {
@@ -413,10 +384,8 @@ function serializeData(data) {
   for (const key in data) {
     if (data[key] && typeof data[key] === 'object' && !Array.isArray(data[key])) {
       if (data[key].seconds) {
-        // Convert Firestore timestamp to string
         serializedData[key] = new Date(data[key].seconds * 1000).toISOString();
       } else {
-        // Recursively serialize nested objects
         serializedData[key] = serializeData(data[key]);
       }
     } else {

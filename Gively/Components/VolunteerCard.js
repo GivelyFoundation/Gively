@@ -1,15 +1,10 @@
-import 'firebase/firestore';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, Dimensions } from 'react-native';
-import { LinkPreview } from '@flyerhq/react-native-link-preview';
+import MapView, { Marker } from 'react-native-maps';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
-import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, addDoc, serverTimestamp } from 'firebase/firestore';
-
-import { getUserByUsername } from '../services/userService';
-
-const likeIcon = require('../assets/Icons/heart.png');
+import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, addDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 
 const screenWidth = Dimensions.get('window').width; // Get screen width
 
@@ -39,18 +34,22 @@ const unlikePost = async (postId, userId) => {
 };
 
 const removeNotification = async (postOwnerId, notificationId) => {
-    const notificationsRef = collection(firestore, 'users', postOwnerId, 'notifications');
-    const q = query(notificationsRef, where("notificationId", "==", notificationId));
+    try {
+        const notificationsRef = collection(firestore, 'users', postOwnerId, 'notifications');
+        const q = query(notificationsRef, where("notificationId", "==", notificationId));
 
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-        querySnapshot.forEach(async (doc) => {
-            console.log("Removing notification with ID:", notificationId);
-            await deleteDoc(doc.ref);
-            console.log("Notification removed successfully");
-        });
-    } else {
-        console.log("No notification found with ID:", notificationId);
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            for (const doc of querySnapshot.docs) {
+                console.log("Removing notification with ID:", notificationId);
+                await deleteDoc(doc.ref);
+                console.log("Notification removed successfully");
+            }
+        } else {
+            console.log("No notification found with ID:", notificationId);
+        }
+    } catch (error) {
+        console.error("Failed to remove notification:", error);
     }
 };
 
@@ -76,20 +75,20 @@ const likePost = async (postId, userId, username, postOwnerId) => {
         postId: postId,
         user: userId,
         type: "like",
-        notificationId: postId+userId
+        notificationId: postId + userId
     }
     await addDoc(collection(firestore, 'users', postOwnerId, 'notifications'), notification);
-    console.log("notification sent")
+    console.log("Notification sent");
 
     console.log("Post liked successfully for user:", userId);
 };
 
-export const GoFundMeCard = ({ data = {} }) => {
+export const VolunteerCard = ({ data = {} }) => {
     const [postOwnerId, setPostOwnerId] = useState(null);
     const [user, setUser] = useState(null);
     const { userData, loading } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
-    const [likesCount, setLikesCount] = useState(data.Likers.length);
+    const [likesCount, setLikesCount] = useState(data.Likers ? data.Likers.length : 0);
     const [postId, setPostId] = useState("");
     const navigation = useNavigation();
 
@@ -102,9 +101,6 @@ export const GoFundMeCard = ({ data = {} }) => {
                 console.log('Document ID:', doc.id);
                 setPostId(doc.id);
                 const postData = doc.data();
-                console.log("___________________________")
-                console.log(postData)
-                console.log("___________________________")
                 setPostOwnerId(postData.uid);  // Set the post owner ID from the post data
                 setLikesCount(postData.Likers.length);
             });
@@ -132,6 +128,7 @@ export const GoFundMeCard = ({ data = {} }) => {
             getUserDocumentById(postOwnerId);
         }
     }, [postOwnerId]);
+    
     useEffect(() => {
         const checkIfLiked = async () => {
             if (userData && postId) {
@@ -155,17 +152,17 @@ export const GoFundMeCard = ({ data = {} }) => {
 
             if (isLiked) {
                 console.log("Unlike post initiated");
-                const notId = postId+userData.uid
-                await handleUnlikePost(postId, userData.uid, notId,postOwnerId )
+                const notId = postId + userData.uid;
+                await handleUnlikePost(postId, userData.uid, notId, postOwnerId);
                 setIsLiked(false);
                 setLikesCount(likesCount - 1);
                 console.log("Post unliked successfully");
             } else {
                 console.log("Like post initiated");
-                console.log("postId: "+postId )
-                console.log("userData.uid: "+userData.uid )
-                console.log("userData.username: "+ userData.username )
-                console.log("postOwnerId "+postOwnerId)
+                console.log("postId:", postId);
+                console.log("userData.uid:", userData.uid);
+                console.log("userData.username:", userData.username);
+                console.log("postOwnerId:", postOwnerId);
 
                 await likePost(postId, userData.uid, userData.username, postOwnerId);
                 setIsLiked(true);
@@ -184,12 +181,12 @@ export const GoFundMeCard = ({ data = {} }) => {
 
     useEffect(() => {
         const fetchUser = async () => {
-            const userData = await getUserByUsername(data.originalDonationPoster);
+            const userData = await getUserDocumentById(data.userId);
             setUser(userData);
         };
 
         fetchUser();
-    }, [data.originalDonationPoster]);
+    }, [data.userId]);
 
     const getFirstNameLastInitial = (displayName) => {
         if (!displayName) return '';
@@ -224,23 +221,38 @@ export const GoFundMeCard = ({ data = {} }) => {
                                 <TouchableOpacity onPress={handleNamePress}>
                                     <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
                                 </TouchableOpacity>
-                                <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this GoFundMe:</Text>
+                                <Text style={{ fontFamily: 'Montserrat-Medium' }}> shared this volunteer opportunity:</Text>
                             </View>
                             <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(data.date)}</Text>
                         </View>
                     </View>
                 </View>
-                <Text style={[styles.postText, { fontFamily: 'Montserrat-Medium' }]}>{data.postText}</Text>
-                <View style={styles.linkView}>
-                    <LinkPreview text={data.Link} />
+                <Text style={[styles.postText, { fontFamily: 'Montserrat-Medium' }]}>{data.description}</Text>
+                <Text style={[styles.dateTimeText, { fontFamily: 'Montserrat-Medium' }]}>Date and Time: {formatDate(data.eventDate)}</Text>
+                <Text style={[styles.addressText, { fontFamily: 'Montserrat-Medium' }]}>Address: {data.address}</Text>
+                <View style={styles.mapView}>
+                    <MapView
+                        style={styles.map}
+                        initialRegion={{
+                            latitude: data.location.latitude,
+                            longitude: data.location.longitude,
+                            latitudeDelta: 0.0922,
+                            longitudeDelta: 0.0421,
+                        }}
+                    >
+                        <Marker
+                            coordinate={{ latitude: data.location.latitude, longitude: data.location.longitude }}
+                            title={data.address}
+                        />
+                    </MapView>
                 </View>
                 <View style={styles.footer}>
                     <TouchableOpacity style={styles.likesContainer} onPress={handleLikeToggle}>
-                        <Image source={likeIcon} style={[styles.likeIcon, { tintColor: isLiked ? '#EB5757' : '#8484A9' }]} />
+                        <Image source={require('../assets/Icons/heart.png')} style={[styles.likeIcon, { tintColor: isLiked ? '#EB5757' : '#8484A9' }]} />
                         <Text style={[styles.likes, { fontFamily: 'Montserrat-Medium', color: isLiked ? '#EB5757' : '#8484A9' }]}>{likesCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.button}>
-                        <Text style={styles.buttonText}>Share GoFundMe</Text>
+                        <Text style={styles.buttonText}>Share</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -253,6 +265,7 @@ const styles = StyleSheet.create({
         width: screenWidth - 20, // Set width to screen width with some padding
         marginHorizontal: 10,
         marginBottom: 20,
+        alignSelf: 'center'
     },
     card: {
         width: '100%',
@@ -289,6 +302,16 @@ const styles = StyleSheet.create({
         paddingTop: 5,
     },
     postText: {
+        fontSize: 14,
+        marginBottom: 10,
+        lineHeight: 24,
+    },
+    dateTimeText: {
+        fontSize: 14,
+        marginBottom: 10,
+        lineHeight: 24,
+    },
+    addressText: {
         fontSize: 14,
         marginBottom: 10,
         lineHeight: 24,
@@ -334,8 +357,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '100%',
     },
-    linkView: {
-        paddingRight: 10,
+    mapView: {
+        width: '100%',
+        height: 150, // Reduce the height of the map to fit better
+        marginBottom: 10,
+    },
+    map: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 10,
     },
     boldText: {
         fontSize: 16,
@@ -346,4 +376,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default GoFundMeCard;
+export default VolunteerCard;

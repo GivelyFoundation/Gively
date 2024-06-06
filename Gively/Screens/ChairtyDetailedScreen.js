@@ -200,9 +200,14 @@ export default function CharityDetailedScreen({ navigation }) {
      
         <ApolloProvider client={client}>
             <View style={styles.wrapper}>
-                <TouchableOpacity onPress={() => navigation.navigate("Discover")} style={styles.backButton}>
-                <Icon name="arrow-back" size={30} color="#000" />
-                </TouchableOpacity>
+                <View style={styles.headerRow}>
+                    <TouchableOpacity onPress={() => navigation.navigate("Discover")} style={styles.backButton}>
+                        <Icon name="arrow-back" size={30} color="#000" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.bookmarkButton}>
+                        <Icon name="bookmark-border" size={30} color="#000" />
+                    </TouchableOpacity>
+                </View>
                 <CharityDetailedView term="53-0196605" />
                 
                 <TouchableOpacity style={styles.donateButton}>
@@ -218,6 +223,13 @@ const styles = StyleSheet.create({
     wrapper: {
         flex: 1,
         backgroundColor: "#fff"
+    },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingTop: 60
     },
     friendsRow: {
         flexDirection: 'row',
@@ -256,8 +268,10 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     backButton: {
-        paddingTop: 60,
-        paddingLeft: 20
+        paddingVertical: 20
+    },
+    bookmarkButton: {
+        paddingVertical: 20
     },
     backButtonText: {
         fontSize: 20

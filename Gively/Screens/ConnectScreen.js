@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import * as SMS from 'expo-sms';
 import styles from '../Styles.js/Styles';
 import { FriendCard } from '../Components/FriendCard';
 import { fakeFriends, fakeFriendReccomendations } from '../MockData';
-
-const GoFundMeLogo = require('../assets/Images/GoFundMeLogo.jpg');
+const noFriends = require('../assets/Images/NoFriendsYet.png');
 
 export default function FriendsListScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,43 +44,53 @@ export default function FriendsListScreen({ navigation }) {
       console.log("SMS is not available on this device");
     }
   };
+
   return (
     <View style={[styles.page, friendStyles.container]}>
-      <Text style={[friendStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Friends</Text>
+      <View style={friendStyles.headerContainer}>
+        
+        <Text style={[friendStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Connect</Text>
+        
+      </View>
       <TextInput
         style={[friendStyles.searchBox]}
         placeholder="Search..."
         onChangeText={text => setSearchQuery(text)}
         value={searchQuery}
       />
-      
+
       <ScrollView>
-      <TouchableOpacity style={friendStyles.inviteFriendsButton} onPress={handleInviteFriends}>
-        <Text style={[friendStyles.inviteFriendsButtonText, { fontFamily: 'Montserrat-Bold' }]}>
-          Invite Friends From Contacts
-        </Text>
-      </TouchableOpacity>
-        <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Medium' }]}>People You May Know</Text>
+        <TouchableOpacity style={friendStyles.inviteFriendsButton} onPress={handleInviteFriends}>
+          <Text style={[friendStyles.inviteFriendsButtonText, { fontFamily: 'Montserrat-Bold' }]}>
+            Invite Friends From Contacts
+          </Text>
+        </TouchableOpacity>
+        <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Bold' }]}>People You May Know</Text>
         <ScrollView>
           {fakeFriends.map(friend => (
             <FriendCard key={friend.id} friend={friend} areFollow={friend.areFollowing} />
           ))}
         </ScrollView>
-        <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Medium' }]}>Following</Text>
-        <ScrollView>
-          {fakeFriendReccomendations.map(friend => (
-            <FriendCard key={friend.id} friend={friend} areFollowing={friend.areFollowing} />
-          ))}
-        </ScrollView>
+        <View style={friendStyles.spacer} />
       </ScrollView>
     </View>
   );
 }
 
 const friendStyles = StyleSheet.create({
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
   headerText: {
-    paddingLeft: 20,
-    fontSize: 24
+    fontSize: 24,
+  },
+  notificationIcon: {
+    width: 24,
+    height: 24,
   },
   searchBox: {
     height: 40,
@@ -92,7 +101,7 @@ const friendStyles = StyleSheet.create({
     marginVertical: 10,
     backgroundColor: '#FFF',
     marginHorizontal: 20,
-    paddingHorizontal: 20
+    paddingHorizontal: 20,
   },
   horizontalLine: {
     height: 1, // Line thickness
@@ -104,13 +113,13 @@ const friendStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 10,
     paddingVertical: 30,
-    marginTop: 40
+    marginTop: 40,
   },
   title: {
     fontSize: 16,
     paddingLeft: 20,
-    paddingTop: 10,
-    paddingBottom: 20
+    paddingTop: 20,
+    paddingBottom: 20,
   },
   inviteFriendsButton: {
     backgroundColor: '#3FC032',
@@ -129,4 +138,16 @@ const friendStyles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  noFriends:{
+      width: 350,
+      height: 350,
+      alignSelf: 'center'
+  },
+  spacer:{
+    height: 200
+  },
+  addFriends:{
+    alignSelf: 'center',
+    fontSize: 18
+  }
 });

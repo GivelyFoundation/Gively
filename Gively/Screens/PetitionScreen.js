@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, TextInput, ScrollView, Alert, TouchableOpacity, Image } from 'react-native';
-import {  PetitionCard } from '../Components/PetitionCard';
+import { PetitionCard } from '../Components/PetitionCard';
 import { useAuth } from '../services/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
 import { collection, addDoc } from 'firebase/firestore';
@@ -9,17 +9,17 @@ import Icon from 'react-native-vector-icons/MaterialIcons'; // Importing Materia
 
 const ChangeOrgLogo = require('../assets/Images/ChangeOrgLogo.png');
 
-const  PetitionCardPreview = ({ data }) => {
+const PetitionCardPreview = ({ data }) => {
     const { userData } = useAuth();
     const dataWithProfilePicture = { ...data, originalPosterProfileImage: userData.profilePicture };
     return (
         <View style={styles.card}>
-            < PetitionCard data={dataWithProfilePicture} />
+            <PetitionCard data={dataWithProfilePicture} />
         </View>
     );
 };
 
-const  PetitionScreen = ({ navigation }) => {
+const PetitionScreen = ({ navigation }) => {
     const [petitionLink, setPetitionLink] = useState('https://www.change.org/');
     const [userText, setUserText] = useState('');
     const [data, setData] = useState({});
@@ -49,6 +49,15 @@ const  PetitionScreen = ({ navigation }) => {
 
     const handleButtonPress = () => {
         if (petitionLink !== '' && containsPetition(petitionLink)) {
+            if (!userData || !userData.username || !userData.uid) {
+                Alert.alert(
+                    "User Data Error",
+                    "Unable to retrieve user data. Please make sure you are logged in.",
+                    [{ text: "OK" }]
+                );
+                return;
+            }
+
             const uniqueId = uuidv4();
             const newData = {
                 Likers: [],
@@ -106,19 +115,18 @@ const  PetitionScreen = ({ navigation }) => {
     return (
         <View style={styles.container}>
             <ScrollView>
-                
-                <View style = {styles.row}>
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                    <Icon name="arrow-back" size={30} color="#000" />
-                </TouchableOpacity>
+                <View style={styles.row}>
+                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                        <Icon name="arrow-back" size={30} color="#000" />
+                    </TouchableOpacity>
 
-                <Image
-                        source={ChangeOrgLogo }
+                    <Image
+                        source={ChangeOrgLogo}
                         style={styles.changeOrgLogo}
                         resizeMode="contain"
                     />
                 </View>
-              
+
                 <Text style={[styles.label, { fontFamily: 'Montserrat-Medium' }]}>Caption:</Text>
                 <TextInput
                     style={styles.input}
@@ -219,23 +227,19 @@ const styles = StyleSheet.create({
     card: {
         marginVertical: 50,
     },
-    backButtonText: {
-        fontSize: 20
-    },
     backButton: {
-        fpaddingTop: 60,
-        paddingLeft: 20
+        padding: 10,
     },
     row: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
+        justifyContent: 'space-between',
         paddingBottom: 40
     },
-    changeOrgLogo:{
-    width: 150,
-    height: 50
-    }
+    changeOrgLogo: {
+        width: 150,
+        height: 50,
+    },
 });
 
-export default  PetitionScreen;
+export default PetitionScreen;

@@ -68,6 +68,11 @@ export default function DiscoverScreen({ navigation }) {
         onPress={() => navigation.navigate('GoFundMe')}>
         <Text style={[discoverStyles.goFundMeButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A GoFundMe</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={discoverStyles.petitionButton}
+        onPress={() => navigation.navigate('VolunteerScreen')}>
+        <Text style={[discoverStyles.petitionButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A Volunteer Opportunity</Text>
+      </TouchableOpacity>
       <View style={discoverStyles.sectionContainer}>
         <View style={[discoverStyles.browseByCategorySection]}>
           <Text style={[discoverStyles.subheadingText, { fontFamily: 'Montserrat-Medium' }]}>BROWSE BY CATEGORY</Text>

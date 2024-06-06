@@ -1,29 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import { getUserByUsername } from '../services/userService';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
-import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from 'firebase/firestore';
-
+import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useNavigation } from '@react-navigation/native';
+const screenWidth = Dimensions.get('window').width; // Get screen width
 
 const likeIcon = require('../assets/Icons/heart.png');
 const welcome = require('../assets/Images/Welcome.png');
 
 const formatDate = (dateStr) => {
     const date = new Date(dateStr);
-
-    // Options for the date part
     const optionsDate = { weekday: 'short', month: 'short', day: 'numeric' };
-
-    // Format the date part
     const formattedDate = date.toLocaleDateString('en-US', optionsDate);
-
-    // Options for the time part
     const optionsTime = { hour: 'numeric', minute: 'numeric', hour12: true };
-
-    // Format the time part
     const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
-
     return `${formattedDate} • ${formattedTime}`;
 };
 
@@ -41,45 +33,102 @@ const unlikePost = async (postId, userId) => {
     await updateDoc(postRef, {
         Likers: arrayRemove(userId)
     });
+    console.log("Post unliked successfully for user:", userId);
 };
 
-const likePost = async (postId, userId, username) => {
+const removeNotification = async (postOwnerId, notificationId) => {
+    const notificationsRef = collection(firestore, 'users', postOwnerId, 'notifications');
+    const q = query(notificationsRef, where("notificationId", "==", notificationId));
+
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+        querySnapshot.forEach(async (doc) => {
+            console.log("Removing notification with ID:", notificationId);
+            await deleteDoc(doc.ref);
+            console.log("Notification removed successfully");
+        });
+    } else {
+        console.log("No notification found with ID:", notificationId);
+    }
+};
+
+const handleUnlikePost = async (postId, userId, notificationId, postOwnerId) => {
+    try {
+        await unlikePost(postId, userId);
+        await removeNotification(postOwnerId, notificationId);
+        console.log("Post unliked and notification removed for user:", userId);
+    } catch (error) {
+        console.error("Failed to unlike post and remove notification:", error);
+    }
+};
+
+const likePost = async (postId, userId, username, postOwnerId) => {
     const postRef = doc(firestore, 'Posts', postId);
-    console.log("Liking post for user:", userId, "with username:", username);
+    console.log("Liking post for user:", userId);
     await updateDoc(postRef, {
         Likers: arrayUnion(userId)
     });
+    const notification = {
+        message: `${username} liked your post!`,
+        timestamp: serverTimestamp(),
+        postId: postId,
+        user: userId,
+        type: "like",
+        notificationId: postId+userId
+        
+    }
+    await addDoc(collection(firestore, 'users', postOwnerId, 'notifications'), notification);
+    console.log("notification sent")
+
     console.log("Post liked successfully for user:", userId);
 };
 
 const FirstTimeDonationCard = ({ data }) => {
+    const [postOwnerId, setPostOwnerId] = useState(null);
     const [user, setUser] = useState(null);
     const { userData, loading } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
     const [likesCount, setLikesCount] = useState(data.Likers.length);
-    console.log("FirstTimeLikes: " + data.Likers)
-    console.log("FirstTimeLikes: " + likesCount)
     const [postId, setPostId] = useState("");
+    const navigation = useNavigation();
 
+    console.log(data.Likers.length)
     const getPostDocumentIdById = async (id) => {
-        console.log(id);
         const postsRef = collection(firestore, "Posts");
         const q = query(postsRef, where('id', '==', id));
         const querySnapshot = await getDocs(q);
-        console.log(querySnapshot);
         if (!querySnapshot.empty) {
             querySnapshot.forEach(doc => {
                 console.log('Document ID:', doc.id);
                 setPostId(doc.id);
+                const postData = doc.data();
+                setPostOwnerId(postData.uid);  // Set the post owner ID from the post data
+                setLikesCount(postData.Likers.length);
             });
         } else {
             console.log('No matching documents.');
         }
     };
 
+    const getUserDocumentById = async (userId) => {
+        const userRef = doc(firestore, 'users', userId);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+            setUser(userDoc.data());
+        } else {
+            console.log('No such document!');
+        }
+    };
+
     useEffect(() => {
         getPostDocumentIdById(data.id);
     }, [data.id]);
+
+    useEffect(() => {
+        if (postOwnerId) {
+            getUserDocumentById(postOwnerId);
+        }
+    }, [postOwnerId]);
 
     useEffect(() => {
         const checkIfLiked = async () => {
@@ -103,14 +152,15 @@ const FirstTimeDonationCard = ({ data }) => {
             }
 
             if (isLiked) {
-                console.log("Unlike post initiated");
-                await unlikePost(postId, userData.uid);
+                console.log("Unlike post initiated")
+                const notId = postId+userData.uid
+                await handleUnlikePost(postId, userData.uid, notId,postOwnerId )
                 setIsLiked(false);
                 setLikesCount(likesCount - 1);
                 console.log("Post unliked successfully");
             } else {
                 console.log("Like post initiated");
-                await likePost(postId, userData.uid, userData.username);
+                await likePost(postId, userData.uid, userData.username, postOwnerId);
                 setIsLiked(true);
                 setLikesCount(likesCount + 1);
                 console.log("Post liked successfully");
@@ -124,9 +174,6 @@ const FirstTimeDonationCard = ({ data }) => {
             );
         }
     };
-
-
-
     useEffect(() => {
         const fetchUser = async () => {
             const userData = await getUserByUsername(data.originalDonationPoster);
@@ -143,19 +190,36 @@ const FirstTimeDonationCard = ({ data }) => {
         return `${firstName} ${lastInitial}`;
     };
 
-    const formattedName = user ? getFirstNameLastInitial(user.displayName) : '';
+    if (!user) {
+        console.log(user)
+        return null; // or a loading indicator
+    }
+    const handleNamePress = () => {
+        if (user) {
+
+            navigation.navigate('UserScreen', { user });
+        } else {
+            console.log('User data is not available.');
+        }
+    };
+
+    const formattedName = getFirstNameLastInitial(user.displayName);
 
     return (
         <View style={styles.card}>
             <View style={styles.header}>
-                <Image source={{ uri: data.originalPosterProfileImage }} style={styles.profileImage} />
+                <TouchableOpacity onPress={handleNamePress}>
+                    <Image source={{ uri: data.originalPosterProfileImage }} style={styles.profileImage} />
+                </TouchableOpacity>
                 <View style={styles.posterInfo}>
                     <View style={styles.column}>
-                        <Text style={styles.posterName}>
-                            <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
+                        <View style={styles.nameContainer}>
+                            <TouchableOpacity onPress={handleNamePress}>
+                                <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{formattedName}</Text>
+                            </TouchableOpacity>
                             <Text style={{ fontFamily: 'Montserrat-Medium' }}>'s first donation is to </Text>
                             <Text style={[styles.boldText, { fontFamily: 'Montserrat-Bold' }]}>{data.charity}!</Text>
-                        </Text>
+                        </View>
                         <Text style={[styles.posterDate, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(data.date)}</Text>
                     </View>
                 </View>
@@ -164,11 +228,11 @@ const FirstTimeDonationCard = ({ data }) => {
             <Text style={[styles.postText, styles.welcomeText, { fontFamily: 'Montserrat-Medium' }]}>Welcome {formattedName} to Gively!!!</Text>
             <View style={styles.footer}>
                 <View style={styles.likesContainer}>
-                    <TouchableOpacity   style={styles.likesContainer}  onPress={handleLikeToggle}>
-                    <Image source={likeIcon} style={[styles.likeIcon, { tintColor: isLiked ? '#EB5757' : '#8484A9' }]} />
-                    <Text style={[styles.likes, { fontFamily: 'Montserrat-Medium', color: data.isLiked ? '#EB5757' : '#8484A9' }]}>{likesCount}</Text>
+                    <TouchableOpacity style={styles.likesContainer} onPress={handleLikeToggle}>
+                        <Image source={likeIcon} style={[styles.likeIcon, { tintColor: isLiked ? '#EB5757' : '#8484A9' }]} />
+                        <Text style={[styles.likes, { fontFamily: 'Montserrat-Medium', color: data.isLiked ? '#EB5757' : '#8484A9' }]}>{likesCount}</Text>
                     </TouchableOpacity>
-                   </View>
+                </View>
                 <TouchableOpacity style={styles.button}>
                     <Text style={[styles.buttonText, { fontFamily: 'Montserrat-Bold' }]}>Donate</Text>
                 </TouchableOpacity>
@@ -179,9 +243,11 @@ const FirstTimeDonationCard = ({ data }) => {
 
 const styles = StyleSheet.create({
     card: {
+        width: screenWidth - 20,
         backgroundColor: '#fff',
         borderRadius: 10,
         padding: 15,
+        marginHorizontal: 10,
         marginBottom: 20,
         shadowColor: '#5A5A5A',
         shadowOffset: { width: 0, height: 20 },
@@ -261,10 +327,18 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     welcome: {
-        width: 200,
+        width: 300,
         height: 150,
+        marginVertical:10,
         alignSelf: 'center'
-    }
+    },
+    boldText: {
+        fontSize: 16
+    },
+    nameContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
 });
 
 export default FirstTimeDonationCard;
