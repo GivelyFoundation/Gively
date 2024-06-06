@@ -5,6 +5,10 @@ import { CommonActions } from '@react-navigation/native';
 import { auth } from '../services/firebaseConfig';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+import { GOOGLE_CLIENT_ID } from '@env';
+
+
+
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -99,7 +103,7 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   logoContainer: {
-    alignItems: 'center', 
+    alignItems: 'center',
     marginTop: 20,
   },
   logo: {
