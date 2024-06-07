@@ -298,8 +298,14 @@ export default function UserScreen({ route, navigation }) {
             <Text style={[profileStyles.bioHeader, { fontFamily: 'Montserrat-Medium' }]}>{user.displayName}</Text>
             <Text style={[profileStyles.bioMainText, { fontFamily: 'Montserrat-Medium' }]}>{user.bio}</Text>
             <CategoryScroll user={user} />
-            <PinnedCharityCard username={user.username.split(" ")[0]} charity={"NAMI"} reason={"Help me raise money for mental health awareness!"} />
 
+            {activeTab === 'Portfolio' && (
+                <PinnedCharityCard
+                    username={user.username.split(" ")[0]}
+                    charity="NAMI"
+                    reason="Help me raise money for mental health awareness!"
+                />
+            )}
             <SwitchSelector
                 initial={0}
                 onPress={value => handleTabPress(value)}
