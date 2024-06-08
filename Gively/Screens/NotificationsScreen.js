@@ -98,7 +98,7 @@ const NotificationItem = ({ item, navigation, isFollowing, handleFollowPress }) 
             <Text style={[styles.timestamp, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(item.timestamp)}</Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.followButton} onPress={handleFollowPress}>
+        <TouchableOpacity  style={[styles.followButton, isFollowing && styles.followingButton]} onPress={handleFollowPress}>
           <Text style={[styles.followButtonText, { fontFamily: 'Montserrat-Medium' }]}>{isFollowing ? 'Unfollow' : 'Follow'}</Text>
         </TouchableOpacity>
       </View>
@@ -237,6 +237,18 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 16,
   },
+  followButton: {
+    backgroundColor: '#3FC032',
+    borderRadius: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 20,
+    width: '50%',
+    marginTop: 10,
+    alignSelf: 'center'
+},
+followingButton: {
+    backgroundColor: '#1C5AA3',
+},
   notificationText: {
     flex: 1,
   },

@@ -12,7 +12,7 @@ const CustomHeader = () => {
         <Icon name="menu" size={30} color='#1C5AA3' />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Nofications')} style={{ paddingRight: 10 }}>
-        <Icon name="notifications" size={30} color='#1C5AA3' />
+        <Icon name="notifications" size={30} color='#3FC032' />
       </TouchableOpacity>
     </View>
   );
