@@ -23,7 +23,6 @@ const hasUserLikedPost = async (postId, userId) => {
     const postRef = doc(firestore, 'Posts', postId);
     const docSnapshot = await getDoc(postRef);
     const likers = docSnapshot.data().Likers || [];
-    console.log("Checking if user has liked the post:", likers.includes(userId));
     return likers.includes(userId);
 };
 
@@ -293,13 +292,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     likeIcon: {
-        width: 16,
-        height: 16,
+        width: 24,
+        height: 24,
         marginRight: 5
     },
     likes: {
         color: '#EB5757',
-        fontSize: 13
+        fontSize: 16
     },
     button: {
         backgroundColor: '#3FC032',

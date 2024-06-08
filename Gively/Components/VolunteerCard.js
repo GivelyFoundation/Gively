@@ -327,14 +327,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     likeIcon: {
-        width: 16,
-        height: 16,
+        width: 24,
+        height: 24,
         marginRight: 5,
     },
     likes: {
         color: '#EB5757',
-        fontSize: 13,
-        fontFamily: 'Montserrat-Medium',
+        fontSize: 16,
     },
     button: {
         backgroundColor: '#3FC032',
