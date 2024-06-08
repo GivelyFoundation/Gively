@@ -13,7 +13,7 @@ const charitylogos = [charityLogo, charityLogo, charityLogo, charityLogo, charit
 const renderDiscoverCharityCards = (charityLogos) => {
   const navigation = useNavigation();
   return charityLogos.map((charityLogo, index) => (
-    <DiscoverCharityCard key={index} image={charityLogo} navigation = {navigation}/>
+    <DiscoverCharityCard key={index} image={charityLogo} navigation={navigation} />
   ));
 };
 
@@ -31,66 +31,69 @@ export default function DiscoverScreen({ navigation }) {
     setSearchResults(filteredResults);
   };
   return (
-    <View style={[styles.page, discoverStyles.container]}>
-      <Text style={[discoverStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Discover</Text>
-      <TextInput
-        style={[discoverStyles.searchBox]}
-        placeholder="Search..."
-        onChangeText={text => setSearchQuery(text)}
-        value={searchQuery}
-      />
+    
+      <View style={[styles.page, discoverStyles.container]}>
+        <ScrollView>
+        <Text style={[discoverStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Discover</Text>
+        <TextInput
+          style={[discoverStyles.searchBox]}
+          placeholder="Search..."
+          onChangeText={text => setSearchQuery(text)}
+          value={searchQuery}
+        />
 
-      <View style={discoverStyles.sectionContainer}>
-        <Text style={[discoverStyles.subheadingText, { fontFamily: 'Montserrat-Medium' }]}>LOCAL</Text>
-        <ScrollView horizontal>
-          <View style={{ flexDirection: 'row' }}>
-            {renderDiscoverCharityCards(charitylogos)}
-          </View>
-        </ScrollView>
-      </View>
-
-      <View style={discoverStyles.sectionContainer}>
-        <Text style={[discoverStyles.subheadingText, { fontFamily: 'Montserrat-Medium' }]}>OUR PICKS FOR YOU</Text>
-        <ScrollView horizontal>
-          <View style={{ flexDirection: 'row' }}>
-            {renderDiscoverCharityCards(charitylogos)}
-          </View>
-        </ScrollView>
-      </View>
-      <TouchableOpacity
-        style={discoverStyles.petitionButton}
-        onPress={() => navigation.navigate('Petition')} // Navigate to PetitionScreen
-      >
-        <Text style={[discoverStyles.petitionButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A Change.Org Petition</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={discoverStyles.goFundMeButton}
-        onPress={() => navigation.navigate('GoFundMe')}>
-        <Text style={[discoverStyles.goFundMeButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A GoFundMe</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={discoverStyles.petitionButton}
-        onPress={() => navigation.navigate('VolunteerScreen')}>
-        <Text style={[discoverStyles.petitionButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A Volunteer Opportunity</Text>
-      </TouchableOpacity>
-      <View style={discoverStyles.sectionContainer}>
-        <View style={[discoverStyles.browseByCategorySection]}>
-          <Text style={[discoverStyles.subheadingText, { fontFamily: 'Montserrat-Medium' }]}>BROWSE BY CATEGORY</Text>
-          <TouchableOpacity>
-            <Text style={[discoverStyles.seeAllButton, { fontFamily: 'Montserrat-Medium' }]}>SEE ALL </Text>
-          </TouchableOpacity>
+        <View style={discoverStyles.sectionContainer}>
+          <Text style={[discoverStyles.subheadingText, { fontFamily: 'Montserrat-Medium' }]}>LOCAL</Text>
+          <ScrollView horizontal>
+            <View style={{ flexDirection: 'row' }}>
+              {renderDiscoverCharityCards(charitylogos)}
+            </View>
+          </ScrollView>
         </View>
-        <View style={discoverStyles.categoryButtonContainer}>
-          {charityCategories.map((category, index) => (
-            <TouchableOpacity key={index} style={discoverStyles.categoryButton}>
-              <Text style={[discoverStyles.categoryButtonText, { fontFamily: 'Montserrat-Medium' }]}>{category.name}</Text>
+
+        <View style={discoverStyles.sectionContainer}>
+          <Text style={[discoverStyles.subheadingText, { fontFamily: 'Montserrat-Medium' }]}>OUR PICKS FOR YOU</Text>
+          <ScrollView horizontal>
+            <View style={{ flexDirection: 'row' }}>
+              {renderDiscoverCharityCards(charitylogos)}
+            </View>
+          </ScrollView>
+        </View>
+        <TouchableOpacity
+          style={discoverStyles.petitionButton}
+          onPress={() => navigation.navigate('Petition')} // Navigate to PetitionScreen
+        >
+          <Text style={[discoverStyles.petitionButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A Change.Org Petition</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={discoverStyles.goFundMeButton}
+          onPress={() => navigation.navigate('GoFundMe')}>
+          <Text style={[discoverStyles.goFundMeButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A GoFundMe</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={discoverStyles.petitionButton}
+          onPress={() => navigation.navigate('VolunteerScreen')}>
+          <Text style={[discoverStyles.petitionButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A Volunteer Opportunity</Text>
+        </TouchableOpacity>
+        <View style={discoverStyles.sectionContainer}>
+          <View style={[discoverStyles.browseByCategorySection]}>
+            <Text style={[discoverStyles.subheadingText, { fontFamily: 'Montserrat-Medium' }]}>BROWSE BY CATEGORY</Text>
+            <TouchableOpacity>
+              <Text style={[discoverStyles.seeAllButton, { fontFamily: 'Montserrat-Medium' }]}>SEE ALL </Text>
             </TouchableOpacity>
-          ))}
+          </View>
+          <View style={discoverStyles.categoryButtonContainer}>
+            {charityCategories.map((category, index) => (
+              <TouchableOpacity key={index} style={discoverStyles.categoryButton}>
+                <Text style={[discoverStyles.categoryButtonText, { fontFamily: 'Montserrat-Medium' }]}>{category.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
+
+        </ScrollView>
       </View>
-
-
-    </View>
+    
   );
 }
 
