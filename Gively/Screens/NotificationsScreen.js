@@ -3,7 +3,7 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from 'react
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
-import {  collection, query, where, getDocs, doc, onSnapshot, serverTimestamp ,addDoc, deleteDoc , getDoc,orderBy } from 'firebase/firestore';
+import {  collection, query, where, getDocs, doc, onSnapshot, serverTimestamp ,addDoc, deleteDoc , getDoc,orderBy, updateDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
 import { followUser, unfollowUser } from '../services/followService';
 
@@ -106,11 +106,25 @@ const NotificationItem = ({ item, navigation, isFollowing, handleFollowPress }) 
   }
 };
 
+const updateLastTimeNotificationsChecked = async (userId) => {
+  try {
+      const userRef = doc(firestore, 'users', userId);
+      const currTime =  serverTimestamp()
+      await updateDoc(userRef, {
+          lastTimeNotificationsChecked: currTime
+      });
+  } catch (error) {
+      console.error("Error updating lastTimeNotificationsChecked for user:", userId, error);
+  }
+};
+
 const NotificationsScreen = () => {
   const { userData } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [followingState, setFollowingState] = useState({});
   const navigation = useNavigation();
+
+  updateLastTimeNotificationsChecked(userData.uid);
 
   useEffect(() => {
     if (!userData) return;
