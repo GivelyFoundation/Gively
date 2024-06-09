@@ -23,7 +23,6 @@ export default EditProfileScreen = ({ navigation }) => {
     }, [displayName, bio, profilePicture]);
 
     const handleSaveChanges = async () => {
-        console.log("here")
         try {
             const userDocRef = doc(firestore, 'users', userData.uid);
             await updateDoc(userDocRef, {
@@ -68,7 +67,9 @@ export default EditProfileScreen = ({ navigation }) => {
                     placeholder="Bio"
                     multiline={true}
                     numberOfLines={4}
+                    maxLength={150}
                 />
+                <Text style={styles.charCount}>{bio.length}/150</Text>
                 <TextInput
                     style={styles.input}
                     onChangeText={setCharity}
@@ -139,6 +140,11 @@ const styles = StyleSheet.create({
         padding: 10,
         textAlignVertical: 'top',
         borderRadius: 10,
+    },
+    charCount: {
+        alignSelf: 'flex-end',
+        marginBottom: 12,
+        color: '#888',
     },
     donateButton: {
         position: 'absolute',

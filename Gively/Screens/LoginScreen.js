@@ -5,7 +5,7 @@ import { CommonActions } from '@react-navigation/native';
 import { auth } from '../services/firebaseConfig';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import { GOOGLE_CLIENT_ID } from '@env';
+//import { GOOGLE_CLIENT_ID } from '@env';
 
 
 
