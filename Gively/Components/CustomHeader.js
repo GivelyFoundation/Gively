@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
 import { doc, getDoc, collection, query, orderBy, limit, onSnapshot, getDocs } from "firebase/firestore";
@@ -67,15 +67,43 @@ const CustomHeader = () => {
   }, [userData]);
 
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, paddingTop: 60, backgroundColor: '#fff' }}>
-      <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())} style={{ paddingLeft: 10 }}>
+    <View style={styles.headerContainer}>
+      <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())} style={styles.menuButton}>
         <Icon name="menu" size={30} color='#1C5AA3' />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate('Notifications')} style={{ paddingRight: 10 }}>
-        <Icon name="notifications" size={30} color={hasNewNotifications ? '#FF0000' : '#3FC032'} />
+      <TouchableOpacity onPress={() => navigation.navigate('Notifications')} style={styles.notificationButton}>
+        <Icon name="notifications" size={30} color='#3FC032' />
+        {hasNewNotifications && <View style={styles.dot} />}
       </TouchableOpacity>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    paddingTop: 60,
+    backgroundColor: '#fff',
+  },
+  menuButton: {
+    paddingLeft: 10,
+  },
+  notificationButton: {
+    paddingRight: 10,
+    position: 'relative',
+  },
+  dot: {
+    position: 'absolute',
+    right: 10,
+    top: 6,
+    backgroundColor: '#FF0000',
+    borderRadius: 6,
+    width: 12,
+    height: 12,
+  },
+});
 
 export default CustomHeader;
