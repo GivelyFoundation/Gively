@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
 import { auth, firestore } from './firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 
@@ -38,6 +38,17 @@ export const AuthProvider = ({ children }) => {
         });
         return unsubscribe; // Cleanup subscription
     }, []);
+
+    const signIn = async (email, password) => {
+        setLoading(true)
+        try {
+            await signInWithEmailAndPassword(auth, email, password);             
+        } catch (error) {
+            console.error ("Sign in failed", error); 
+        } finally {
+            setLoading(false)            
+        }
+    }
 
     const signOut = async () => {
         try {
@@ -83,7 +94,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, isSigningUp, userData, startSignUp, endSignUp, updateUserData, signOut }}>
+        <AuthContext.Provider value={{ user, loading, isSigningUp, userData, startSignUp, endSignUp, updateUserData, signOut, signIn }}>
             {children}
         </AuthContext.Provider>
     );

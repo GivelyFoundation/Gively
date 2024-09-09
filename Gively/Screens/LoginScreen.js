@@ -4,6 +4,8 @@ import { View, Text, TextInput, Pressable, Image, StyleSheet, Alert } from 'reac
 import { CommonActions } from '@react-navigation/native';
 import { auth } from '../services/firebaseConfig';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useAuth } from '../services/AuthContext';
+import Spinner from '../Components/Spinner';
 
 import { GOOGLE_CLIENT_ID } from '@env';
 
@@ -14,14 +16,20 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-  const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Home' }] }));
-      })
-      .catch((error) => {
-        Alert.alert("Login Failed", error.message);
-      });
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const { signIn } = useAuth();
+
+
+  const handleLogin = async () => {
+    setIsLoggingIn(true);
+    try {
+      await signIn(email, password);
+      // Navigation will be handled by the AuthContext listener
+    } catch (error) {
+      Alert.alert("Login Failed", error.message);
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   return (
@@ -40,38 +48,48 @@ export default function LoginScreen({ navigation }) {
 
       <View style={styles.loginForm}>
         <Text style={styles.title}>Sign in</Text>
-        <View style={styles.inputContainer}>
-          <Icon name="email" size={20} color="#A9A9A9" />
-          <TextInput
-            style={styles.input}
-            placeholder="abc@email.com"
-            value={email}
-            onChangeText={setEmail}
-            textContentType="emailAddress"
-          />
-        </View>
-        <View style={styles.inputContainer}>
-          <Icon name="lock" size={20} color="#A9A9A9" />
-          <TextInput
-            style={styles.input}
-            placeholder="Your password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!passwordVisible}
-            textContentType="password"
-          />
-          <Pressable onPress={() => setPasswordVisible(!passwordVisible)}>
-            <Icon name={passwordVisible ? "visibility-off" : "visibility"} size={20} color="#A9A9A9" />
-          </Pressable>
-        </View>
-        <View style={styles.row}>
-          <Pressable onPress={() => Alert.alert('Forgot Password?', 'This functionality is not implemented yet.')}>
-            <Text style={styles.forgotPassword}>Forgot Password?</Text>
-          </Pressable>
-        </View>
-        <Pressable style={styles.signInButton} onPress={handleLogin}>
-          <Text style={styles.signInButtonText}>SIGN IN</Text>
-        </Pressable>
+
+        {isLoggingIn ? (
+          <View style={styles.spinnerContainer}>
+            <Spinner />
+          </View>
+        ) : (
+          <>
+            <View style={styles.inputContainer}>
+              <Icon name="email" size={20} color="#A9A9A9" />
+              <TextInput
+                style={styles.input}
+                placeholder="abc@email.com"
+                value={email}
+                onChangeText={setEmail}
+                textContentType="emailAddress"
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Icon name="lock" size={20} color="#A9A9A9" />
+              <TextInput
+                style={styles.input}
+                placeholder="Your password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!passwordVisible}
+                textContentType="password"
+              />
+              <Pressable onPress={() => setPasswordVisible(!passwordVisible)}>
+                <Icon name={passwordVisible ? "visibility-off" : "visibility"} size={20} color="#A9A9A9" />
+              </Pressable>
+            </View>
+            <View style={styles.row}>
+              <Pressable onPress={() => Alert.alert('Forgot Password?', 'This functionality is not implemented yet.')}>
+                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+              </Pressable>
+            </View>
+            <Pressable style={styles.signInButton} onPress={handleLogin}>
+              <Text style={styles.signInButtonText}>SIGN IN</Text>
+            </Pressable>
+          </>
+        )}
+
       </View>
 
       <Text style={styles.orText}>OR</Text>
@@ -208,5 +226,10 @@ const styles = StyleSheet.create({
     top: '7%',
     left: 20,
     zIndex: 10,
+  },
+  spinnerContainer: {
+    height: 200, // Adjust this value to match the height of your form
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
