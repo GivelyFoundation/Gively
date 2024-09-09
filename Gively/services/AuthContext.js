@@ -41,10 +41,17 @@ export const AuthProvider = ({ children }) => {
 
     const signOut = async () => {
         try {
+            setLoading(true);
             await firebaseSignOut(auth);
-            setUser(null); // Optionally reset user state
+            setUser(null);
+            setUserData(null);
+            setIsSigningUp(false);
+            console.log("User signed out successfully");
         } catch (error) {
             console.error("Failed to sign out: ", error);
+            // Optionally, you can add error handling or user notification here
+        } finally {
+            setLoading(false);
         }
     };
 

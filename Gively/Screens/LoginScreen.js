@@ -26,6 +26,9 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <Pressable onPress={() => navigation.navigate('Splash')} style={styles.backButton}>
+        <Icon name="arrow-back" size={24} color="#000" />
+      </Pressable>
       <View style={styles.logoContainer}>
         <Image
           source={require('../assets/Images/logo-2.png')}
@@ -199,5 +202,11 @@ const styles = StyleSheet.create({
   },
   signUpLink: {
     color: '#1C5AA3',
+  },
+  backButton: {
+    position: 'absolute',
+    top: '7%',
+    left: 20,
+    zIndex: 10,
   },
 });

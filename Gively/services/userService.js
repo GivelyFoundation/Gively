@@ -1,4 +1,3 @@
-// services/userService.js
 import { firestore } from './firebaseConfig'; // Adjust the path according to your project structure
 import { collection, query, where, getDocs } from 'firebase/firestore';
 
