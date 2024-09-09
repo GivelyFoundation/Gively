@@ -6,6 +6,7 @@ import { auth } from '../services/firebaseConfig';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../services/AuthContext';
 import Spinner from '../Components/Spinner';
+import { getReadableErrorMessage } from '../utilities/firebaseAuthErrorHandler';
 
 import { GOOGLE_CLIENT_ID } from '@env';
 
@@ -32,7 +33,9 @@ export default function LoginScreen({ navigation }) {
       await signIn(email, password);
       // Navigation will be handled by the AuthContext listener
     } catch (error) {
-      Alert.alert("Login Failed", error.message);
+      const errorMessage = getReadableErrorMessage(error);
+      Alert.alert("Login Failed", errorMessage);
+      console.error('Login error:', error.code, error.message); // For debugging
       setIsLoggingIn(false);
     }
   };
