@@ -1,5 +1,5 @@
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, Image, StyleSheet, Alert } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import { auth } from '../services/firebaseConfig';
@@ -17,8 +17,14 @@ export default function LoginScreen({ navigation }) {
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, user, loading } = useAuth();
 
+  useEffect(() => {
+    if (user && !loading) {
+      setIsLoggingIn(false);
+      // Navigation will be handled by the AuthContext listener
+    }
+  }, [user, loading]);
 
   const handleLogin = async () => {
     setIsLoggingIn(true);
@@ -27,7 +33,6 @@ export default function LoginScreen({ navigation }) {
       // Navigation will be handled by the AuthContext listener
     } catch (error) {
       Alert.alert("Login Failed", error.message);
-    } finally {
       setIsLoggingIn(false);
     }
   };

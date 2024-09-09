@@ -45,6 +45,7 @@ export const AuthProvider = ({ children }) => {
             await signInWithEmailAndPassword(auth, email, password);             
         } catch (error) {
             console.error ("Sign in failed", error); 
+            throw error
         } finally {
             setLoading(false)            
         }

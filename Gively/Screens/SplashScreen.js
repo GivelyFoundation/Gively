@@ -17,11 +17,11 @@ export default function SplashScreen({ navigation }) {
       <Text style={styles.appName}>Gively</Text>
       </View>
 
-      {user ? (
+      {loading ? (
         <View style={styles.spinnerContainer}>
           <Spinner />
         </View>
-      ) : (
+      ) :  (
         <View style={styles.buttonContainer}>
           <Pressable style={[styles.button, styles.createAccountButton]} onPress={() => navigation.navigate('CreateAccount')}>
             <Text style={styles.createAccountButtonText}>CREATE ACCOUNT</Text>
@@ -30,7 +30,8 @@ export default function SplashScreen({ navigation }) {
             <Text style={styles.signInButtonText}>SIGN IN</Text>
           </Pressable>
         </View>
-      )}
+      ) }
+
 
       {/* <View style={styles.buttonContainer}>
         <Pressable style={[styles.button, styles.createAccountButton]} onPress={() => navigation.navigate('CreateAccount')}>
