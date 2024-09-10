@@ -1,33 +1,41 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity, Alert, Image, FlatList } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, FlatList, SafeAreaView, Dimensions } from 'react-native';
 import * as SMS from 'expo-sms';
 import Fuse from 'fuse.js';
-import styles from '../Styles.js/Styles';
+import { debounce } from 'lodash';
 import { FriendCard } from '../Components/FriendCard';
 import { fakeFriends } from '../MockData';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Vector icon for clear button
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
-export default function FriendsListScreen({ navigation }) {
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+export default function ConnectScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fuse = new Fuse(fakeFriends, {
     keys: ['name'],
-    threshold: 0.3, // Adjust to control the fuzziness
+    threshold: 0.3,
+    includeScore: true,
   });
 
-  const handleSearch = (text) => {
-    setSearchQuery(text);
-    if (text) {
-      const results = fuse.search(text);
-      setSearchResults(results.map(result => result.item));
-      setShowDropdown(true);
-    } else {
-      setShowDropdown(false);
-      setSearchResults([]);
-    }
-  };
+  const handleSearch = useCallback(
+    debounce((text) => {
+      setIsLoading(true);
+      if (text) {
+        const results = fuse.search(text);
+        setSearchResults(results.map(result => ({ ...result.item, score: result.score })));
+        setShowDropdown(true);
+      } else {
+        setShowDropdown(false);
+        setSearchResults([]);
+      }
+      setIsLoading(false);
+    }, 300),
+    []
+  );
 
   const clearSearch = () => {
     setSearchQuery('');
@@ -55,158 +63,186 @@ export default function FriendsListScreen({ navigation }) {
     }
   };
 
+  const renderSearchResult = ({ item }) => (
+    <TouchableOpacity
+      style={styles.dropdownItem}
+      onPress={() => {
+        Alert.alert('Selected', item.name);
+        clearSearch();
+      }}
+    >
+      <Text>{item.name}</Text>
+    </TouchableOpacity>
+  );
+
+  const renderFriendItem = ({ item }) => (
+    <View style={styles.friendCardContainer}>
+      <FriendCard friend={item} areFollow={item.areFollowing} />
+    </View>
+  );
+
   return (
-    <View style={[styles.page, friendStyles.container]}>
-      <View style={friendStyles.headerContainer}>
-        <Text style={[friendStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Connect</Text>
-      </View>
-      <View style={friendStyles.searchBoxContainer}>
-        <TextInput
-          style={friendStyles.searchBox}
-          placeholder="Search..."
-          onChangeText={handleSearch}
-          value={searchQuery}
-        />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity style={friendStyles.clearButton} onPress={clearSearch}>
-            <Icon name="close" size={16} color="#A9A9A9" />
-          </TouchableOpacity>
-        )}
-      </View>
-      {showDropdown && (
-        <View style={friendStyles.dropdown}>
-          {searchResults.length > 0 ? (
-            <FlatList
-              data={searchResults}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => Alert.alert('Selected', item.name)}>
-                  <Text style={friendStyles.dropdownItem}>{item.name}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          ) : (
-            <Text style={friendStyles.noResultsText}>No matching users found</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerText}>Connect</Text>
+        </View>
+        <View style={styles.searchBoxContainer}>
+          <TextInput
+            style={styles.searchBox}
+            placeholder="Search..."
+            onChangeText={(text) => {
+              setSearchQuery(text);
+              handleSearch(text);
+            }}
+            value={searchQuery}
+            accessibilityLabel="Search for friends"
+            accessibilityRole="search"
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity style={styles.clearButton} onPress={clearSearch}>
+              <Icon name="close" size={16} color="#A9A9A9" />
+            </TouchableOpacity>
           )}
         </View>
-      )}
-      <ScrollView>
-        <TouchableOpacity style={friendStyles.inviteFriendsButton} onPress={handleInviteFriends}>
-          <Text style={[friendStyles.inviteFriendsButtonText, { fontFamily: 'Montserrat-Bold' }]}>
-            Invite Friends From Contacts
-          </Text>
-        </TouchableOpacity>
-        <Text style={[friendStyles.title, { fontFamily: 'Montserrat-Bold' }]}>People You May Know</Text>
-        <ScrollView>
-          {fakeFriends.map(friend => (
-            <FriendCard key={friend.id} friend={friend} areFollow={friend.areFollowing} />
-          ))}
-        </ScrollView>
-        <View style={friendStyles.spacer} />
-      </ScrollView>
-    </View>
+        {isLoading && <Text style={styles.loadingText}>Searching...</Text>}
+        {showDropdown && (
+          <View style={styles.dropdownContainer}>
+            <FlatList
+              data={searchResults}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderSearchResult}
+              maxToRenderPerBatch={10}
+              initialNumToRender={10}
+              ListEmptyComponent={<Text style={styles.noResultsText}>No matching users found</Text>}
+            />
+          </View>
+        )}
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>People You May Know</Text>
+          <TouchableOpacity style={styles.inviteFriendsButton} onPress={handleInviteFriends}>
+            <Text style={styles.inviteFriendsButtonText}>
+              Invite Friends
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <FlatList
+          data={fakeFriends}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderFriendItem}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 
-const friendStyles = StyleSheet.create({
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: SCREEN_WIDTH * 0.03, // Reduced horizontal padding
+    paddingTop: SCREEN_HEIGHT * 0.02,
+  },
   headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 10,
+    marginBottom: SCREEN_HEIGHT * 0.02,
   },
   headerText: {
-    fontSize: 24,
+    fontSize: SCREEN_WIDTH * 0.06,
+    fontFamily: 'Montserrat-Medium',
   },
   searchBoxContainer: {
     position: 'relative',
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 20,
+    marginBottom: SCREEN_HEIGHT * 0.02,
   },
   searchBox: {
-    flex: 1,
-    height: 40,
+    height: SCREEN_HEIGHT * 0.05,
     borderColor: '#E4DFDF',
     borderWidth: 1,
     borderRadius: 12,
     backgroundColor: '#FFF',
-    paddingHorizontal: 20,
+    paddingHorizontal: SCREEN_WIDTH * 0.05,
+    fontFamily: 'Montserrat-Regular',
+    fontSize: SCREEN_WIDTH * 0.04,
   },
   clearButton: {
     position: 'absolute',
-    right: 10,
-    padding: 5,
+    right: SCREEN_WIDTH * 0.02,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: SCREEN_WIDTH * 0.02,
   },
-  dropdown: {
+  dropdownContainer: {
+    position: 'absolute',
+    top: SCREEN_HEIGHT * 0.13,
+    left: SCREEN_WIDTH * 0.03,
+    right: SCREEN_WIDTH * 0.03,
+    zIndex: 1,
     backgroundColor: '#FFF',
-    borderRadius: 10,
-    marginHorizontal: 20,
-    padding: 10,
-    elevation: 5, // Shadow for Android
-    shadowColor: '#000', // Shadow for iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    maxHeight: 200, // Limit the height
+    borderRadius: 12,
+    borderColor: '#E4DFDF',
+    borderWidth: 1,
+    maxHeight: SCREEN_HEIGHT * 0.3,
   },
   dropdownItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingVertical: SCREEN_HEIGHT * 0.015,
+    paddingHorizontal: SCREEN_WIDTH * 0.04,
     borderBottomColor: '#E4DFDF',
     borderBottomWidth: 1,
   },
   noResultsText: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingVertical: SCREEN_HEIGHT * 0.015,
+    paddingHorizontal: SCREEN_WIDTH * 0.04,
     color: '#A9A9A9',
+    fontFamily: 'Montserrat-Regular',
+    fontSize: SCREEN_WIDTH * 0.035,
   },
-  horizontalLine: {
-    height: 1, // Line thickness
-    backgroundColor: '#cccccc', // Line color, light grey
-    marginTop: 20,
-    marginBottom: 5,
-    marginHorizontal: 30,
-  },
-  container: {
-    paddingHorizontal: 10,
-    paddingVertical: 30,
-    marginTop: 40,
+  titleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SCREEN_HEIGHT * 0.02,
   },
   title: {
-    fontSize: 16,
-    paddingLeft: 20,
-    paddingTop: 20,
-    paddingBottom: 20,
+    fontSize: SCREEN_WIDTH * 0.045,
+    fontFamily: 'Montserrat-Bold',
   },
   inviteFriendsButton: {
     backgroundColor: '#3FC032',
-    padding: 4,
-    marginHorizontal: 20,
-    alignItems: 'center',
+    paddingVertical: SCREEN_HEIGHT * 0.01,
+    paddingHorizontal: SCREEN_WIDTH * 0.03,
     borderRadius: 10,
-    elevation: 5, // Adds shadow for Android
-    shadowColor: '#000', // Adds shadow for iOS
+    elevation: 5,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 2,
   },
   inviteFriendsButtonText: {
-    fontSize: 18,
+    fontSize: SCREEN_WIDTH * 0.035,
     color: '#fff',
     fontWeight: 'bold',
+    fontFamily: 'Montserrat-Bold',
   },
-  noFriends: {
-    width: 350,
-    height: 350,
-    alignSelf: 'center'
+  loadingText: {
+    textAlign: 'center',
+    marginTop: SCREEN_HEIGHT * 0.01,
+    color: '#666',
+    fontFamily: 'Montserrat-Regular',
+    fontSize: SCREEN_WIDTH * 0.035,
   },
-  spacer: {
-    height: 200
+  friendCardContainer: {
+    width: '100%', // Make the friend card container full width
+    marginBottom: SCREEN_HEIGHT * 0.01, // Add some vertical spacing between cards
   },
-  addFriends: {
-    alignSelf: 'center',
-    fontSize: 18
-  }
 });
