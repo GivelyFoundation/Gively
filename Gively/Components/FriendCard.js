@@ -65,13 +65,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#3FC032',
         paddingHorizontal: 15,
         paddingVertical: 8,
-        borderRadius: 5,
+        borderRadius: 10,
     },
     followButton: {
         backgroundColor: '#3FC032',
         paddingHorizontal: 15,
         paddingVertical: 8,
-        borderRadius: 5,
+        borderRadius: 10,
     },
     alreadyFollowingbutton: {
         backgroundColor: '#1C5AA3',

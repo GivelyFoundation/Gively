@@ -1,55 +1,68 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import FeedbackForm from '../Components/FeedbackForm';
 
 const ContactUsScreen = () => {
-  // Function to handle email press
   const handleEmailPress = () => {
     const email = "support@gively.com";
     Linking.openURL(`mailto:${email}`);
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={[styles.header, {fontFamily: 'Montserrat-Medium'}]}>Contact Us</Text>
-      <TouchableOpacity style={styles.button} onPress={handleEmailPress}>
-        <Text style={[styles.buttonText,{fontFamily: 'Montserrat-Medium'}]}>Email Us: support@gively.com</Text>
-      </TouchableOpacity>
-    </View>
+    <SafeAreaView edges={['bottom']} style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Our Email</Text>
+          <Text style={styles.emailText}>support@gively.com</Text>
+          <TouchableOpacity style={styles.button} onPress={handleEmailPress}>
+            <Text style={styles.buttonText}>Send us an email</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>Feedback Form</Text>
+          <FeedbackForm />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
+    backgroundColor: '#fff',
+  },
+  scrollContent: {
+    flexGrow: 1,
     padding: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff'
   },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+  section: {
+    marginBottom: 30,
   },
-  infoContainer: {
-    marginBottom: 20,
+  sectionHeader: {
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 10,
+    fontFamily: 'Montserrat-Medium',
   },
-  infoText: {
+  emailText: {
     fontSize: 16,
-    color: '#333',
+    marginBottom: 10,
+    fontFamily: 'Montserrat-Regular',
   },
   button: {
     backgroundColor: '#3FC032',
     padding: 15,
     borderRadius: 10,
-    marginBottom: 10,
-    width: '100%',
+    alignItems: 'center',
   },
   buttonText: {
     color: 'white',
     fontSize: 16,
-    textAlign: 'center',
-  }
+    fontFamily: 'Montserrat-Medium',
+  },
 });
 
 export default ContactUsScreen;
