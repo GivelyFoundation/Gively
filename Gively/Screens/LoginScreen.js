@@ -23,7 +23,6 @@ export default function LoginScreen({ navigation }) {
   useEffect(() => {
     if (user && !loading) {
       setIsLoggingIn(false);
-      // Navigation will be handled by the AuthContext listener
     }
   }, [user, loading]);
 
