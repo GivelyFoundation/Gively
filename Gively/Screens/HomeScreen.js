@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator, TouchableOpacity, Modal } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import SwitchSelector from "react-native-switch-selector";
 import styles from '../Styles.js/Styles';
 import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
-import { VolunteerCard } from '../Components/VolunteerCard'; // Import VolunteerCard
+import { VolunteerCard } from '../Components/VolunteerCard';
 import { collection, query, getDocs, limit, startAfter, orderBy, where } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig';
 import { useAuth } from '../services/AuthContext';
@@ -26,7 +27,7 @@ const ForYouFeed = ({ posts, refreshing, onRefresh, fetchMorePosts }) => {
         return <PetitionCard key={item.id} data={item} />;
       case 'gofundme':
         return <GoFundMeCard key={item.id} data={item} />;
-      case 'volunteer': // Add case for volunteer
+      case 'volunteer':
         return <VolunteerCard key={item.id} data={item} />;
       case 'firstTime':
         return <FirstTimeDonationCard key={item.id} data={item} />;
@@ -68,7 +69,7 @@ const FriendsFeed = ({ posts, refreshing, onRefresh, fetchMorePosts }) => {
         return <PetitionCard key={item.id} data={item} />;
       case 'gofundme':
         return <GoFundMeCard key={item.id} data={item} />;
-      case 'volunteer': // Add case for volunteer
+      case 'volunteer':
         return <VolunteerCard key={item.id} data={item} />;
       case 'firstTime':
         return <FirstTimeDonationCard key={item.id} data={item} />;
@@ -108,6 +109,7 @@ export default function HomeFeedScreen({ navigation }) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadingMoreFriends, setLoadingMoreFriends] = useState(false);
   const [followedUsers, setFollowedUsers] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const { userData } = useAuth();
 
   const handleTabPress = (tab) => {
@@ -245,6 +247,10 @@ export default function HomeFeedScreen({ navigation }) {
     }
   };
 
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+  };
+
   useEffect(() => {
     fetchFollowedUsers();
   }, [userData]);
@@ -301,6 +307,58 @@ export default function HomeFeedScreen({ navigation }) {
       }
       {loadingMore && <ActivityIndicator size="large" color="#3FC032" />}
       {loadingMoreFriends && <ActivityIndicator size="large" color="#3FC032" />}
+
+      <TouchableOpacity
+        style={homeStyles.floatingButton}
+        onPress={toggleModal}
+      >
+        <Icon name="plus" size={24} color="#fff" />
+      </TouchableOpacity>
+
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={isModalVisible}
+        onRequestClose={toggleModal}
+      >
+        <View style={homeStyles.modalOverlay}>
+          <View style={homeStyles.modalContent}>
+            <TouchableOpacity
+              style={discoverStyles.petitionButton}
+              onPress={() => { 
+                toggleModal();
+                navigation.navigate('Petition');
+              }}
+            >
+              <Text style={[discoverStyles.petitionButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A Change.Org Petition</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={discoverStyles.goFundMeButton}
+              onPress={() => { 
+                toggleModal();
+                navigation.navigate('GoFundMe');
+              }}
+            >
+              <Text style={[discoverStyles.goFundMeButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A GoFundMe</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={discoverStyles.petitionButton}
+              onPress={() => { 
+                toggleModal();
+                navigation.navigate('VolunteerScreen');
+              }}
+            >
+              <Text style={[discoverStyles.petitionButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A Volunteer Opportunity</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={homeStyles.closeModalButton}
+              onPress={toggleModal}
+            >
+              <Text style={homeStyles.closeModalText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -311,7 +369,83 @@ const homeStyles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20
   },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#3FC032',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeModalButton: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#3FC032',
+    borderRadius: 5,
+  },
+  closeModalText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
 });
+
+const discoverStyles = StyleSheet.create({
+  petitionButton: {
+    borderRadius: 12,
+    borderColor: '#1C5AA3',
+    borderWidth: 1,
+    height: 36,
+    width: '94%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginBottom: 10,
+  },
+  petitionButtonText: {
+    color: '#1C5AA3',
+    fontSize: 16,
+    opacity: 0.9,
+  },
+  goFundMeButton: {
+    borderRadius: 12,
+    borderColor: '#3FC032',
+    borderWidth: 1,
+    height: 36,
+    width: '94%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    marginBottom: 10,
+  },
+  goFundMeButtonText: {
+    color: '#3FC032',
+    fontSize: 16,
+    opacity: 0.9,
+  },
+});
+
 
 function serializeData(data) {
   const serializedData = {};

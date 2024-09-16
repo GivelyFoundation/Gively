@@ -210,7 +210,7 @@ function RootNavigator() {
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
           <Stack.Screen name="UserScreen" component={UserScreen} /> 
           <Stack.Screen name="CharityDetailedScreen" component={CharityDetailedScreen} /> 
-          <Stack.Screen name= "Nofications" component={NotificationsScreen}/>
+          <Stack.Screen name= "Notifications" component={NotificationsScreen}/>
           <Stack.Screen name="SinglePostScreen" component={SinglePostScreen}/>
           <Stack.Screen name="LearningScreen" component={LearningScreen} />
           <Stack.Screen name="BlogPostScreen" component={BlogPostScreen} />

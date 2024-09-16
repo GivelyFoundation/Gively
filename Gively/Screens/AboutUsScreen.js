@@ -22,13 +22,13 @@ export default function AboutUsScreen({ navigation }) {
         name="Andy Abebaw"
         role="Co-founder & UI/UX Designer"
         profilePic={profilePicture}
-        bio="Andy brings his vast experience from various tech giants to lead the development of Gively..."
+        bio="Andy brings his vast experience from various tech giants to lead the development of Gively. He focuses on designing intuitive user interfaces and ensuring a seamless user experience. Andy's dedication to philanthropy and technology drives the innovative approach behind Gively, aiming to make charitable giving accessible and engaging for everyone. His journey through overcoming mental health challenges has inspired him to create tools that empower others to make a positive impact in the world."
       />
       <DeveloperProfile
         name="Ben Lee"
         role="Co-founder & Lead Developer"
         profilePic={profilePicture}
-        bio="Ben's expertise in design and user experience helps in making Gively a visually appealing and easy-to-use platform..."
+        bio="Ben's expertise in design and user experience helps in making Gively a visually appealing and easy-to-use platform. He leads the development team, ensuring that the app is not only functional but also enjoyable to use. Ben's background in design and development fuels his passion for creating intuitive and impactful solutions that enhance the user experience and make charitable giving more accessible."
       />
     </ScrollView>
   );
@@ -92,10 +92,10 @@ const DeveloperProfile = ({ name, role, profilePic, bio }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20
+    padding: 20,
   },
   page: {
-    backgroundColor: '#fff', 
+    backgroundColor: '#fff'
   },
   headerText: {
     fontSize: 22,

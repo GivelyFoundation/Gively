@@ -8,7 +8,7 @@ import { useAuth } from '../services/AuthContext';
 import Spinner from '../Components/Spinner';
 import { getReadableErrorMessage } from '../utilities/firebaseAuthErrorHandler';
 
-import { GOOGLE_CLIENT_ID } from '@env';
+//import { GOOGLE_CLIENT_ID } from '@env';
 
 
 
