@@ -1,7 +1,11 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet, Image } from 'react-native';
+import { useAuth } from '../services/AuthContext';
+import Spinner from '../Components/Spinner';
 
 export default function SplashScreen({ navigation }) {
+  const { user, loading } = useAuth()
+
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
@@ -12,14 +16,33 @@ export default function SplashScreen({ navigation }) {
       />
       <Text style={styles.appName}>Gively</Text>
       </View>
-      <View style={styles.buttonContainer}>
+
+      {loading ? (
+        <View style={styles.spinnerContainer}>
+          <Spinner />
+        </View>
+      ) :  (
+        <View style={styles.buttonContainer}>
+          <Pressable style={[styles.button, styles.createAccountButton]} onPress={() => navigation.navigate('CreateAccount')}>
+            <Text style={styles.createAccountButtonText}>CREATE ACCOUNT</Text>
+          </Pressable>
+          <Pressable style={[styles.button, styles.signInButton]} onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.signInButtonText}>SIGN IN</Text>
+          </Pressable>
+        </View>
+      ) }
+
+
+      {/* <View style={styles.buttonContainer}>
         <Pressable style={[styles.button, styles.createAccountButton]} onPress={() => navigation.navigate('CreateAccount')}>
           <Text style={styles.createAccountButtonText}>CREATE ACCOUNT</Text>
         </Pressable>
         <Pressable style={[styles.button, styles.signInButton]} onPress={() => navigation.navigate('Login')}>
           <Text style={styles.signInButtonText}>SIGN IN</Text>
         </Pressable>
-      </View>
+      </View> */}
+
+
     </View>
   );
 }
@@ -76,5 +99,10 @@ const styles = StyleSheet.create({
   signInButtonText: {
     color: '#1C5AA3',
     fontSize: 16,
+  },
+  spinnerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

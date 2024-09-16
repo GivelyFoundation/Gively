@@ -152,19 +152,24 @@ function shouldShowTabBar(route) {
 
 //Home page main drawer sign out handler
 function CustomDrawerContent(props) {
-  const { signOut } = useAuth(); // Destructure signOut from the context
+  const { signOut, loading } = useAuth(); 
 
   const handleSignOut = async () => {
+    if (loading) return; // Prevent multiple sign-out attempts
+
     await signOut();
     Alert.alert("Signed Out", "You have been successfully signed out.");
-    props.navigation.navigate('Splash'); // Navigate to splash screen after sign-out
   };
 
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItemList {...props} />
       <View style={{ padding: 20 }}>
-        <Button title="Sign Out" onPress={handleSignOut} />
+      <Button 
+          title={loading ? "Signing Out..." : "Sign Out"} 
+          onPress={handleSignOut}
+          disabled={loading}
+        />
       </View>
     </DrawerContentScrollView>
   );

@@ -1,9 +1,12 @@
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, Image, StyleSheet, Alert } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import { auth } from '../services/firebaseConfig';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useAuth } from '../services/AuthContext';
+import Spinner from '../Components/Spinner';
+import { getReadableErrorMessage } from '../utilities/firebaseAuthErrorHandler';
 
 //import { GOOGLE_CLIENT_ID } from '@env';
 
@@ -14,18 +17,33 @@ export default function LoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-  const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // navigation.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Home' }] }));
-      })
-      .catch((error) => {
-        Alert.alert("Login Failed", error.message);
-      });
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const { signIn, user, loading } = useAuth();
+
+  useEffect(() => {
+    if (user && !loading) {
+      setIsLoggingIn(false);
+    }
+  }, [user, loading]);
+
+  const handleLogin = async () => {
+    setIsLoggingIn(true);
+    try {
+      await signIn(email, password);
+      // Navigation will be handled by the AuthContext listener
+    } catch (error) {
+      const errorMessage = getReadableErrorMessage(error);
+      Alert.alert("Login Failed", errorMessage);
+      console.error('Login error:', error.code, error.message); // For debugging
+      setIsLoggingIn(false);
+    }
   };
 
   return (
     <View style={styles.container}>
+      <Pressable onPress={() => navigation.navigate('Splash')} style={styles.backButton}>
+        <Icon name="arrow-back" size={24} color="#000" />
+      </Pressable>
       <View style={styles.logoContainer}>
         <Image
           source={require('../assets/Images/logo-2.png')}
@@ -37,38 +55,48 @@ export default function LoginScreen({ navigation }) {
 
       <View style={styles.loginForm}>
         <Text style={styles.title}>Sign in</Text>
-        <View style={styles.inputContainer}>
-          <Icon name="email" size={20} color="#A9A9A9" />
-          <TextInput
-            style={styles.input}
-            placeholder="abc@email.com"
-            value={email}
-            onChangeText={setEmail}
-            textContentType="emailAddress"
-          />
-        </View>
-        <View style={styles.inputContainer}>
-          <Icon name="lock" size={20} color="#A9A9A9" />
-          <TextInput
-            style={styles.input}
-            placeholder="Your password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!passwordVisible}
-            textContentType="password"
-          />
-          <Pressable onPress={() => setPasswordVisible(!passwordVisible)}>
-            <Icon name={passwordVisible ? "visibility-off" : "visibility"} size={20} color="#A9A9A9" />
-          </Pressable>
-        </View>
-        <View style={styles.row}>
-          <Pressable onPress={() => Alert.alert('Forgot Password?', 'This functionality is not implemented yet.')}>
-            <Text style={styles.forgotPassword}>Forgot Password?</Text>
-          </Pressable>
-        </View>
-        <Pressable style={styles.signInButton} onPress={handleLogin}>
-          <Text style={styles.signInButtonText}>SIGN IN</Text>
-        </Pressable>
+
+        {isLoggingIn ? (
+          <View style={styles.spinnerContainer}>
+            <Spinner />
+          </View>
+        ) : (
+          <>
+            <View style={styles.inputContainer}>
+              <Icon name="email" size={20} color="#A9A9A9" />
+              <TextInput
+                style={styles.input}
+                placeholder="abc@email.com"
+                value={email}
+                onChangeText={setEmail}
+                textContentType="emailAddress"
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Icon name="lock" size={20} color="#A9A9A9" />
+              <TextInput
+                style={styles.input}
+                placeholder="Your password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!passwordVisible}
+                textContentType="password"
+              />
+              <Pressable onPress={() => setPasswordVisible(!passwordVisible)}>
+                <Icon name={passwordVisible ? "visibility-off" : "visibility"} size={20} color="#A9A9A9" />
+              </Pressable>
+            </View>
+            <View style={styles.row}>
+              <Pressable onPress={() => Alert.alert('Forgot Password?', 'This functionality is not implemented yet.')}>
+                <Text style={styles.forgotPassword}>Forgot Password?</Text>
+              </Pressable>
+            </View>
+            <Pressable style={styles.signInButton} onPress={handleLogin}>
+              <Text style={styles.signInButtonText}>SIGN IN</Text>
+            </Pressable>
+          </>
+        )}
+
       </View>
 
       <Text style={styles.orText}>OR</Text>
@@ -199,5 +227,16 @@ const styles = StyleSheet.create({
   },
   signUpLink: {
     color: '#1C5AA3',
+  },
+  backButton: {
+    position: 'absolute',
+    top: '7%',
+    left: 20,
+    zIndex: 10,
+  },
+  spinnerContainer: {
+    height: 200, // Adjust this value to match the height of your form
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

@@ -5,6 +5,7 @@ import { useAuth } from '../services/AuthContext';
 import { auth, firestore } from '../services/firebaseConfig';
 import { doc, setDoc } from 'firebase/firestore';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { getReadableErrorMessage } from '../utilities/firebaseAuthErrorHandler';
 
 export default function SignUpForm({ navigation, userData, nextStep, handleChange, accountCreated, setAccountCreated }) {
   const { startSignUp, endSignUp } = useAuth();
@@ -41,7 +42,8 @@ export default function SignUpForm({ navigation, userData, nextStep, handleChang
       setAccountCreated(true);
       nextStep(); // Move to the next step in the account creation process
     } catch (error) {
-      Alert.alert('Signup Failed', error.message);
+      const errorMessage = getReadableErrorMessage(error)
+      Alert.alert('Signup Failed', errorMessage);
     }
   };
 
