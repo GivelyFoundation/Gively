@@ -29,7 +29,7 @@ import SettingScreen from './Screens/SettingScreen'
 import DonationHistoryScreen from './Screens/DonationHistoryScreen';
 import PetitionScreen from './Screens/PetitionScreen';
 import GoFundMeScreen from './Screens/GoFundMeScreen';
-import FavoriteScreen from './Screens/FavoritesScareen';
+import FavoriteScreen from './Screens/FavoritesScreen';
 import EditProfileScreen from './Screens/EditProfileScreen';
 import UserScreen from './Screens/UserScreen';
 import CharityDetailedScreen from './Screens/ChairtyDetailedScreen';
