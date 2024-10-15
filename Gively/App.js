@@ -1,6 +1,20 @@
 import React from 'react';
 import { View, Alert, Button, Image, TouchableOpacity, Text } from 'react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+
+// assets
+import { useFonts } from 'expo-font';
+import homeIcon from './assets/Icons/Home.png'
+import discoverIcon from './assets/Icons/Discover.png'
+import friendsIcon from './assets/Icons/Friends.png'
+import profileIcon from './assets/Icons/Profile.png'
+import notificationIcon from './assets/Icons/notificationIcon.png'
+
+// screen imports
 import CreateAccountScreen from './Screens/CreateAccountScreen';
 import HomeScreen from './Screens/HomeScreen'
 import LoginScreen from './Screens/LoginScreen'
@@ -26,63 +40,39 @@ import FollowersList from './Screens/FollowersList';
 import FollowingList from './Screens/FollowingList';
 import CustomHeader from './Components/CustomHeader';
 import VolunteerScreen from './Screens/VolunteerScreen';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
-import { useFonts } from 'expo-font';
-import homeIcon from './assets/Icons/Home.png'
-import discoverIcon from './assets/Icons/Discover.png'
-import friendsIcon from './assets/Icons/Friends.png'
-import profileIcon from './assets/Icons/Profile.png'
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCJ0lvNYPed98Piop1WCIjDaI99YjF8l-4",
-  authDomain: "gively-1c014.firebaseapp.com",
-  databaseURL: "https://gively-1c014-default-rtdb.firebaseio.com",
-  projectId: "gively-1c014",
-  storageBucket: "gively-1c014.appspot.com",
-  messagingSenderId: "479338294390",
-  appId: "1:479338294390:web:233e87af7ab30144184357",
-  measurementId: "G-R5LZD333FY"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-export { db };
-
-import notificationIcon from './assets/Icons/notificationIcon.png'
-
-import { AuthProvider, useAuth } from './services/AuthContext';
 import NotificationsScreen from './Screens/NotificationsScreen';
+
+// custom imports
+import { AuthProvider, useAuth } from './services/AuthContext';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 
 //Core App Pages Tab Navigator
-function MainApp() {
+function MainTabs() {
   return (
     <Tab.Navigator
-      initialRouteName="Home"
+      initialRouteName="HomeDrawer"
       screenOptions={({ route }) => ({
         headerShown: false,
+        tabBarActiveTintColor: '#3FC032',
+        tabBarInactiveTintColor: '#8484A9',
         tabBarStyle: {
           display: shouldShowTabBar(route) ? 'flex' : 'none',
           borderTopWidth: 0
+        },
+        tabBarLabelStyle: { 
+          fontSize: 12, 
+          fontFamily: 'Montserrat-Medium' 
         }
       })}
-      tabBarOptions={{
-        activeTintColor: '#3FC032',
-      }}
     >
       <Tab.Screen
-        name="Home"
+        name="HomeDrawer"
         component={HomeScreenDrawer}
         options={{
+          tabBarLabel: 'Home',
           tabBarLabelStyle: { fontSize: 12, fontFamily: 'Montserrat-Medium' },
           tabBarIcon: ({ size, focused }) => {
             return (
@@ -142,7 +132,7 @@ function MainApp() {
 //TO DO: Currently have "Home" and  "Home "(with a space) as 2 different page titles, need to find work around
 function shouldShowTabBar(route) {
   // Get the current route name
-  const routeName = getFocusedRouteNameFromRoute(route) ?? 'Home ';
+  const routeName = getFocusedRouteNameFromRoute(route) ?? 'HomeScreen';
 
   // List of screens where you want to hide the tab bar
   const hideTabBarScreens = ['About Us', 'Contact Us', 'Help & FAQs']; // Add more screen names as needed
@@ -177,12 +167,13 @@ function CustomDrawerContent(props) {
 
 function HomeScreenDrawer() {
   return (
-    <Drawer.Navigator initialRouteName="Home" drawerContent={(props) => <CustomDrawerContent {...props} />}>
+    <Drawer.Navigator initialRouteName="HomeScreen" drawerContent={(props) => <CustomDrawerContent {...props} />}>
       <Drawer.Screen 
-        name="Home" 
+        name="HomeScreen" 
         component={HomeScreen} 
         options={{ 
-          header: () => <CustomHeader /> 
+          header: () => <CustomHeader />,
+          title: 'Home'
         }} 
       />
       <Drawer.Screen name="Learning" component={LearningScreen} />
@@ -204,7 +195,7 @@ function RootNavigator() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user && !isSigningUp ? (
         <>
-          <Stack.Screen name="Home" component={MainApp} />
+          <Stack.Screen name="MainTabs" component={MainTabs} />
           <Stack.Screen name="Petition" component={PetitionScreen} />
           <Stack.Screen name="GoFundMe" component={GoFundMeScreen} />
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
