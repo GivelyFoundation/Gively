@@ -1,62 +1,80 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import { useAuth } from '../services/AuthContext';
-import { firestore } from '../services/firebaseConfig';
-import { collection, doc, getDoc, getDocs, query, where, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
-import { cardStyles } from '../stylesfolder/cardStyles';
-import { formatDate } from '../utilities/dateFormatter';
+import { firebaseService } from '../services/firebaseService';
+import { cardStyles } from '../styles/cardStyles';
+import UserHeader from './UserHeader';
+import LikeButton from './LikeButton';
 
-const likeIcon = require('../assets/Icons/heart.png');
-const profilePicture = require('../assets/Images/profileDefault.png');
 
-const DonationCard = ({ data }) => {
-  const { userData, loading } = useAuth();
+// Memoize child components
+const MemoizedUserHeader = memo(UserHeader);
+const MemoizedLikeButton = memo(LikeButton);
+
+// Memoize the OthersElement component
+const OthersElement = memo(({ otherDonationUsers }) => {
+  if (otherDonationUsers.length === 0) return null;
+
+  const firstDonor = otherDonationUsers[0];
+  const parts = firstDonor.split(' ');
+
+  if (otherDonationUsers.length === 1) {
+    return (
+      <View style={styles.row}>
+        <Image source={profilePicture} style={styles.profilePicture} />
+        <Text style={{ fontFamily: 'Montserrat-Medium' }}>
+          <Text style={{ fontFamily: 'Montserrat-Bold' }}>{parts[0]}</Text> {parts.slice(1).join(' ')} Donated too!
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.row}>
+      <Image source={profilePicture} style={styles.profilePicture} />
+      <Text style={{ fontFamily: 'Montserrat-Medium' }}>
+        <Text style={{ fontFamily: 'Montserrat-Bold' }}>{firstDonor}</Text> and {otherDonationUsers.length - 1} others Donated!
+      </Text>
+    </View>
+  );
+});
+
+const DonationCard = memo(({ data }) => {
+  const { userData } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(data.Likers.length);
-  const [postId, setPostId] = useState("");
-
-  useEffect(() => {
-    getPostDocumentIdById(data.id);
-  }, [data.id]);
+  const [likesCount, setLikesCount] = useState((data?.Likers || []).length);
 
   useEffect(() => {
     const checkIfLiked = async () => {
-      if (userData && postId) {
-        const liked = await hasUserLikedPost(postId, userData.uid);
-        setIsLiked(liked);
+      if (userData?.uid && data?.id) {
+        try {
+          const liked = await firebaseService.hasUserLikedPost(data.id, userData.uid);
+          setIsLiked(liked);
+        } catch (error) {
+          console.error('Error checking like status:', error);
+          setIsLiked(false);
+        }
       }
     };
-    if (!loading && postId) {
-      checkIfLiked();
-    }
-  }, [userData, postId, loading]);
+    checkIfLiked();
+  }, [userData?.uid, data?.id]);
 
-  const getPostDocumentIdById = async (id) => {
-    const postsRef = collection(firestore, "Posts");
-    const q = query(postsRef, where('id', '==', id));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-      querySnapshot.forEach(doc => {
-        setPostId(doc.id);
-      });
-    }
-  };
-
-  const handleLikeToggle = async () => {
+  const handleLikeToggle = useCallback(async () => {
     try {
-      if (!userData) {
-        console.log("User data is not loaded yet");
+      if (!userData?.uid || !data?.id) {
+        console.log("Required data not available");
         return;
       }
 
       if (isLiked) {
-        await unlikePost(postId, userData.uid);
+        await firebaseService.unlikePost(data.id, userData.uid);
+        await firebaseService.removeNotification(data.uid, data.id + userData.uid);
         setIsLiked(false);
-        setLikesCount(likesCount - 1);
+        setLikesCount(prev => Math.max(0, prev - 1));
       } else {
-        await likePost(postId, userData.uid, userData.username);
+        await firebaseService.likePost(data.id, userData.uid, userData.username, data.uid);
         setIsLiked(true);
-        setLikesCount(likesCount + 1);
+        setLikesCount(prev => prev + 1);
       }
     } catch (error) {
       console.error("Failed to like/unlike post: ", error);
@@ -66,65 +84,49 @@ const DonationCard = ({ data }) => {
         [{ text: "OK" }]
       );
     }
+  }, [isLiked, userData?.uid, userData?.username, data?.id, data?.uid]);
+
+  const user = data.posterData || {
+    displayName: 'Deleted User',
+    profilePicture: null,
+    username: 'deleted_user'
   };
 
-  const renderOthersElement = () => {
-    const firstDonor = data.otherDonationUsers[0];
-    switch (data.otherDonationUsers.length) {
-      case 0:
-        return null;
-      case 1:
-        const parts = firstDonor.split(' ');
-        return (
-          <View style={styles.row}>
-            <Image source={profilePicture} style={styles.profilePicture} />
-            <Text style={{ fontFamily: 'Montserrat-Medium' }}>
-              <Text style={{ fontFamily: 'Montserrat-Bold' }}>{parts[0]}</Text> {parts.slice(1).join(' ')} Donated too!
-            </Text>
-          </View>
-        );
-      default:
-        return (
-          <View style={styles.row}>
-            <Image source={profilePicture} style={styles.profilePicture} />
-            <Text style={{ fontFamily: 'Montserrat-Medium' }}>
-              <Text style={{ fontFamily: 'Montserrat-Bold' }}>{firstDonor}</Text> and {data.otherDonationUsers.length - 1} others Donated!
-            </Text>
-          </View>
-        );
-    }
-  };
+  if (!user) return null;
 
   return (
     <View style={cardStyles.card}>
-      <View style={cardStyles.header}>
-        <Image source={data.originalPosterProfileImage} style={cardStyles.profileImage} />
-        <View style={cardStyles.posterInfo}>
-          <Text style={cardStyles.posterName}>
-            <Text style={{ fontFamily: 'Montserrat-Bold' }}>{data.originalDonationPoster}</Text>
-            <Text style={{ fontFamily: 'Montserrat-Medium' }}> donated to </Text>
-            <Text style={{ fontFamily: 'Montserrat-Bold' }}>{data.charityName}</Text>
-          </Text>
-          <Text style={cardStyles.posterDate}>{formatDate(data.date)}</Text>
-        </View>
-      </View>
-
+      <MemoizedUserHeader 
+        user={user} 
+        date={data.date} 
+        action={`donated to ${data.charityName}`}
+      />
       <Text style={cardStyles.postText}>{data.postText}</Text>
-      <View style={cardStyles.footer}>
-        {renderOthersElement()}
-        <View style={styles.likesContainer}>
-          <TouchableOpacity style={styles.likesContainer} onPress={handleLikeToggle}>
-            <Image source={likeIcon} style={[styles.likeIcon, { tintColor: isLiked ? '#EB5757' : '#8484A9' }]} />
-            <Text style={[styles.likes, { fontFamily: 'Montserrat-Medium', color: isLiked ? '#EB5757' : '#8484A9' }]}>{likesCount}</Text>
-          </TouchableOpacity>
-        </View>
+      <View style={styles.footer}>
+        <OthersElement otherDonationUsers={data.otherDonationUsers || []} />
+        <MemoizedLikeButton 
+          isLiked={isLiked}
+          likesCount={likesCount}
+          onPress={handleLikeToggle}
+        />
         <TouchableOpacity style={cardStyles.button}>
           <Text style={cardStyles.buttonText}>Donate</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison function for memo
+  return (
+    prevProps.data.id === nextProps.data.id &&
+    prevProps.data.postText === nextProps.data.postText &&
+    prevProps.data.charityName === nextProps.data.charityName &&
+    prevProps.data.date === nextProps.data.date &&
+    prevProps.data.Likers?.length === nextProps.data.Likers?.length &&
+    prevProps.data.posterData?.username === nextProps.data.posterData?.username &&
+    prevProps.data.otherDonationUsers?.length === nextProps.data.otherDonationUsers?.length
+  );
+});
 
 const styles = StyleSheet.create({
   profilePicture: {
@@ -137,17 +139,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center'
   },
-  likesContainer: {
+  footer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  likeIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 5
-  },
-  likes: {
-    fontSize: 16
   },
 });
 

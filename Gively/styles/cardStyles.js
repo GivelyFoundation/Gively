@@ -25,6 +25,7 @@ export const cardStyles = StyleSheet.create({
   },
   posterInfo: {
     flex: 1,
+    height: 64,  // Match height of profile image
   },
   posterName: {
     fontSize: 16,
@@ -33,11 +34,11 @@ export const cardStyles = StyleSheet.create({
   posterDate: {
     fontSize: 13,
     color: '#1C5AA3',
-    paddingTop: 5,
     fontFamily: 'Montserrat-Medium',
   },
   postText: {
     fontSize: 14,
+    marginTop: 10,
     marginBottom: 10,
     lineHeight: 24,
     fontFamily: 'Montserrat-Medium',

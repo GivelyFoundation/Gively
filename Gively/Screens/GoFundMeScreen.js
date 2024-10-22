@@ -55,7 +55,8 @@ const GoFundMeScreen = ({ navigation }) => {
                 Link: goFundMeLink,
                 PostType: "gofundme",
                 date: new Date().toISOString(),
-                id: uniqueId,
+                // unsure why this is necessary when we have firestore id? 
+                // id: uniqueId,
                 originalDonationPoster: userData.username,
                 originalPosterProfileImage: userData.profilePicture,
                 postText: userText,

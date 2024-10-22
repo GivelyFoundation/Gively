@@ -32,7 +32,7 @@ import GoFundMeScreen from './Screens/GoFundMeScreen';
 import FavoriteScreen from './Screens/FavoritesScreen';
 import EditProfileScreen from './Screens/EditProfileScreen';
 import UserScreen from './Screens/UserScreen';
-import CharityDetailedScreen from './Screens/ChairtyDetailedScreen';
+import CharityDetailedScreen from './Screens/CharityDetailsScreen';
 import SinglePostScreen from './Screens/SinglePostScreen';
 import LearningScreen from './Screens/LearningScreen';
 import BlogPostScreen from './Screens/BlogPostScreen';

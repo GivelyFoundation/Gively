@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Button} from 'react-native';
-import styles from '../Styles.js/Styles';
+import styles from '../styles/Styles';
 import updateCurrentUserStructure from '../services/updateCurrentUserDocument';
 
 export default function SettingScreen({ navigation }) {

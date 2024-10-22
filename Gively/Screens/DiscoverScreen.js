@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity } from 'react-native';
-import styles from '../Styles.js/Styles';
+import styles from '../styles/Styles';
 import DiscoverCharityCard from '../Components/DiscoverCharityCard';
 import { charityCategories } from '../MockData';
 import { useNavigation } from '@react-navigation/native';

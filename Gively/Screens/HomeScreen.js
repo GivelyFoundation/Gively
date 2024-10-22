@@ -1,291 +1,188 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, ActivityIndicator, TouchableOpacity, Modal } from 'react-native';
+import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  RefreshControl,
+  ActivityIndicator,
+  TouchableOpacity,
+  Modal
+} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SwitchSelector from "react-native-switch-selector";
-import styles from '../stylesfolder/Styles';
+import { useAuth } from '../services/AuthContext';
+import { usePosts } from '../services/usePosts';
 
 import DonationCard from '../Components/DonationCard';
-import { PetitionCard } from '../Components/PetitionCard';
-import { GoFundMeCard } from '../Components/GoFundMeCard';
-import { VolunteerCard } from '../Components/VolunteerCard';
-import { collection, query, getDocs, limit, startAfter, orderBy, where } from 'firebase/firestore';
-import { firestore } from '../services/firebaseConfig';
-import { useAuth } from '../services/AuthContext';
-import WelcomeCard from '../Components/WelcomeCard';
+import PetitionCard from '../Components/PetitionCard';
+import GoFundMeCard from '../Components/GoFundMeCard';
+import VolunteerCard from '../Components/VolunteerCard';
 import FirstTimeDonationCard from '../Components/FirstTimeDonationCard';
 
 const POSTS_LIMIT = 10;
 
-const ForYouFeed = ({ posts, refreshing, onRefresh, fetchMorePosts }) => {
-  const renderCard = (item) => {
-    if (!item) {
-      return null;
+const PostCard = memo(({ item }) => {
+  if (!item) return null;
+  
+  switch (item.PostType) {
+    case 'donation':
+      return <View style={styles.cardContainer}><DonationCard data={item} /></View>;
+    case 'petition':
+      return <View style={styles.cardContainer}><PetitionCard data={item} /></View>;
+    case 'gofundme':
+      return <View style={styles.cardContainer}><GoFundMeCard data={item} /></View>;
+    case 'volunteer':
+      return <View style={styles.cardContainer}><VolunteerCard data={item} /></View>;
+    case 'firstTime':
+      return <View style={styles.cardContainer}><FirstTimeDonationCard data={item} /></View>;
+    default:
+      return <View><Text>Unknown Post Type</Text></View>;
+  }
+});
+
+const PostList = memo(({ posts, refreshing, onRefresh, onEndReached, loadingMore, listKey }) => {
+  const flatListRef = useRef(null);
+  const isLoadingRef = useRef(false);
+
+  useEffect(() => {
+    if (flatListRef.current) {
+      requestAnimationFrame(() => {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+      });
     }
-    switch (item.PostType) {
-      case 'donation':
-        return <DonationCard key={item.id} data={item} />;
-      case 'petition':
-        return <PetitionCard key={item.id} data={item} />;
-      case 'gofundme':
-        return <GoFundMeCard key={item.id} data={item} />;
-      case 'volunteer':
-        return <VolunteerCard key={item.id} data={item} />;
-      case 'firstTime':
-        return <FirstTimeDonationCard key={item.id} data={item} />;
-      default:
-        return <View key={item.id}><Text>Unknown Post Type</Text></View>;
-    }
+  }, [listKey]);
+
+  const handleLoadMore = async () => {
+    if (isLoadingRef.current || loadingMore) return;
+    
+    isLoadingRef.current = true;
+    await onEndReached();
+    isLoadingRef.current = false;
   };
-  const sortedPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const renderItem = useCallback(({ item }) => (
+    <PostCard item={item} />
+  ), []);
+
+  const keyExtractor = useCallback(item => item.id, []);
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 10 }}
+    <View style={styles.listContainer}>
+      <FlatList
+        ref={flatListRef}
+        style={styles.list}
+        contentContainerStyle={[
+          styles.listContent,
+          posts.length < 4 && styles.shortListContent
+        ]}
+        data={posts}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl 
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#3FC032"
+            progressBackgroundColor="#fff"
+            colors={["#3FC032"]}
+            style={{ backgroundColor: 'transparent' }}
+          />
         }
-        onScroll={({ nativeEvent }) => {
-          if (isCloseToBottom(nativeEvent)) {
-            fetchMorePosts();
-          }
-        }}
-        scrollEventThrottle={400}
-      >
-        {sortedPosts.map((item) => renderCard(item))}
-      </ScrollView>
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.3}
+        ListFooterComponent={loadingMore ? (
+          <View style={styles.loadingMoreContainer}>
+            <ActivityIndicator color="#3FC032" size="large" />
+          </View>
+        ) : null}
+        removeClippedSubviews={false}
+        initialNumToRender={7}
+        maxToRenderPerBatch={5}
+        windowSize={11}
+        updateCellsBatchingPeriod={50}
+        key={listKey}
+      />
     </View>
   );
-};
+});
 
-const FriendsFeed = ({ posts, refreshing, onRefresh, fetchMorePosts }) => {
-  const renderCard = (item) => {
-    if (!item) {
-      return null;
-    }
-    switch (item.PostType) {
-      case 'donation':
-        return <DonationCard key={item.id} data={item} />;
-      case 'petition':
-        return <PetitionCard key={item.id} data={item} />;
-      case 'gofundme':
-        return <GoFundMeCard key={item.id} data={item} />;
-      case 'volunteer':
-        return <VolunteerCard key={item.id} data={item} />;
-      case 'firstTime':
-        return <FirstTimeDonationCard key={item.id} data={item} />;
-      default:
-        return <View key={item.id}><Text>Unknown Post Type</Text></View>;
-    }
-  };
-  const sortedPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  return (
-    <View style={{ flex: 1 }}>
-      <ScrollView
-        contentContainerStyle={{ paddingHorizontal: 10 }}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        onScroll={({ nativeEvent }) => {
-          if (isCloseToBottom(nativeEvent)) {
-            fetchMorePosts();
-          }
-        }}
-        scrollEventThrottle={400}
-      >
-        {sortedPosts.map((item) => renderCard(item))}
-      </ScrollView>
-    </View>
-  );
-};
+const FriendsPrompt = memo(({ navigation }) => (
+  <View style={styles.friendsPromptContainer}>
+    <Text style={styles.friendsPromptText}>
+      You're not following anyone yet. Start following other users to see their posts here!
+    </Text>
+    <TouchableOpacity
+      style={styles.friendsPromptButton}
+      onPress={() => navigation.navigate('ConnectScreen')}
+    >
+      <Text style={styles.friendsPromptButtonText}>Find Users to Follow</Text>
+    </TouchableOpacity>
+  </View>
+));
 
 export default function HomeFeedScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('For You');
-  const [posts, setPosts] = useState([]);
-  const [friendsPosts, setFriendsPosts] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
-  const [lastVisible, setLastVisible] = useState(null);
-  const [lastVisibleFriends, setLastVisibleFriends] = useState(null);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [loadingMoreFriends, setLoadingMoreFriends] = useState(false);
-  const [followedUsers, setFollowedUsers] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { userData } = useAuth();
 
-  const handleTabPress = (tab) => {
+  const isForYouFeed = activeTab === 'For You';
+  const followedUsers = userData?.following?.map(f => f.followedUserId) || [];
+  const listKey = `${activeTab}-${isForYouFeed ? 'forYou' : 'friends'}`;
+  
+  const { 
+    posts, 
+    loading, 
+    refreshing, 
+    error, 
+    refresh, 
+    loadMore 
+  } = usePosts(isForYouFeed, followedUsers);
+
+  const handleTabPress = useCallback((tab) => {
     setActiveTab(tab);
-  };
+  }, []);
 
-  const fetchFollowedUsers = async () => {
-    if (!userData) return;
-    try {
-      const followingCollection = collection(firestore, `users/${userData.uid}/following`);
-      const followingSnapshot = await getDocs(followingCollection);
-      const followedUsersList = followingSnapshot.docs.map(doc => doc.data().followedUserId);
-      setFollowedUsers(followedUsersList);
-    } catch (error) {
-      console.error('Error fetching followed users:', error);
+  const toggleModal = useCallback(() => {
+    setIsModalVisible(prev => !prev);
+  }, []);
+
+  const renderContent = useCallback(() => {
+    if (!isForYouFeed && followedUsers.length === 0) {
+      return <FriendsPrompt navigation={navigation} />;
     }
-  };
 
-  const fetchPosts = async () => {
-    try {
-      const postsCollection = collection(firestore, 'Posts');
-      const q = query(postsCollection, orderBy('date', 'desc'), limit(POSTS_LIMIT));
-      const postsSnapshot = await getDocs(q);
-      const lastVisibleDoc = postsSnapshot.docs[postsSnapshot.docs.length - 1];
-      setLastVisible(lastVisibleDoc);
-
-      const postsList = postsSnapshot.docs.map(doc => {
-        const data = doc.data();
-        const serializedData = serializeData(data);
-        return { id: doc.id, ...serializedData };
-      });
-
-      const cleanedPostsList = postsList.map(post => JSON.parse(JSON.stringify(post)));
-      const validPosts = cleanedPostsList.filter(post => post !== null);
-
-      if (validPosts.length > 0) {
-        setPosts(validPosts);
-      } else {
-        console.error('No valid posts found');
-      }
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-    }
-  };
-
-  const fetchFriendsPosts = async () => {
-    if (followedUsers.length === 0) return;
-    try {
-      const postsCollection = collection(firestore, 'Posts');
-      const q = query(postsCollection, where('uid', 'in', followedUsers), orderBy('date', 'desc'), limit(POSTS_LIMIT));
-      const postsSnapshot = await getDocs(q);
-      const lastVisibleDoc = postsSnapshot.docs[postsSnapshot.docs.length - 1];
-      setLastVisibleFriends(lastVisibleDoc);
-
-      const postsList = postsSnapshot.docs.map(doc => {
-        const data = doc.data();
-        const serializedData = serializeData(data);
-        return { id: doc.id, ...serializedData };
-      });
-
-      const cleanedPostsList = postsList.map(post => JSON.parse(JSON.stringify(post)));
-      const validPosts = cleanedPostsList.filter(post => post !== null);
-
-      if (validPosts.length > 0) {
-        setFriendsPosts(validPosts);
-      } else {
-        console.error('No valid posts found');
-      }
-    } catch (error) {
-      console.error('Error fetching friends posts:', error);
-    }
-  };
-
-  const fetchMorePosts = async () => {
-    if (loadingMore || !lastVisible) return;
-    setLoadingMore(true);
-
-    try {
-      const postsCollection = collection(firestore, 'Posts');
-      const q = query(postsCollection, orderBy('date', 'desc'), startAfter(lastVisible), limit(POSTS_LIMIT));
-      const postsSnapshot = await getDocs(q);
-      const lastVisibleDoc = postsSnapshot.docs[postsSnapshot.docs.length - 1];
-      setLastVisible(lastVisibleDoc);
-
-      const postsList = postsSnapshot.docs.map(doc => {
-        const data = doc.data();
-        const serializedData = serializeData(data);
-        return { id: doc.id, ...serializedData };
-      });
-
-      const cleanedPostsList = postsList.map(post => JSON.parse(JSON.stringify(post)));
-      const validPosts = cleanedPostsList.filter(post => post !== null);
-
-      if (validPosts.length > 0) {
-        setPosts(prevPosts => [...prevPosts, ...validPosts]);
-      } else {
-        console.error('No valid posts found');
-      }
-    } catch (error) {
-      console.error('Error fetching more posts:', error);
-    } finally {
-      setLoadingMore(false);
-    }
-  };
-
-  const fetchMoreFriendsPosts = async () => {
-    if (loadingMoreFriends || !lastVisibleFriends || followedUsers.length === 0) return;
-    setLoadingMoreFriends(true);
-
-    try {
-      const postsCollection = collection(firestore, 'Posts');
-      const q = query(postsCollection, where('uid', 'in', followedUsers), orderBy('date', 'desc'), startAfter(lastVisibleFriends), limit(POSTS_LIMIT));
-      const postsSnapshot = await getDocs(q);
-      const lastVisibleDoc = postsSnapshot.docs[postsSnapshot.docs.length - 1];
-      setLastVisibleFriends(lastVisibleDoc);
-
-      const postsList = postsSnapshot.docs.map(doc => {
-        const data = doc.data();
-        const serializedData = serializeData(data);
-        return { id: doc.id, ...serializedData };
-      });
-
-      const cleanedPostsList = postsList.map(post => JSON.parse(JSON.stringify(post)));
-      const validPosts = cleanedPostsList.filter(post => post !== null);
-
-      if (validPosts.length > 0) {
-        setFriendsPosts(prevPosts => [...prevPosts, ...validPosts]);
-      } else {
-        console.error('No valid posts found');
-      }
-    } catch (error) {
-      console.error('Error fetching more friends posts:', error);
-    } finally {
-      setLoadingMoreFriends(false);
-    }
-  };
-
-  const toggleModal = () => {
-    setIsModalVisible(!isModalVisible);
-  };
-
-  useEffect(() => {
-    fetchFollowedUsers();
-  }, [userData]);
-
-  useEffect(() => {
-    if (activeTab === 'For You') {
-      fetchPosts();
-    } else {
-      fetchFriendsPosts();
-    }
-  }, [activeTab, followedUsers]);
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    setLastVisible(null);
-    setLastVisibleFriends(null);
-    if (activeTab === 'For You') {
-      await fetchPosts();
-    } else {
-      await fetchFriendsPosts();
-    }
-    setRefreshing(false);
-  };
+    return (
+      <View style={styles.contentContainer}>
+        {error && <Text style={styles.errorText}>{error}</Text>}
+        <PostList
+          posts={posts}
+          refreshing={refreshing}
+          onRefresh={refresh}
+          onEndReached={loadMore}
+          loadingMore={loading}
+          listKey={listKey}
+        />
+      </View>
+    );
+  }, [
+    isForYouFeed,
+    followedUsers.length,
+    posts,
+    refreshing,
+    loading,
+    error,
+    refresh,
+    loadMore,
+    listKey,
+    navigation
+  ]);
 
   return (
-    <View style={[styles.container, styles.page]}>
-      {/* {userData && userData.displayName ? (
-        <WelcomeCard username={userData.displayName.split(' ')[0]} donationAmount={2515} charityCount={25} />
-      ) : (
-        <Text>Loading...</Text>
-      )} */}
+    <View style={styles.parent}>
       <SwitchSelector
         initial={0}
-        onPress={value => handleTabPress(value)}
+        onPress={handleTabPress}
         hasPadding
         options={[
           { label: "For You", value: "For You" },
@@ -293,7 +190,7 @@ export default function HomeFeedScreen({ navigation }) {
         ]}
         testID="feed-switch-selector"
         accessibilityLabel="feed-switch-selector"
-        style={[homeStyles.switchStyle]}
+        style={styles.switchStyle}
         selectedColor={'#1C5AA3'}
         buttonColor={'#fff'}
         backgroundColor={'#F5F5F5'}
@@ -302,15 +199,9 @@ export default function HomeFeedScreen({ navigation }) {
         fontSize={16}
         height={30}
       />
-      {activeTab === 'For You' ?
-        <ForYouFeed posts={posts} refreshing={refreshing} onRefresh={onRefresh} fetchMorePosts={fetchMorePosts} /> :
-        <FriendsFeed posts={friendsPosts} refreshing={refreshing} onRefresh={onRefresh} fetchMorePosts={fetchMoreFriendsPosts} />
-      }
-      {loadingMore && <ActivityIndicator size="large" color="#3FC032" />}
-      {loadingMoreFriends && <ActivityIndicator size="large" color="#3FC032" />}
-
+      {renderContent()}
       <TouchableOpacity
-        style={homeStyles.floatingButton}
+        style={styles.floatingButton}
         onPress={toggleModal}
       >
         <Icon name="plus" size={24} color="#fff" />
@@ -322,40 +213,46 @@ export default function HomeFeedScreen({ navigation }) {
         visible={isModalVisible}
         onRequestClose={toggleModal}
       >
-        <View style={homeStyles.modalOverlay}>
-          <View style={homeStyles.modalContent}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
             <TouchableOpacity
-              style={discoverStyles.petitionButton}
+              style={[styles.actionButton, styles.petitionButton]}
               onPress={() => { 
                 toggleModal();
                 navigation.navigate('Petition');
               }}
             >
-              <Text style={[discoverStyles.petitionButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A Change.Org Petition</Text>
+              <Text style={[styles.actionButtonText, styles.petitionButtonText]}>
+                Share A Change.Org Petition
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={discoverStyles.goFundMeButton}
+              style={[styles.actionButton, styles.goFundMeButton]}
               onPress={() => { 
                 toggleModal();
                 navigation.navigate('GoFundMe');
               }}
             >
-              <Text style={[discoverStyles.goFundMeButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A GoFundMe</Text>
+              <Text style={[styles.actionButtonText, styles.goFundMeButtonText]}>
+                Share A GoFundMe
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={discoverStyles.petitionButton}
+              style={[styles.actionButton, styles.petitionButton]}
               onPress={() => { 
                 toggleModal();
                 navigation.navigate('VolunteerScreen');
               }}
             >
-              <Text style={[discoverStyles.petitionButtonText, { fontFamily: 'Montserrat-Medium' }]}>Share A Volunteer Opportunity</Text>
+              <Text style={[styles.actionButtonText, styles.petitionButtonText]}>
+                Share A Volunteer Opportunity
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={homeStyles.closeModalButton}
+              style={styles.closeModalButton}
               onPress={toggleModal}
             >
-              <Text style={homeStyles.closeModalText}>Close</Text>
+              <Text style={styles.closeModalText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -364,11 +261,55 @@ export default function HomeFeedScreen({ navigation }) {
   );
 }
 
-const homeStyles = StyleSheet.create({
+const styles = StyleSheet.create({
+  parent: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: '#fff',
+  },
+  listContainer: {
+    flex: 1,
+    width: '100%',
+  },
+  contentContainer: {
+    flex: 1,
+    width: '100%',
+  },
+  cardContainer: {
+    width: '100%',
+  },
   switchStyle: {
     paddingTop: 10,
     paddingHorizontal: 20,
-    paddingBottom: 20
+    paddingBottom: 10
+  },
+  list: {
+    width: '100%',
+  },
+  listContent: {
+    paddingHorizontal: 10,
+    paddingBottom: 80,
+  },
+  shortListContent: {
+    flexGrow: 1,
+  },
+  loadingMoreContainer: {
+    paddingVertical: 20,
+    marginBottom: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   floatingButton: {
     position: 'absolute',
@@ -386,19 +327,21 @@ const homeStyles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 3,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  actionButton: {
+    borderRadius: 12,
+    borderWidth: 1,
+    height: 36,
+    width: '94%',
     justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'center',
+    marginBottom: 10,
   },
-  modalContent: {
-    width: '80%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+  petitionButton: {
+    borderColor: '#1C5AA3',
+  },
+  goFundMeButton: {
+    borderColor: '#3FC032',
   },
   closeModalButton: {
     marginTop: 10,
@@ -406,67 +349,48 @@ const homeStyles = StyleSheet.create({
     backgroundColor: '#3FC032',
     borderRadius: 5,
   },
+  actionButtonText: {
+    fontSize: 16,
+    opacity: 0.9,
+    fontFamily: 'Montserrat-Medium',
+  },
+  petitionButtonText: {
+    color: '#1C5AA3',
+  },
+  goFundMeButtonText: {
+    color: '#3FC032',
+  },
   closeModalText: {
     color: '#fff',
     fontWeight: 'bold',
   },
-});
-
-const discoverStyles = StyleSheet.create({
-  petitionButton: {
-    borderRadius: 12,
-    borderColor: '#1C5AA3',
-    borderWidth: 1,
-    height: 36,
-    width: '94%',
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  friendsPromptContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    alignSelf: 'center',
-    marginBottom: 10,
+    paddingHorizontal: 20,
   },
-  petitionButtonText: {
-    color: '#1C5AA3',
+  friendsPromptText: {
     fontSize: 16,
-    opacity: 0.9,
+    textAlign: 'center',
+    marginBottom: 20,
+    fontFamily: 'Montserrat-Medium',
+    color: '#4A4A4A',
   },
-  goFundMeButton: {
-    borderRadius: 12,
-    borderColor: '#3FC032',
-    borderWidth: 1,
-    height: 36,
-    width: '94%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center',
-    marginBottom: 10,
+  friendsPromptButton: {
+    backgroundColor: '#3FC032',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
   },
-  goFundMeButtonText: {
-    color: '#3FC032',
+  friendsPromptButtonText: {
+    color: '#FFFFFF',
     fontSize: 16,
-    opacity: 0.9,
+    fontFamily: 'Montserrat-Bold',
   },
 });
-
-
-function serializeData(data) {
-  const serializedData = {};
-  for (const key in data) {
-    if (data[key] && typeof data[key] === 'object' && !Array.isArray(data[key])) {
-      if (data[key].seconds) {
-        // Convert Firestore timestamp to string
-        serializedData[key] = new Date(data[key].seconds * 1000).toISOString();
-      } else {
-        // Recursively serialize nested objects
-        serializedData[key] = serializeData(data[key]);
-      }
-    } else {
-      serializedData[key] = data[key];
-    }
-  }
-  return serializedData;
-}
-
-function isCloseToBottom({ layoutMeasurement, contentOffset, contentSize }) {
-  const paddingToBottom = 20;
-  return layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom;
-}
