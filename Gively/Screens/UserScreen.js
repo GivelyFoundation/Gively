@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, RefreshCon
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import SwitchSelector from "react-native-switch-selector";
 import { charityData, user } from '../MockData';
-import styles from '../Styles.js/Styles';
+import styles from '../styles/Styles';
 import PinnedCharityCard from '../Components/PinnedCharityCard';
 import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
@@ -253,7 +253,9 @@ export default function UserScreen({ route, navigation }) {
     }
     return (
         <View style={styles.page}>
-            <TouchableOpacity onPress={() => navigation.navigate('Home')} style={profileStyles.backButton}>
+
+            {/* NEED TO REFACTOR TO GO BACK NOT */}
+            <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')} style={profileStyles.backButton}>
                 <Icon name="arrow-back" size={30} color="#000" />
             </TouchableOpacity>
 
