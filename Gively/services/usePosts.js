@@ -59,11 +59,11 @@ export const usePosts = (isForYouFeed) => {
         followedUsers,
         POSTS_LIMIT
       );
-
       // Update posts state based on whether we're resetting or adding more
       setPosts(prevPosts => shouldResetPosts ? newPosts : [...prevPosts, ...newPosts]);
       setLastVisible(lastVisibleDoc);
-
+      
+      console.log(posts)
       // Update cache
       if (shouldResetPosts) {
         postsCache.current[cacheKey] = {

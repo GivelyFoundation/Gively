@@ -19,6 +19,7 @@ import PetitionCard from '../Components/PetitionCard';
 import GoFundMeCard from '../Components/GoFundMeCard';
 import VolunteerCard from '../Components/VolunteerCard';
 import FirstTimeDonationCard from '../Components/FirstTimeDonationCard';
+import PostCreationModal from '../Components/PostCreationModal';
 
 const POSTS_LIMIT = 10;
 
@@ -147,6 +148,16 @@ export default function HomeFeedScreen({ navigation }) {
     setIsModalVisible(prev => !prev);
   }, []);
 
+  const handleModalClose = useCallback(() => {
+    setIsModalVisible(false);
+  }, []);
+
+  const handlePostCreated = useCallback(() => {
+    refresh(); // Refresh the feed
+    handleModalClose(); // Close the modal
+  }, [refresh]);
+
+
   const renderContent = useCallback(() => {
     if (!isForYouFeed && followedUsers.length === 0) {
       return <FriendsPrompt navigation={navigation} />;
@@ -206,57 +217,11 @@ export default function HomeFeedScreen({ navigation }) {
       >
         <Icon name="plus" size={24} color="#fff" />
       </TouchableOpacity>
-
-      <Modal
-        transparent={true}
-        animationType="slide"
+      <PostCreationModal
         visible={isModalVisible}
-        onRequestClose={toggleModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.petitionButton]}
-              onPress={() => { 
-                toggleModal();
-                navigation.navigate('Petition');
-              }}
-            >
-              <Text style={[styles.actionButtonText, styles.petitionButtonText]}>
-                Share A Change.Org Petition
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.goFundMeButton]}
-              onPress={() => { 
-                toggleModal();
-                navigation.navigate('GoFundMe');
-              }}
-            >
-              <Text style={[styles.actionButtonText, styles.goFundMeButtonText]}>
-                Share A GoFundMe
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.petitionButton]}
-              onPress={() => { 
-                toggleModal();
-                navigation.navigate('VolunteerScreen');
-              }}
-            >
-              <Text style={[styles.actionButtonText, styles.petitionButtonText]}>
-                Share A Volunteer Opportunity
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.closeModalButton}
-              onPress={toggleModal}
-            >
-              <Text style={styles.closeModalText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        onClose={handleModalClose}
+        onPostCreated={handlePostCreated}
+      />
     </View>
   );
 }

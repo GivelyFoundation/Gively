@@ -145,4 +145,18 @@ export const firebaseService = {
         }
     },
 
+    createPost: async (postData) => {
+        try {
+            const postsRef = collection(firestore, 'Posts');
+            const docRef = await addDoc(postsRef, {
+                ...postData,
+                date: serverTimestamp(), // Use server timestamp for consistency
+            });
+            return docRef.id;
+        } catch (error) {
+            console.error('Error creating post:', error);
+            throw error;
+        }
+    },
+
 };
