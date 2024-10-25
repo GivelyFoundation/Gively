@@ -1,4 +1,5 @@
 import { firestore } from './firebaseConfig';
+import { timestampToISO } from '../utilities/dateFormatter';
 import { 
     collection, 
     doc, 
@@ -17,6 +18,7 @@ import {
 } from 'firebase/firestore';
 
 export const firebaseService = {
+    
     // Fetch posts with pagination
     getPosts: async (lastVisible, followedUsers = null, postLimit = 10) => {
         // console.log('getPosts called with:', { lastVisible, followedUsers, postLimit });
@@ -72,6 +74,7 @@ export const firebaseService = {
                     return {
                         id: postDoc.id,
                         ...postData,
+                        date: timestampToISO(postData.date),
                         Likers: postData.Likers || [],
                         posterData: {
                             displayName: userData.displayName,
@@ -152,7 +155,16 @@ export const firebaseService = {
                 ...postData,
                 date: serverTimestamp(), // Use server timestamp for consistency
             });
-            return docRef.id;
+
+            // Get the actual document with server timestamp
+            const docSnap = await getDoc(docRef);
+            const actualData = docSnap.data();
+            // Return the created post with its ID
+            return {
+                id: docRef.id,
+                ...actualData,
+                date: actualData.date,
+            };
         } catch (error) {
             console.error('Error creating post:', error);
             throw error;

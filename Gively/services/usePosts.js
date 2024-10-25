@@ -19,6 +19,7 @@ export const usePosts = (isForYouFeed) => {
     forYou: { posts: [], lastVisible: null, timestamp: null },
     friends: { posts: [], lastVisible: null, timestamp: null }
   });
+  
   const isLoadingRef = useRef(false);
   const lastRefreshTimeRef = useRef(0);
 
@@ -63,7 +64,6 @@ export const usePosts = (isForYouFeed) => {
       setPosts(prevPosts => shouldResetPosts ? newPosts : [...prevPosts, ...newPosts]);
       setLastVisible(lastVisibleDoc);
       
-      console.log(posts)
       // Update cache
       if (shouldResetPosts) {
         postsCache.current[cacheKey] = {
@@ -87,18 +87,29 @@ export const usePosts = (isForYouFeed) => {
     }
   }, [isForYouFeed, userData]);
 
+  const addNewPost = useCallback((newPost) => {
+    setPosts(currentPosts => [newPost, ...currentPosts]);
+
+    // Update cache
+    const cacheKey = getCacheKey();
+    postsCache.current[cacheKey] = {
+      ...postsCache.current[cacheKey],
+      posts: [newPost, ...postsCache.current[cacheKey].posts],
+      timestamp: Date.now() // Reset cache timestamp
+    };
+  }, [getCacheKey]);
+
   // Refresh function with cooldown
   const refresh = useCallback(async (force = false) => {
     const now = Date.now();
     const timeSinceLastRefresh = now - lastRefreshTimeRef.current;
 
-    // Check if we're within cooldown period
+    // Skip cooldown if force is true
     if (!force && timeSinceLastRefresh < REFRESH_COOLDOWN) {
       console.log('Refresh attempted too soon, please wait...');
       return false;
     }
 
-    // Prevent duplicate refreshes
     if (refreshing) {
       console.log('Already refreshing, please wait...');
       return false;
@@ -171,6 +182,7 @@ export const usePosts = (isForYouFeed) => {
     refresh,
     loadMore,
     updatePost,
+    addNewPost,
     hasMore: !!lastVisible && posts.length >= POSTS_LIMIT,
     metadata: {
       lastRefreshed: lastRefreshTimeRef.current,

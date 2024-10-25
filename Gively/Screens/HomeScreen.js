@@ -137,7 +137,8 @@ export default function HomeFeedScreen({ navigation }) {
     refreshing, 
     error, 
     refresh, 
-    loadMore 
+    loadMore, 
+    addNewPost
   } = usePosts(isForYouFeed, followedUsers);
 
   const handleTabPress = useCallback((tab) => {
@@ -152,10 +153,10 @@ export default function HomeFeedScreen({ navigation }) {
     setIsModalVisible(false);
   }, []);
 
-  const handlePostCreated = useCallback(() => {
-    refresh(); // Refresh the feed
-    handleModalClose(); // Close the modal
-  }, [refresh]);
+  const handlePostCreated = useCallback((newPost) => {
+    addNewPost(newPost);
+    handleModalClose();
+  }, [addNewPost]);
 
 
   const renderContent = useCallback(() => {

@@ -107,8 +107,8 @@ const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
         ),
       };
   
-      await firebaseService.createPost(postData);
-      onPostCreated?.(); // Call the callback if provided
+      const createdPost = await firebaseService.createPost(postData);
+      onPostCreated?.(createdPost); // Call the callback if provided
     } catch (error) {
       console.error('Error creating post:', error);
       setErrors(prev => ({ ...prev, submit: 'Failed to create post. Please try again.' }));
