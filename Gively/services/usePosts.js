@@ -88,6 +88,14 @@ export const usePosts = (isForYouFeed) => {
   }, [isForYouFeed, userData]);
 
   const addNewPost = useCallback((newPost) => {
+    newPost = {
+        ...newPost,
+        posterData: {
+            displayName: userData.displayName,
+            profilePicture: userData.profilePicture,
+            username: userData.username
+        }
+     }
     setPosts(currentPosts => [newPost, ...currentPosts]);
 
     // Update cache
