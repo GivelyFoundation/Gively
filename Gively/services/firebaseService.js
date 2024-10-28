@@ -18,12 +18,12 @@ import {
 } from 'firebase/firestore';
 
 export const firebaseService = {
-    
+
     // Fetch posts with pagination
     getPosts: async (lastVisible, followedUsers = null, postLimit = 10) => {
         // console.log('getPosts called with:', { lastVisible, followedUsers, postLimit });
         console.log('fetching posts')
-        const postsRef = collection(firestore, 'Posts');
+        const postsRef = collection(firestore, 'posts');
         let q;
 
         if (followedUsers && followedUsers.length > 0) {
@@ -75,7 +75,7 @@ export const firebaseService = {
                         id: postDoc.id,
                         ...postData,
                         date: timestampToISO(postData.date),
-                        Likers: postData.Likers || [],
+                        likers: postData.likers || [],
                         posterData: {
                             displayName: userData.displayName,
                             profilePicture: userData.profilePicture,
@@ -98,9 +98,9 @@ export const firebaseService = {
 
     // Like a post
     likePost: async (postId, userId, username, postOwnerId) => {
-        const postRef = doc(firestore, 'Posts', postId);
+        const postRef = doc(firestore, 'posts', postId);
         await updateDoc(postRef, {
-            Likers: arrayUnion(userId)
+            likers: arrayUnion(userId)
         });
         const notification = {
             message: `${username} liked your post!`,
@@ -115,20 +115,20 @@ export const firebaseService = {
 
     // Unlike a post
     unlikePost: async (postId, userId) => {
-        const postRef = doc(firestore, 'Posts', postId);
+        const postRef = doc(firestore, 'posts', postId);
         await updateDoc(postRef, {
-            Likers: arrayRemove(userId)
+            likers: arrayRemove(userId)
         });
     },
 
     // Check if a user has liked a post
     hasUserLikedPost: async (postId, userId) => {
         try {
-            const postRef = doc(firestore, 'Posts', postId);
+            const postRef = doc(firestore, 'posts', postId);
             const docSnapshot = await getDoc(postRef);
             if (!docSnapshot.exists()) return false;
             
-            const likers = docSnapshot.data().Likers || [];
+            const likers = docSnapshot.data().likers || [];
             return likers.includes(userId);
         } catch (error) {
             console.error('Error checking if user liked post:', error);
@@ -150,7 +150,7 @@ export const firebaseService = {
 
     createPost: async (postData) => {
         try {
-            const postsRef = collection(firestore, 'Posts');
+            const postsRef = collection(firestore, 'posts');
             const docRef = await addDoc(postsRef, {
                 ...postData,
                 date: serverTimestamp(), // Use server timestamp for consistency

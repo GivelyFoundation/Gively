@@ -69,7 +69,7 @@ const Posts = () => {
 
   const renderCard = (item) => {
     console.log(item)
-    switch (item.PostType) {
+    switch (item.postType) {
       case 'donation':
         return <DonationCard key={item.id} data={item} />;
       case 'petition':

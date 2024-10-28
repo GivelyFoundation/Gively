@@ -54,7 +54,7 @@ const EventDetails = memo(({ description, eventDate, address }) => (
 const VolunteerCard = memo(({ data = {} }) => {
     const { userData } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
-    const [likesCount, setLikesCount] = useState((data?.Likers || []).length);
+    const [likesCount, setLikesCount] = useState((data?.likers || []).length);
 
     useEffect(() => {
         const checkIfLiked = async () => {
@@ -142,7 +142,7 @@ const VolunteerCard = memo(({ data = {} }) => {
         prevProps.data.eventDate === nextProps.data.eventDate &&
         prevProps.data.address === nextProps.data.address &&
         prevProps.data.date === nextProps.data.date &&
-        prevProps.data.Likers?.length === nextProps.data.Likers?.length &&
+        prevProps.data.likers?.length === nextProps.data.likers?.length &&
         prevProps.data.posterData?.username === nextProps.data.posterData?.username &&
         prevProps.data.location?.latitude === nextProps.data.location?.latitude &&
         prevProps.data.location?.longitude === nextProps.data.location?.longitude

@@ -1,6 +1,5 @@
-// migration.js
 const admin = require('firebase-admin');
-const serviceAccount = require('./serviceAccount.json'); // You'll update this path
+const serviceAccount = require('./serviceAccount.json'); 
 
 // Initialize Firebase Admin
 admin.initializeApp({

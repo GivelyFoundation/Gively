@@ -26,7 +26,7 @@ const POSTS_LIMIT = 10;
 const PostCard = memo(({ item }) => {
   if (!item) return null;
   
-  switch (item.PostType) {
+  switch (item.postType) {
     case 'donation':
       return <View style={styles.cardContainer}><DonationCard data={item} /></View>;
     case 'petition':

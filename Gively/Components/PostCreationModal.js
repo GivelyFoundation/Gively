@@ -33,6 +33,11 @@ const POST_TYPES = [
   { label: 'Volunteer Opportunity', value: 'volunteer' },
 ];
 
+const VALIDATION_PATTERNS = {
+    gofundme: /^https?:\/\/(www\.)?gofundme\.com/,
+    petition: /^https?:\/\/(www\.)?change\.org/,
+  };
+
 const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
     const { userData } = useAuth();
     const [formData, setFormData] = useState({
@@ -83,15 +88,15 @@ const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
             'Discard Changes',
             'Are you sure you want to discard your changes?',
             [
-            { text: 'Cancel', style: 'cancel' },
-            { 
-                text: 'Discard',
-                style: 'destructive',
-                onPress: () => {
-                resetForm();
-                onClose();
+                { text: 'Cancel', style: 'cancel' },
+                { 
+                    text: 'Discard',
+                    style: 'destructive',
+                    onPress: () => {
+                        resetForm();
+                        onClose();
+                    }
                 }
-            }
             ]
         );
         } else {
@@ -100,29 +105,54 @@ const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
     }, [formData, onClose]);
 
     const validateUrl = useCallback((type, url) => {
-    const patterns = {
-        gofundme: /^https?:\/\/(www\.)?gofundme\.com/,
-        petition: /^https?:\/\/(www\.)?change\.org/,
-    };
-    return patterns[type]?.test(url) ?? true;
-    }, []);
+        if (!url) return false;
+        if (!VALIDATION_PATTERNS[type]) return true;
+        return VALIDATION_PATTERNS[type].test(url.trim());
+      }, []);
 
-    const validateAddress = async (address) => {
+    const validateField = useCallback((fieldName, value, type = formData.postType) => {
+        switch (fieldName) {
+          case 'postType':
+            return !!value;
+          case 'link':
+            return validateUrl(type, value);
+          case 'caption':
+          case 'description':
+            return !!value?.trim();
+          case 'date':
+            return !!value && moment(value).isValid();
+          case 'time':
+            return !!value && moment(value, 'HH:mm').isValid();
+          case 'address':
+            return !!value?.trim();
+          default:
+            return true;
+        }
+      }, [formData.postType, validateUrl]);
+      
+
+      const validateAddress = useCallback(async (address) => {
         try {
-        const response = await axios.get(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${GOOGLE_MAPS_API_KEY}`
-        );
-        const { results } = response.data;
-        if (results.length > 0) {
-            return results[0].geometry.location;
-        }
-        return null;
+          const response = await axios.get(
+            `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${GOOGLE_MAPS_API_KEY}`
+          );
+          
+          if (response.data.status === 'OK' && response.data.results.length > 0) {
+            const result = response.data.results[0];
+            return {
+              location: result.geometry.location,
+              formattedAddress: result.formatted_address,
+            };
+          }
+          
+          return null;
         } catch (error) {
-        console.error('Error validating address: ', error);
-        return null;
+          console.error('Address validation error:', error);
+          return null;
         }
-    };
+      }, []);
 
+    // Date picker handlers
     const showDatePicker = () => setDatePickerVisibility(true);
     const hideDatePicker = () => setDatePickerVisibility(false);
     const handleConfirmDate = (selectedDate) => {
@@ -147,36 +177,39 @@ const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
 
     const validateForm = useCallback(() => {
         const newErrors = {};
-        
-        if (!formData.postType) {
-          newErrors.postType = 'Please select a post type';
-        }
-    
+        const fieldsToValidate = ['postType'];
+      
         if (['gofundme', 'petition'].includes(formData.postType)) {
-          if (!formData.link) {
-            newErrors.link = 'Please enter a URL';
-          } else if (!validateUrl(formData.postType, formData.link)) {
-            newErrors.link = `Please enter a valid ${formData.postType === 'gofundme' ? 'GoFundMe' : 'Change.org'} URL`;
-          }
-          if (!formData.caption) {
-            newErrors.caption = 'Please enter a caption';
-          }
+          fieldsToValidate.push('link', 'caption');
         }
-    
+      
         if (formData.postType === 'volunteer') {
-          if (!formData.description) {
-            newErrors.description = 'Please enter a description';
-          }
-          if (!formData.date) newErrors.date = 'Please select a date';
-          if (!formData.time) newErrors.time = 'Please select a time';
-          if (!formData.address) newErrors.address = 'Please enter an address';
+          fieldsToValidate.push('description', 'date', 'time', 'address');
         }
-    
+      
+        fieldsToValidate.forEach(field => {
+          if (!validateField(field, formData[field])) {
+            newErrors[field] = `Please enter a valid ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`;
+          }
+        });
+      
+        // Special case for URL validation messages
+        if (newErrors.link) {
+          newErrors.link = `Please enter a valid ${formData.postType === 'gofundme' ? 'GoFundMe' : 'Change.org'} URL`;
+        }
+      
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
-      }, [formData, validateUrl]);
+      }, [formData, validateField]);
+
+      const handleUrlChange = useCallback((text) => {
+        setFormData(prev => ({ ...prev, link: text }));
+        const isValid = validateUrl(formData.postType, text);
+        setShowPreview(isValid);
+      }, [formData.postType, validateUrl]);
+
     
-      const handleSubmit = async () => {
+    const handleSubmit = async () => {
         if (isLoading || !validateForm()) return;
     
         try {
@@ -184,21 +217,27 @@ const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
           setErrors({});
     
           let location = null;
-          if (formData.postType === 'volunteer') {
-            location = await validateAddress(formData.address);
-            if (!location) {
-              setErrors(prev => ({
+            if (formData.postType === 'volunteer') {
+            const addressValidation = await validateAddress(formData.address);
+            if (!addressValidation) {
+                setErrors(prev => ({
                 ...prev,
-                address: 'Invalid address. Please enter a valid address.',
-              }));
-              return;
+                address: 'Please enter a valid address',
+                }));
+                return;
             }
-          }
+            location = addressValidation.location;
+            // Update address to formatted version
+            setFormData(prev => ({
+                ...prev,
+                address: addressValidation.formattedAddress,
+            }));
+            }
     
           const postData = {
-            PostType: formData.postType,
+            postType: formData.postType,
             uid: userData.uid,
-            Likers: [],
+            likers: [],
             ...(formData.postType === 'volunteer' 
               ? {
                   description: formData.description,
@@ -210,7 +249,7 @@ const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
                   },
                 }
               : {
-                  Link: formData.link,
+                  link: formData.link,
                   postText: formData.caption,
                 }
             ),
@@ -231,18 +270,18 @@ const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
       };
     
       const isFormValid = useCallback(() => {
-        if (!formData.postType) return false;
+        const requiredFields = ['postType'];
       
         if (['gofundme', 'petition'].includes(formData.postType)) {
-          return formData.link && validateUrl(formData.postType, formData.link);
+          requiredFields.push('link', 'caption');
         }
       
         if (formData.postType === 'volunteer') {
-          return formData.description && formData.date && formData.time && formData.address;
+          requiredFields.push('description', 'date', 'time', 'address');
         }
       
-        return false;
-      }, [formData, validateUrl]);
+        return requiredFields.every(field => validateField(field, formData[field]));
+      }, [formData, validateField]);
     
       return (
         <Modal
@@ -320,10 +359,7 @@ const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
                               ]}
                               placeholder={`Enter ${formData.postType === 'gofundme' ? 'GoFundMe' : 'Change.org'} URL`}
                               value={formData.link}
-                              onChangeText={(text) => {
-                                setFormData(prev => ({ ...prev, link: text }));
-                                setShowPreview(validateUrl(formData.postType, text));
-                              }}
+                              onChangeText={handleUrlChange}
                               editable={!isLoading}
                             />
                             {errors.link && <Text style={styles.errorText}>{errors.link}</Text>}
@@ -407,21 +443,21 @@ const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
                                     { height: 40 }
                                     ],
                                     listView: {
-                                    maxHeight: 150, // Limit the height of suggestions
-                                    backgroundColor: 'white',
-                                    borderRadius: 8,
-                                    borderWidth: 1,
-                                    borderColor: '#ddd',
-                                    marginTop: 4,
-                                    overflow: 'scroll', // Allow scrolling within limited height
+                                        maxHeight: 150, // Limit the height of suggestions
+                                        backgroundColor: 'white',
+                                        borderRadius: 8,
+                                        borderWidth: 1,
+                                        borderColor: '#ddd',
+                                        marginTop: 4,
+                                        overflow: 'scroll', // Allow scrolling within limited height
                                     },
                                     row: {
-                                    padding: 13,
-                                    height: 44,
-                                    fontSize: 14,
+                                        padding: 13,
+                                        height: 44,
+                                        fontSize: 14,
                                     },
                                     description: {
-                                    fontSize: 14,
+                                        fontSize: 14,
                                     }
                                 }}
                                 enablePoweredByContainer={false}
@@ -477,61 +513,74 @@ const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
       );
     };
     
-    const styles = StyleSheet.create({
-      overlay: {
+const styles = StyleSheet.create({
+    // Layout
+    overlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
-      },
-      modalContainer: {
+    },
+    modalContainer: {
         width: '90%',
         maxHeight: SCREEN_HEIGHT * 0.8,
         minHeight: SCREEN_HEIGHT * 0.4,
-      },
-      content: {
+    },
+    content: {
         backgroundColor: '#fff',
         borderRadius: 10,
         padding: 20,
         height: '100%',
-      },
-      header: {
+    },
+    header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 20,
-      },
-      title: {
+    },
+    formContainer: {
+        flex: 1,
+    },
+    fieldsContainer: {
+        marginTop: 15,
+    },
+    // Typography
+    title: {
         fontSize: 20,
         fontFamily: 'Montserrat-Bold',
-      },
-      closeButton: {
-        padding: 5,
-      },
-      formContainer: {
-        flex: 1,
-      },
-      fieldsContainer: {
-        marginTop: 15,
-      },
-      dropdown: {
-        borderColor: '#ddd',
-        borderRadius: 8,
-      },
-      dropdownContainer: {
-        borderColor: '#ddd',
-        borderRadius: 8,
-        elevation: 5,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-      },
-      dropdownText: {
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 12,
+        marginBottom: 10,
+        fontFamily: 'Montserrat-Regular',
+    },
+    pickerText: {
         fontFamily: 'Montserrat-Regular',
         fontSize: 16,
-      },
-      input: {
+        color: '#333',
+    },
+    // Buttons 
+    closeButton: {
+        padding: 5,
+    },
+    submitButton: {
+        backgroundColor: '#3FC032',
+        padding: 15,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 'auto',
+    },
+    submitButtonDisabled: {
+        opacity: 0.7,
+    },
+    submitButtonText: {
+        color: '#fff',
+        fontFamily: 'Montserrat-Bold',
+        fontSize: 16,
+    },
+    // Inputs
+    input: {
         borderWidth: 1,
         borderColor: '#ddd',
         borderRadius: 8,
@@ -539,74 +588,52 @@ const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
         marginBottom: 15,
         fontFamily: 'Montserrat-Regular',
         fontSize: 16,
-      },
-      multilineInput: {
+    },
+    multilineInput: {
         height: 100,
         textAlignVertical: 'top',
-      },
-      previewContainer: {
+    },
+    inputError: {
+        borderColor: 'red',
+    },
+    // Dropdown
+    dropdown: {
+        borderColor: '#ddd',
+        borderRadius: 8,
+    },
+    dropdownContainer: {
+        borderColor: '#ddd',
+        borderRadius: 8,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    dropdownText: {
+        fontFamily: 'Montserrat-Regular',
+        fontSize: 16,
+    },
+    // Link Preview
+    previewContainer: {
         marginBottom: 15,
-      },
-      linkPreview: {
+    },
+    linkPreview: {
         backgroundColor: '#F8F9FA',
         padding: 10,
         borderRadius: 8,
-      },
-      metadataContainer: {
+    },
+    metadataContainer: {
         marginTop: 0,
-      },
-      previewTitle: {
+    },
+    previewTitle: {
         fontFamily: 'Montserrat-Medium',
         fontSize: 14,
-      },
-      previewDescription: {
+    },
+    previewDescription: {
         fontFamily: 'Montserrat-Regular',
         fontSize: 12,
-      },
-      errorText: {
-        color: 'red',
-        fontSize: 12,
-        marginBottom: 10,
-        fontFamily: 'Montserrat-Regular',
-      },
-      submitButton: {
-        backgroundColor: '#3FC032',
-        padding: 15,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 'auto',
-      },
-      submitButtonDisabled: {
-        opacity: 0.7,
-      },
-      submitButtonText: {
-        color: '#fff',
-        fontFamily: 'Montserrat-Bold',
-        fontSize: 16,
-      },
-      inputError: {
-        borderColor: 'red',
-      },
-      addressListView: {
-        backgroundColor: 'white',
-        borderColor: '#ddd',
-        borderWidth: 1,
-        borderRadius: 8,
-        marginTop: 4,
-      },
-      addressRow: {
-        padding: 13,
-        height: 44,
-        fontSize: 14,
-      },
-      addressDescription: {
-        fontSize: 14,
-      },
-      pickerText: {
-        fontFamily: 'Montserrat-Regular',
-        fontSize: 16,
-        color: '#333',
-      },
-    });
+    },
+});
     
     export default PostCreationModal;
