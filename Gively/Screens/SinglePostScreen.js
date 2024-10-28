@@ -41,7 +41,7 @@ const SinglePostScreen = () => {
     if (!item) {
       return null;
     }
-    switch (item.PostType) {
+    switch (item.postType) {
       case 'donation':
         return <DonationCard key={item.id} data={item} />;
       case 'petition':

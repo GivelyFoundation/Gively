@@ -209,7 +209,7 @@ const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
       }, [formData.postType, validateUrl]);
 
     
-      const handleSubmit = async () => {
+    const handleSubmit = async () => {
         if (isLoading || !validateForm()) return;
     
         try {
@@ -235,9 +235,9 @@ const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
             }
     
           const postData = {
-            PostType: formData.postType,
+            postType: formData.postType,
             uid: userData.uid,
-            Likers: [],
+            likers: [],
             ...(formData.postType === 'volunteer' 
               ? {
                   description: formData.description,
@@ -249,7 +249,7 @@ const PostCreationModal = ({ visible, onClose, onPostCreated }) => {
                   },
                 }
               : {
-                  Link: formData.link,
+                  link: formData.link,
                   postText: formData.caption,
                 }
             ),

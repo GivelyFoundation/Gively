@@ -10,74 +10,71 @@ if (admin.apps.length === 0) {
 
 const db = admin.firestore();
 
-const migratePostIds = async () => {
-    console.log('Starting post ID migration...');
+const migratePostFields = async () => {
+    console.log('Starting posts field migration...');
     const postsRef = db.collection('Posts');
     const snapshot = await postsRef.get();
     
     let migratedCount = 0;
-    let skippedCount = 0;
     let errorCount = 0;
     
-    // Create a batch
     let batch = db.batch();
     let batchCount = 0;
     const BATCH_SIZE = 500;
     
+    const newPostsRef = db.collection('posts');
+    
     for (const doc of snapshot.docs) {
-        const postData = doc.data();
-        const nativeId = doc.id;
-        const customId = postData.id;
-        
-        // Skip if IDs already match
-        if (customId === nativeId) {
-            skippedCount++;
-            console.log(`Skipped document (IDs match): ${doc.id}`);
-            continue;
-        }
-        
         try {
-            // Update the post document
-            const postRef = postsRef.doc(nativeId);
-            batch.update(postRef, {
-                id: nativeId,
-                lastMigrated: admin.firestore.FieldValue.serverTimestamp()
-            });
+            const oldData = doc.data();
+            
+            // Base fields that all posts have
+            const newData = {
+                id: oldData.id,
+                uid: oldData.uid,
+                postType: oldData.PostType?.toLowerCase() || oldData.PostType, // Maintain case if needed
+                likers: oldData.Likers || [],
+                date: oldData.date,
+            };
+
+            // Add type-specific fields if they exist
+            if (oldData.Link) newData.link = oldData.Link;
+            if (oldData.postText) newData.postText = oldData.postText;
+            if (oldData.description) newData.description = oldData.description;
+            if (oldData.eventDate) newData.eventDate = oldData.eventDate;
+            if (oldData.location) newData.location = oldData.location;
+            if (oldData.address) newData.address = oldData.address;
+            if (oldData.charity) newData.charity = oldData.charity;
+            if (oldData.timestamp) newData.timestamp = oldData.timestamp;
+            if (oldData.originalDonationPoster) newData.originalDonationPoster = oldData.originalDonationPoster;
+            if (oldData.originalPosterProfileImage) newData.originalPosterProfileImage = oldData.originalPosterProfileImage;
+            
+            // Create document in new collection with same ID
+            const newDocRef = newPostsRef.doc(doc.id);
+            batch.set(newDocRef, newData);
+            
+            // Delete document from old collection
+            const oldDocRef = postsRef.doc(doc.id);
+            batch.delete(oldDocRef);
             
             batchCount++;
             
-            // Check for references in likes collection
-            const likesSnapshot = await db.collection('likes')
-                .where('postId', '==', customId)
-                .get();
-                
-            for (const likeDoc of likesSnapshot.docs) {
-                const likeRef = db.collection('likes').doc(likeDoc.id);
-                batch.update(likeRef, {
-                    postId: nativeId
-                });
-                batchCount++;
-            }
-            
-            // If batch is getting full, commit and start new batch
             if (batchCount >= BATCH_SIZE) {
                 await batch.commit();
                 migratedCount += batchCount;
-                console.log(`Migrated ${migratedCount} operations`);
+                console.log(`Migrated ${migratedCount} documents`);
                 
-                // Start new batch
                 batch = db.batch();
                 batchCount = 0;
             }
             
         } catch (error) {
             console.error(`Error migrating document ${doc.id}:`, error);
-            console.error('Document data:', postData);
+            console.error('Document data:', doc.data());
             errorCount++;
         }
     }
     
-    // Commit any remaining updates
     if (batchCount > 0) {
         await batch.commit();
         migratedCount += batchCount;
@@ -86,46 +83,54 @@ const migratePostIds = async () => {
     console.log(`
 Migration complete:
 - Total documents: ${snapshot.size}
-- Operations completed: ${migratedCount}
-- Documents skipped: ${skippedCount}
+- Documents migrated: ${migratedCount}
 - Errors encountered: ${errorCount}
     `);
 
     // Verification step
-    const verificationDoc = (await postsRef.limit(1).get()).docs[0];
+    const verificationDoc = (await newPostsRef.limit(1).get()).docs[0];
     if (verificationDoc) {
         const verificationData = verificationDoc.data();
-        console.log('Verification check:', {
-            nativeId: verificationDoc.id,
-            storedId: verificationData.id,
-            match: verificationDoc.id === verificationData.id
-        });
+        console.log('Verification sample:', verificationData);
     }
 
-    // Exit the process
     process.exit(0);
 };
 
 // Add rollback functionality
 const rollbackMigration = async () => {
     console.log('Starting rollback...');
-    const postsRef = db.collection('posts');
-    const snapshot = await postsRef.get();
+    const newPostsRef = db.collection('posts');
+    const oldPostsRef = db.collection('Posts');
+    const snapshot = await newPostsRef.get();
     
     let batch = db.batch();
     let batchCount = 0;
     let rolledBackCount = 0;
     
     for (const doc of snapshot.docs) {
-        const postData = doc.data();
-        
-        // Only rollback migrated documents
-        if (postData.lastMigrated) {
-            const postRef = postsRef.doc(doc.id);
-            batch.update(postRef, {
-                id: postData.originalId || postData.customId, // Use whatever field stored the original ID
-                lastMigrated: admin.firestore.FieldValue.delete()
-            });
+        try {
+            const newData = doc.data();
+            
+            // Transform back to old format
+            const oldData = {
+                ...newData,
+                PostType: newData.postType?.toUpperCase() || newData.postType,
+                Likers: newData.likers || [],
+            };
+            
+            if (newData.link) oldData.Link = newData.link;
+            
+            // Remove new camel case fields
+            delete oldData.postType;
+            delete oldData.link;
+            delete oldData.likers;
+            
+            const oldDocRef = oldPostsRef.doc(doc.id);
+            batch.set(oldDocRef, oldData);
+            
+            const newDocRef = newPostsRef.doc(doc.id);
+            batch.delete(newDocRef);
             
             batchCount++;
             
@@ -137,6 +142,8 @@ const rollbackMigration = async () => {
                 batch = db.batch();
                 batchCount = 0;
             }
+        } catch (error) {
+            console.error(`Error rolling back document ${doc.id}:`, error);
         }
     }
     
@@ -157,7 +164,7 @@ if (args[0] === '--rollback') {
         process.exit(1);
     });
 } else {
-    migratePostIds().catch(error => {
+    migratePostFields().catch(error => {
         console.error('Migration failed:', error);
         process.exit(1);
     });

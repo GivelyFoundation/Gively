@@ -37,7 +37,7 @@ const WelcomeMessage = memo(({ displayName }) => {
 const FirstTimeDonationCard = memo(({ data }) => {
     const { userData } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
-    const [likesCount, setLikesCount] = useState((data?.Likers || []).length);
+    const [likesCount, setLikesCount] = useState((data?.likers || []).length);
 
     useEffect(() => {
         const checkIfLiked = async () => {
@@ -116,7 +116,7 @@ const FirstTimeDonationCard = memo(({ data }) => {
         prevProps.data.id === nextProps.data.id &&
         prevProps.data.charity === nextProps.data.charity &&
         prevProps.data.date === nextProps.data.date &&
-        prevProps.data.Likers?.length === nextProps.data.Likers?.length &&
+        prevProps.data.likers?.length === nextProps.data.likers?.length &&
         prevProps.data.posterData?.username === nextProps.data.posterData?.username &&
         prevProps.data.posterData?.displayName === nextProps.data.posterData?.displayName
     );

@@ -39,7 +39,7 @@ const MemoizedLinkPreview = memo(({ url }) => (
 const GoFundMeCard = memo(({ data = {} }) => {
     const { userData } = useAuth();
     const [isLiked, setIsLiked] = useState(false);
-    const [likesCount, setLikesCount] = useState((data?.Likers || []).length);
+    const [likesCount, setLikesCount] = useState((data?.likers || []).length);
 
     useEffect(() => {
         const checkIfLiked = async () => {
@@ -100,7 +100,7 @@ const GoFundMeCard = memo(({ data = {} }) => {
             />
             {data.postText && <Text style={cardStyles.postText}>{data.postText}</Text>}
             <View style={styles.linkPreviewContainer}>
-                <MemoizedLinkPreview url={data.Link} />
+                <MemoizedLinkPreview url={data.link} />
             </View>
             <View style={styles.footer}>
                 <MemoizedLikeButton 
@@ -119,9 +119,9 @@ const GoFundMeCard = memo(({ data = {} }) => {
     return (
         prevProps.data.id === nextProps.data.id &&
         prevProps.data.postText === nextProps.data.postText &&
-        prevProps.data.Link === nextProps.data.Link &&
+        prevProps.data.link === nextProps.data.link &&
         prevProps.data.date === nextProps.data.date &&
-        prevProps.data.Likers?.length === nextProps.data.Likers?.length &&
+        prevProps.data.likers?.length === nextProps.data.likers?.length &&
         prevProps.data.posterData?.username === nextProps.data.posterData?.username
     );
 });

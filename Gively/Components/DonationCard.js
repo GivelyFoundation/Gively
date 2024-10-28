@@ -42,7 +42,7 @@ const OthersElement = memo(({ otherDonationUsers }) => {
 const DonationCard = memo(({ data }) => {
   const { userData } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState((data?.Likers || []).length);
+  const [likesCount, setLikesCount] = useState((data?.likers || []).length);
 
   useEffect(() => {
     const checkIfLiked = async () => {
@@ -122,7 +122,7 @@ const DonationCard = memo(({ data }) => {
     prevProps.data.postText === nextProps.data.postText &&
     prevProps.data.charityName === nextProps.data.charityName &&
     prevProps.data.date === nextProps.data.date &&
-    prevProps.data.Likers?.length === nextProps.data.Likers?.length &&
+    prevProps.data.likers?.length === nextProps.data.likers?.length &&
     prevProps.data.posterData?.username === nextProps.data.posterData?.username &&
     prevProps.data.otherDonationUsers?.length === nextProps.data.otherDonationUsers?.length
   );
