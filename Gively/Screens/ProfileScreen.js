@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, RefreshControl, Dimensions, Animated } from 'react-native';
 import SwitchSelector from "react-native-switch-selector";
 import { user, charityData } from '../MockData';
 import styles from '../styles/Styles';
@@ -13,7 +13,7 @@ import { collection, query, where, getDocs, onSnapshot } from 'firebase/firestor
 import { firestore } from '../services/firebaseConfig';
 
 const pieChartPlaceHolder = require('../assets/Images/pieChartPlaceHolder.png');
-
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const CharityInfoComponent = ({ charityName, color, percentage }) => {
   return (
     <View style={profileStyles.charityCardInfoContainer}>
@@ -68,7 +68,6 @@ const Posts = () => {
   };
 
   const renderCard = (item) => {
-    console.log(item)
     switch (item.postType) {
       case 'donation':
         return <DonationCard key={item.id} data={item} />;
@@ -76,8 +75,8 @@ const Posts = () => {
         return <PetitionCard key={item.id} data={item} user={user} />;
       case 'gofundme':
         return <GoFundMeCard key={item.id} data={item} user={user} />;
-      case 'volunteer': // Add case for volunteer
-        return <VolunteerCard key={item.id} data={item}  />;
+      case 'volunteer':
+        return <VolunteerCard key={item.id} data={item} />;
     }
   };
 
@@ -119,7 +118,23 @@ export default function ProfileScreen({ navigation }) {
   const { userData } = useAuth();
   const [followersCount, setFollowersCount] = useState(null);
   const [followingCount, setFollowingCount] = useState(null);
-
+  const [contentHeight, setContentHeight] = useState(0);
+  const scrollY = new Animated.Value(0);
+  const pinnedOpacity = scrollY.interpolate({
+    inputRange: [0, 100], // Adjust as needed for the fade-out range
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+  const categoryOpacity = scrollY.interpolate({
+    inputRange: [50, 150],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+  const bioOpacity = scrollY.interpolate({
+    inputRange: [100, 200],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
   useEffect(() => {
     const fetchFollowCounts = async () => {
       if (userData && userData.uid) {
@@ -156,91 +171,113 @@ export default function ProfileScreen({ navigation }) {
     navigation.navigate('FollowingList', { userId: userData.uid });
   };
 
+  const handleLayout = (event) => {
+    const { height } = event.nativeEvent.layout;
+    setContentHeight(height);
+  };
+
   return (
-    <View style={styles.page}>
-      <View style={[profileStyles.header]}>
-        <Text style={[profileStyles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Profile</Text>
-        <TouchableOpacity>
-          <Text
-            style={[profileStyles.editProfile, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}
-            onPress={() => navigation.navigate('EditProfile')}
-          >
-            Edit Profile
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View style={[profileStyles.row, profileStyles.profileInfo]}>
-        <Image source={{ uri: userData.profilePicture }} style={profileStyles.profilePicture} />
-        <View style={[profileStyles.column]}>
-          <Text style={[profileStyles.userNameText, { fontFamily: 'Montserrat-Medium' }]}> {userData.username}</Text>
-          <View style={[profileStyles.followRow]}>
-            <View style={[profileStyles.column]}>
-              <TouchableOpacity onPress={handleFollowersPress}>
-                <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>
-                  {followersCount !== null ? followersCount : 0}
-                </Text>
-              </TouchableOpacity>
-              <Text style={[profileStyles.followText, { fontFamily: 'Montserrat-Medium' }]}>Followers</Text>
-            </View>
-            <View style={profileStyles.verticalLine} />
-            <View style={[profileStyles.column]}>
-              <TouchableOpacity onPress={handleFollowingPress}>
-                <Text style={[profileStyles.followText, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}>
-                  {followingCount !== null ? followingCount : 0}
-                </Text>
-              </TouchableOpacity>
-              <Text style={[profileStyles.followText, { fontFamily: 'Montserrat-Medium' }]}>Following</Text>
+    <SafeAreaView style={styles.page}>
+      <View style={profileStyles.container}>
+        <View style={[profileStyles.header]}>
+          <Text style={[profileStyles.headerText]}>Profile</Text>
+          <TouchableOpacity>
+            <Text
+              style={[profileStyles.editProfile, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}
+              onPress={() => navigation.navigate('EditProfile')}
+            >
+              Edit Profile
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={[profileStyles.row, profileStyles.profileInfo]}>
+          <Image source={{ uri: userData.profilePicture }} style={profileStyles.profilePicture} />
+          <View style={[profileStyles.column]}>
+            <Text style={[profileStyles.userNameText]}> {userData.username}</Text>
+            <View style={[profileStyles.followRow]}>
+              <View style={[profileStyles.column]}>
+                <TouchableOpacity onPress={handleFollowersPress}>
+                  <Text style={[profileStyles.followText, profileStyles.buttonText]}>
+                    {followersCount !== null ? followersCount : 0}
+                  </Text>
+                </TouchableOpacity>
+                <Text style={[profileStyles.followText]}>Followers</Text>
+              </View>
+              <View style={profileStyles.verticalLine} />
+              <View style={[profileStyles.column]}>
+                <TouchableOpacity onPress={handleFollowingPress}>
+                  <Text style={[profileStyles.followText, profileStyles.buttonText]}>
+                    {followingCount !== null ? followingCount : 0}
+                  </Text>
+                </TouchableOpacity>
+                <Text style={[profileStyles.followText]}>Following</Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
-      <Text style={[profileStyles.bioHeader, { fontFamily: 'Montserrat-Medium' }]}> {userData.displayName} </Text>
-      <Text style={[profileStyles.bioMainText, { fontFamily: 'Montserrat-Medium' }]}> {userData.bio}</Text>
-      <CategoryScroll />
+        <Animated.View style={{ opacity: bioOpacity }}>
+          <Text style={[profileStyles.bioHeader]}> {userData.displayName} </Text>
+          <Text style={[profileStyles.bioMainText]}> {userData.bio}</Text>
+        </Animated.View>
 
-      
-      {activeTab === 'Portfolio' && (
-        <PinnedCharityCard 
-          username={user.username.split(" ")[0]} 
-          charity="NAMI" 
-          reason="Help me raise money for mental health awareness!" 
+        <Animated.View style={{ opacity: categoryOpacity }}>
+          <CategoryScroll />
+        </Animated.View>
+
+        {activeTab === 'Portfolio' && (
+          <Animated.View style={{ opacity: pinnedOpacity }}>
+            <PinnedCharityCard 
+              username={user.username.split(" ")[0]} 
+              charity="NAMI" 
+              reason="Help me raise money for mental health awareness!" 
+            />
+          </Animated.View>
+        )}
+        <SwitchSelector
+          initial={0}
+          onPress={value => handleTabPress(value)}
+          hasPadding
+          options={[
+            { label: "Portfolio", value: "Portfolio" },
+            { label: "Posts", value: "Posts" }
+          ]}
+          testID="feed-switch-selector"
+          accessibilityLabel="feed-switch-selector"
+          style={[profileStyles.switchStyle]}
+          selectedColor={'#1C5AA3'}
+          buttonColor={'#fff'}
+          backgroundColor={'#F5F5F5'}
+          borderColor={"#AFB1B3"}
+          textColor={"#AFB1B3"}
+          fontSize={16}
+          height={30}
         />
-      )}
-      <SwitchSelector
-        initial={0}
-        onPress={value => handleTabPress(value)}
-        hasPadding
-        options={[
-          { label: "Portfolio", value: "Portfolio" },
-          { label: "Posts", value: "Posts" }
-        ]}
-        testID="feed-switch-selector"
-        accessibilityLabel="feed-switch-selector"
-        style={[profileStyles.switchStyle]}
-        selectedColor={'#1C5AA3'}
-        buttonColor={'#fff'}
-        backgroundColor={'#F5F5F5'}
-        borderColor={"#AFB1B3"}
-        textColor={"#AFB1B3"}
-        fontSize={16}
-        height={30}
-      />
-      {activeTab === 'Portfolio' ? <Portfolio /> : <Posts />}
-    </View>
+        
+        
+        <ScrollView style={[{ height: contentHeight }]}> 
+          <View onLayout={handleLayout}>
+          {activeTab === 'Portfolio' ? <Portfolio /> : <Posts />}
+          </View>
+        </ScrollView>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const profileStyles = StyleSheet.create({
   header: {
-    paddingTop: 70,
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    justifyContent: 'space-between',
-    paddingRight: 20
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: SCREEN_HEIGHT * 0.02,
+  },
+  container: {
+    paddingHorizontal: SCREEN_WIDTH * 0.03, // Reduced horizontal padding
+    paddingTop: SCREEN_HEIGHT * 0.02,
   },
   row: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
   followRow: {
@@ -250,6 +287,7 @@ const profileStyles = StyleSheet.create({
   },
   column: {
     flexDirection: 'column',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
   followColumn: {
@@ -259,24 +297,26 @@ const profileStyles = StyleSheet.create({
   },
   userNameText: {
     fontSize: 24,
+    fontFamily: 'Montserrat-Medium'
   },
   followText: {
     fontSize: 16,
-    color: '#747688'
+    color: '#747688',
+    fontFamily: 'Montserrat-Medium'
   },
   profileInfo: {
     width: '100%',
-    paddingTop: 20,
-    paddingLeft: 30,
-    paddingRight: 30,
-    justifyContent: 'space-between'
+    paddingTop: 10,
+    justifyContent: 'space-between',
+    paddingHorizontal: SCREEN_HEIGHT * 0.02,
   },
   headerText: {
-    paddingLeft: 30,
-    fontSize: 24
+    fontSize: SCREEN_WIDTH * 0.06,
+    fontFamily: 'Montserrat-Medium',
   },
   editProfile: {
-    fontSize: 16
+    fontSize: 16,
+    fontFamily: 'Montserrat-Medium'
   },
   verticalLine: {
     height: '70%',
@@ -304,27 +344,28 @@ const profileStyles = StyleSheet.create({
   },
   buttonText: {
     color: '#1C5AA3',
-    fontFamily: ''
+    fontFamily: 'Montserrat-Medium',
   },
   bioHeader: {
     fontSize: 15,
-    padding: 30,
+    paddingHorizontal: SCREEN_HEIGHT * 0.02,
     paddingVertical: 10,
     paddingBottom: 10,
     textTransform: 'uppercase',
-    color: '#1E1E1E'
+    color: '#1E1E1E',
+    fontFamily: 'Montserrat-Medium'
   },
   bioMainText: {
     fontSize: 16,
-    paddingHorizontal: 30,
     lineHeight: 25,
-    color: '#747688'
+    paddingHorizontal: SCREEN_HEIGHT * 0.02,
+    color: '#747688',
+    fontFamily: 'Montserrat-Medium'
   },
   interestContainer: {
     alignItems: 'center',
     padding: 10,
     paddingBottom: 14,
-    paddingHorizontal: 30
   },
   interestButton: {
     borderRadius: 20,
@@ -336,7 +377,8 @@ const profileStyles = StyleSheet.create({
   interestButtonText: {
     color: '#1C5AA3',
     fontSize: 16,
-    opacity: .9
+    opacity: .9,
+    fontFamily: 'Montserrat-Medium'
   },
   switchStyle: {
     paddingTop: 10,
@@ -348,12 +390,6 @@ const profileStyles = StyleSheet.create({
     backgroundColor: '#fff',
     height: 1000
   },
-  scrollView: {
-    flexGrow: 1,
-    flexDirection: 'column',
-    paddingVertical: 4,
-    paddingHorizontal: 30,
-  },
   portfolioContainer: {
     alignContent: 'center',
     paddingTop: 20,
@@ -363,20 +399,21 @@ const profileStyles = StyleSheet.create({
   charityCardInfoContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginHorizontal: 30,
     marginTop: 10,
   },
   charityName: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'Montserrat-Medium',
   },
   percentage: {
     fontSize: 16,
     fontWeight: '500',
+    fontFamily: 'Montserrat-Medium'
   },
   spacer: {
     height: 700
-  },
+  }
 });
 
 function serializeData(data) {

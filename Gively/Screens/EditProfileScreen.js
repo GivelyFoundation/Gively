@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, TextInput, Text, Image, StyleSheet, ScrollView, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../services/AuthContext';
 import { firestore } from '../services/firebaseConfig';
 import { doc, updateDoc } from 'firebase/firestore';
+
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default EditProfileScreen = ({ navigation }) => {
     const { user2, userData } = useAuth();
@@ -70,12 +73,6 @@ export default EditProfileScreen = ({ navigation }) => {
                     maxLength={150}
                 />
                 <Text style={styles.charCount}>{bio.length}/150</Text>
-                <TextInput
-                    style={styles.input}
-                    onChangeText={setCharity}
-                    value={charity}
-                    placeholder="Search and pin your favorite charity"
-                />
             </ScrollView>
             <TouchableOpacity
                 style={[styles.donateButton, !isChanged && styles.disabledButton]}
@@ -91,16 +88,17 @@ export default EditProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff"
+        backgroundColor: "#fff",
+        paddingTop: SCREEN_HEIGHT * 0.04,
     },
     scrollContainer: {
-        padding: 20,
+    
         alignItems: 'center',
-        paddingTop: 80,
-        backgroundColor: "#fff"
+        backgroundColor: "#fff",
+        paddingHorizontal: SCREEN_WIDTH * 0.03, // Reduced horizontal padding
     },
     backButton: {
-        paddingTop: 60,
+        paddingTop: 10,
         paddingLeft: 20,
     },
     backButtonText: {
