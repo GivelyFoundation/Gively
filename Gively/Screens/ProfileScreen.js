@@ -1,5 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, RefreshControl, Dimensions, Animated } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  SafeAreaView, 
+  View, 
+  Text, 
+  StyleSheet, 
+  Image, 
+  TouchableOpacity, 
+  ScrollView,
+  RefreshControl, 
+  Dimensions, 
+  Animated 
+} from 'react-native';
 import SwitchSelector from "react-native-switch-selector";
 import { user, charityData } from '../MockData';
 import styles from '../styles/Styles';
@@ -7,13 +18,14 @@ import PinnedCharityCard from '../Components/PinnedCharityCard';
 import DonationCard from '../Components/DonationCard';
 import { PetitionCard } from '../Components/PetitionCard';
 import { GoFundMeCard } from '../Components/GoFundMeCard';
-import { VolunteerCard } from '../Components/VolunteerCard'; // Import VolunteerCard
+import { VolunteerCard } from '../Components/VolunteerCard';
 import { useAuth } from '../services/AuthContext';
 import { collection, query, where, getDocs, onSnapshot } from 'firebase/firestore';
 import { firestore } from '../services/firebaseConfig';
 
 const pieChartPlaceHolder = require('../assets/Images/pieChartPlaceHolder.png');
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
 const CharityInfoComponent = ({ charityName, color, percentage }) => {
   return (
     <View style={profileStyles.charityCardInfoContainer}>
@@ -43,14 +55,13 @@ const Posts = () => {
 
   const fetchPosts = async () => {
     try {
-      const postsCollection = collection(firestore, 'Posts');
+      const postsCollection = collection(firestore, 'posts');
       const q = query(postsCollection, where('uid', '==', userData.uid));
       const postsSnapshot = await getDocs(q);
-      const postsList = postsSnapshot.docs.map(doc => {
-        const data = doc.data();
-        const serializedData = serializeData(data);
-        return { id: doc.id, ...serializedData };
-      });
+      const postsList = postsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...serializeData(doc.data())
+      }));
       setPosts(postsList);
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -68,16 +79,15 @@ const Posts = () => {
   };
 
   const renderCard = (item) => {
-    switch (item.postType) {
-      case 'donation':
-        return <DonationCard key={item.id} data={item} />;
-      case 'petition':
-        return <PetitionCard key={item.id} data={item} user={user} />;
-      case 'gofundme':
-        return <GoFundMeCard key={item.id} data={item} user={user} />;
-      case 'volunteer':
-        return <VolunteerCard key={item.id} data={item} />;
-    }
+    const cardComponents = {
+      donation: DonationCard,
+      petition: PetitionCard,
+      gofundme: GoFundMeCard,
+      volunteer: VolunteerCard
+    };
+    
+    const CardComponent = cardComponents[item.postType];
+    return CardComponent ? <CardComponent key={item.id} data={item} user={user} /> : null;
   };
 
   const sortedPosts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -90,51 +100,100 @@ const Posts = () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {sortedPosts.map((item) => renderCard(item))}
+        {sortedPosts.map(renderCard)}
         <View style={profileStyles.spacer} />
       </ScrollView>
     </View>
   );
 };
 
-const CategoryScroll = () => {
-  return (
-    <ScrollView
-      horizontal={true}
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={profileStyles.interestContainer}
-    >
-      {user.interests.map((category, index) => (
-        <TouchableOpacity key={index} style={profileStyles.interestButton}>
-          <Text style={[profileStyles.interestButtonText, { fontFamily: 'Montserrat-Medium' }]}>{category}</Text>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
-  );
-};
+const CategoryScroll = () => (
+  <ScrollView
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+    contentContainerStyle={profileStyles.interestContainer}
+  >
+    {user.interests.map((category, index) => (
+      <TouchableOpacity key={index} style={profileStyles.interestButton}>
+        <Text style={[profileStyles.interestButtonText, { fontFamily: 'Montserrat-Medium' }]}>
+          {category}
+        </Text>
+      </TouchableOpacity>
+    ))}
+  </ScrollView>
+);
 
 export default function ProfileScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Portfolio');
   const { userData } = useAuth();
   const [followersCount, setFollowersCount] = useState(null);
   const [followingCount, setFollowingCount] = useState(null);
-  const [contentHeight, setContentHeight] = useState(0);
-  const scrollY = new Animated.Value(0);
-  const pinnedOpacity = scrollY.interpolate({
-    inputRange: [0, 100], // Adjust as needed for the fade-out range
-    outputRange: [1, 0],
-    extrapolate: 'clamp',
-  });
-  const categoryOpacity = scrollY.interpolate({
-    inputRange: [50, 150],
-    outputRange: [1, 0],
-    extrapolate: 'clamp',
-  });
-  const bioOpacity = scrollY.interpolate({
-    inputRange: [100, 200],
-    outputRange: [1, 0],
-    extrapolate: 'clamp',
-  });
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  // Visibility states
+  const [showPinnedCharity, setShowPinnedCharity] = useState(true);
+  const [showCategoryScroll, setShowCategoryScroll] = useState(true);
+  const [showBio, setShowBio] = useState(true);
+
+  // Animated height values
+  const pinnedCharityHeight = useRef(new Animated.Value(100)).current;
+  const categoryScrollHeight = useRef(new Animated.Value(60)).current;
+  const bioHeight = useRef(new Animated.Value(80)).current;
+
+  // Animation thresholds
+  const PINNED_CHARITY_THRESHOLD = 50;
+  const CATEGORY_SCROLL_THRESHOLD = 10;
+  const BIO_THRESHOLD = 100;
+
+  // Function to animate height and handle visibility
+  const animateHeight = (animatedValue, finalHeight, setVisibility) => {
+    if (finalHeight === 0) {
+      Animated.timing(animatedValue, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }).start(() => {
+        setVisibility(false);
+      });
+    } else {
+      setVisibility(true);
+      Animated.timing(animatedValue, {
+        toValue: finalHeight,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    }
+  };
+
+  useEffect(() => {
+    scrollY.addListener(({ value }) => {
+      // PinnedCharity animations
+      if (value > PINNED_CHARITY_THRESHOLD && showPinnedCharity) {
+        animateHeight(pinnedCharityHeight, 0, setShowPinnedCharity);
+      } else if (value <= PINNED_CHARITY_THRESHOLD && !showPinnedCharity) {
+        animateHeight(pinnedCharityHeight, 100, setShowPinnedCharity);
+      }
+
+      // CategoryScroll animations
+      if (value > CATEGORY_SCROLL_THRESHOLD && showCategoryScroll) {
+        animateHeight(categoryScrollHeight, 0, setShowCategoryScroll);
+      } else if (value <= CATEGORY_SCROLL_THRESHOLD && !showCategoryScroll) {
+        animateHeight(categoryScrollHeight, 60, setShowCategoryScroll);
+      }
+
+      // Bio animations
+      if (value > BIO_THRESHOLD && showBio) {
+        animateHeight(bioHeight, 0, setShowBio);
+      } else if (value <= BIO_THRESHOLD && !showBio) {
+        animateHeight(bioHeight, 80, setShowBio);
+      }
+    });
+
+    return () => {
+      scrollY.removeAllListeners();
+    };
+  }, [showPinnedCharity, showCategoryScroll, showBio]);
+
   useEffect(() => {
     const fetchFollowCounts = async () => {
       if (userData && userData.uid) {
@@ -163,102 +222,131 @@ export default function ProfileScreen({ navigation }) {
     setActiveTab(tab);
   };
 
-  const handleFollowersPress = () => {
-    navigation.navigate('FollowersList', { userId: userData.uid });
-  };
+  let dynamicPadding;
 
-  const handleFollowingPress = () => {
-    navigation.navigate('FollowingList', { userId: userData.uid });
-  };
-
-  const handleLayout = (event) => {
-    const { height } = event.nativeEvent.layout;
-    setContentHeight(height);
-  };
+if (showPinnedCharity) {
+  dynamicPadding = 40;
+} else if (showCategoryScroll){
+  dynamicPadding = 80;
+} else if (showBio){
+  dynamicPadding = 120
+} else {
+  dynamicPadding = 160
+}
 
   return (
     <SafeAreaView style={styles.page}>
-      <View style={profileStyles.container}>
-        <View style={[profileStyles.header]}>
-          <Text style={[profileStyles.headerText]}>Profile</Text>
-          <TouchableOpacity>
-            <Text
-              style={[profileStyles.editProfile, profileStyles.buttonText, { fontFamily: 'Montserrat-Medium' }]}
-              onPress={() => navigation.navigate('EditProfile')}
-            >
-              Edit Profile
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View style={[profileStyles.row, profileStyles.profileInfo]}>
-          <Image source={{ uri: userData.profilePicture }} style={profileStyles.profilePicture} />
-          <View style={[profileStyles.column]}>
-            <Text style={[profileStyles.userNameText]}> {userData.username}</Text>
-            <View style={[profileStyles.followRow]}>
-              <View style={[profileStyles.column]}>
-                <TouchableOpacity onPress={handleFollowersPress}>
-                  <Text style={[profileStyles.followText, profileStyles.buttonText]}>
-                    {followersCount !== null ? followersCount : 0}
-                  </Text>
+      <View style={profileStyles.fixedAccountInfo}>
+        <View style={profileStyles.container}>
+          <View style={profileStyles.header}>
+            <Text style={profileStyles.headerText}>Profile</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
+              <Text style={[profileStyles.editProfile, profileStyles.buttonText]}>
+                Edit Profile
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={[profileStyles.row, profileStyles.profileInfo]}>
+            <Image source={{ uri: userData.profilePicture }} style={profileStyles.profilePicture} />
+            <View style={profileStyles.column}>
+              <Text style={profileStyles.userNameText}>{userData.username}</Text>
+              <View style={profileStyles.followRow}>
+                <TouchableOpacity onPress={() => navigation.navigate('FollowersList', { userId: userData.uid })}>
+                  <View style={profileStyles.column}>
+                    <Text style={[profileStyles.followText, profileStyles.buttonText]}>
+                      {followersCount ?? 0}
+                    </Text>
+                    <Text style={profileStyles.followText}>Followers</Text>
+                  </View>
                 </TouchableOpacity>
-                <Text style={[profileStyles.followText]}>Followers</Text>
-              </View>
-              <View style={profileStyles.verticalLine} />
-              <View style={[profileStyles.column]}>
-                <TouchableOpacity onPress={handleFollowingPress}>
-                  <Text style={[profileStyles.followText, profileStyles.buttonText]}>
-                    {followingCount !== null ? followingCount : 0}
-                  </Text>
+                
+                <View style={profileStyles.verticalLine} />
+                
+                <TouchableOpacity onPress={() => navigation.navigate('FollowingList', { userId: userData.uid })}>
+                  <View style={profileStyles.column}>
+                    <Text style={[profileStyles.followText, profileStyles.buttonText]}>
+                      {followingCount ?? 0}
+                    </Text>
+                    <Text style={profileStyles.followText}>Following</Text>
+                  </View>
                 </TouchableOpacity>
-                <Text style={[profileStyles.followText]}>Following</Text>
               </View>
             </View>
           </View>
+
+          <Text style={profileStyles.bioHeader}>{userData.displayName}</Text>
+
+          {showBio && (
+            <Animated.View style={[
+              profileStyles.bioContainer,
+              {
+                overflow: 'hidden'
+              }
+            ]}>
+              <Text style={profileStyles.bioMainText}>{userData.bio}</Text>
+            </Animated.View>
+          )}
+
+          {showCategoryScroll && (
+            <Animated.View style={[
+              profileStyles.categoryContainer,
+              {
+                overflow: 'hidden'
+              }
+            ]}>
+              <CategoryScroll />
+            </Animated.View>
+          )}
+
+          {activeTab === 'Portfolio' && showPinnedCharity && (
+            <Animated.View style={[
+              profileStyles.pinnedCharityContainer,
+              {
+                overflow: 'hidden'
+              }
+            ]}>
+              <PinnedCharityCard 
+                username={user.username.split(" ")[0]} 
+                charity="NAMI" 
+                reason="Help me raise money for mental health awareness!" 
+              />
+            </Animated.View>
+          )}
+
+          <SwitchSelector
+            initial={0}
+            onPress={value => setActiveTab(value)}
+            hasPadding
+            options={[
+              { label: "Portfolio", value: "Portfolio" },
+              { label: "Posts", value: "Posts" }
+            ]}
+            testID="feed-switch-selector"
+            accessibilityLabel="feed-switch-selector"
+            style={profileStyles.switchStyle}
+            selectedColor="#1C5AA3"
+            buttonColor="#fff"
+            backgroundColor="#F5F5F5"
+            borderColor="#AFB1B3"
+            textColor="#AFB1B3"
+            fontSize={16}
+            height={30}
+          />
+
+          <Animated.ScrollView
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              { useNativeDriver: false }
+            )}
+            scrollEventThrottle={16}
+          >
+            <View style = {[profileStyles.statsAndPostsSection, {paddingTop: dynamicPadding}]}>
+            {activeTab === 'Portfolio' ? <Portfolio /> : <Posts />}
+            </View>
+           
+          </Animated.ScrollView>
         </View>
-        <Animated.View style={{ opacity: bioOpacity }}>
-          <Text style={[profileStyles.bioHeader]}> {userData.displayName} </Text>
-          <Text style={[profileStyles.bioMainText]}> {userData.bio}</Text>
-        </Animated.View>
-
-        <Animated.View style={{ opacity: categoryOpacity }}>
-          <CategoryScroll />
-        </Animated.View>
-
-        {activeTab === 'Portfolio' && (
-          <Animated.View style={{ opacity: pinnedOpacity }}>
-            <PinnedCharityCard 
-              username={user.username.split(" ")[0]} 
-              charity="NAMI" 
-              reason="Help me raise money for mental health awareness!" 
-            />
-          </Animated.View>
-        )}
-        <SwitchSelector
-          initial={0}
-          onPress={value => handleTabPress(value)}
-          hasPadding
-          options={[
-            { label: "Portfolio", value: "Portfolio" },
-            { label: "Posts", value: "Posts" }
-          ]}
-          testID="feed-switch-selector"
-          accessibilityLabel="feed-switch-selector"
-          style={[profileStyles.switchStyle]}
-          selectedColor={'#1C5AA3'}
-          buttonColor={'#fff'}
-          backgroundColor={'#F5F5F5'}
-          borderColor={"#AFB1B3"}
-          textColor={"#AFB1B3"}
-          fontSize={16}
-          height={30}
-        />
-        
-        
-        <ScrollView style={[{ height: contentHeight }]}> 
-          <View onLayout={handleLayout}>
-          {activeTab === 'Portfolio' ? <Portfolio /> : <Posts />}
-          </View>
-        </ScrollView>
       </View>
     </SafeAreaView>
   );
@@ -266,13 +354,13 @@ export default function ProfileScreen({ navigation }) {
 
 const profileStyles = StyleSheet.create({
   header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: SCREEN_HEIGHT * 0.02,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SCREEN_HEIGHT * 0.02,
   },
   container: {
-    paddingHorizontal: SCREEN_WIDTH * 0.03, // Reduced horizontal padding
+    paddingHorizontal: SCREEN_WIDTH * 0.03,
     paddingTop: SCREEN_HEIGHT * 0.02,
   },
   row: {
@@ -303,6 +391,16 @@ const profileStyles = StyleSheet.create({
     fontSize: 16,
     color: '#747688',
     fontFamily: 'Montserrat-Medium'
+  },
+  categoryContainer: {
+    overflow: 'hidden',
+  },
+  bioContainer: {
+    overflow: 'hidden',
+  },
+  statsAndPostsSection:{
+    height: 1600,
+    paddingTop:20
   },
   profileInfo: {
     width: '100%',

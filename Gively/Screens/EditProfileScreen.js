@@ -9,7 +9,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default EditProfileScreen = ({ navigation }) => {
-    const { user2, userData } = useAuth();
+    const {  userData, updateUserData } = useAuth();
 
     const [displayName, setDisplayName] = useState(userData.displayName);
     const [bio, setBio] = useState(userData.bio);
@@ -33,6 +33,7 @@ export default EditProfileScreen = ({ navigation }) => {
                 bio: bio,
                 profilePicture: profilePicture,
             });
+            updateUserData();
             console.log('User profile updated successfully!');
             navigation.navigate('Profile');
         } catch (error) {
