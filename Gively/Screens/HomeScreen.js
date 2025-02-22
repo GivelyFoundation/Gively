@@ -12,7 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import SwitchSelector from "react-native-switch-selector";
 import { useAuth } from '../services/AuthContext';
-import { usePosts } from '../services/usePosts';
+import { usePosts } from '../hooks/usePosts';
 
 import DonationCard from '../Components/DonationCard';
 import PetitionCard from '../Components/PetitionCard';
@@ -115,7 +115,7 @@ const FriendsPrompt = memo(({ navigation }) => (
     </Text>
     <TouchableOpacity
       style={styles.friendsPromptButton}
-      onPress={() => navigation.navigate('ConnectScreen')}
+      onPress={() => navigation.navigate('Connect')}
     >
       <Text style={styles.friendsPromptButtonText}>Find Users to Follow</Text>
     </TouchableOpacity>

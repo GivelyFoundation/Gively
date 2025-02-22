@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Alert, Button, Image, TouchableOpacity, Text } from 'react-native';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
+import * as Notifications from 'expo-notifications'; 
 
 // assets
 import { useFonts } from 'expo-font';
@@ -25,7 +26,7 @@ import ProfileScreen from './Screens/ProfileScreen'
 import AboutUsScreen from './Screens/AboutUsScreen'
 import ContactUsScreen from './Screens/ContactUsScreen'
 import FAQScreen from './Screens/FAQScreen'
-import SettingScreen from './Screens/SettingScreen'
+import SettingsScreen from './Screens/SettingsScreen'
 import DonationHistoryScreen from './Screens/DonationHistoryScreen';
 import PetitionScreen from './Screens/PetitionScreen';
 import GoFundMeScreen from './Screens/GoFundMeScreen';
@@ -48,6 +49,26 @@ import { AuthProvider, useAuth } from './services/AuthContext';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+  }),
+});
+
+const handleNotificationResponse = (response) => {
+  console.log('Notification tapped:', response.notification.request.content.data);
+  
+  // Get the navigation reference
+  const navigationRef = global.navigationRef;
+
+  // Simply navigate to notifications screen for all notification types
+  if (navigationRef) {
+      navigationRef.navigate('Notifications');
+  }
+};
 
 //Core App Pages Tab Navigator
 function MainTabs() {
@@ -181,7 +202,7 @@ function HomeScreenDrawer() {
       <Drawer.Screen name="Donation History & Tax Form" component={DonationHistoryScreen} />
       <Drawer.Screen name="About Us" component={AboutUsScreen} />
       <Drawer.Screen name="Contact Us" component={ContactUsScreen} />
-      <Drawer.Screen name="Settings" component={SettingScreen} />
+      <Drawer.Screen name="Settings" component={SettingsScreen} />
       <Drawer.Screen name="Help & FAQs" component={FAQScreen} />
     </Drawer.Navigator>
   );
@@ -201,7 +222,15 @@ function RootNavigator() {
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
           <Stack.Screen name="UserScreen" component={UserScreen} /> 
           <Stack.Screen name="CharityDetailedScreen" component={CharityDetailedScreen} /> 
-          <Stack.Screen name= "Notifications" component={NotificationsScreen}/>
+          <Stack.Screen 
+              name="Notifications" 
+              component={NotificationsScreen}
+              options={{
+                  animation: 'slide_from_right',
+                  gestureEnabled: true,
+                  gestureDirection: 'horizontal'
+              }}
+          />
           <Stack.Screen name="SinglePostScreen" component={SinglePostScreen}/>
           <Stack.Screen name="LearningScreen" component={LearningScreen} />
           <Stack.Screen name="BlogPostScreen" component={BlogPostScreen} />
@@ -235,13 +264,26 @@ function App() {
     'Montserrat-Bold': require('./assets/Fonts/Montserrat/static/Montserrat-Bold.ttf'),
   });
 
+  // Set up notification handler
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(
+        handleNotificationResponse
+    );
+
+    return () => subscription.remove();
+  }, []);
+
+  // Reference for navigation from outside components
+  const navigationRef = React.useRef(null);
+  global.navigationRef = navigationRef;
+
   if (!fontsLoaded) {
     return null; // Or a loading screen/spinner until the fonts are loaded
   }
 
   return (
     <AuthProvider>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <RootNavigator />
       </NavigationContainer>
     </AuthProvider>

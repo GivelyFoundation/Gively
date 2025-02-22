@@ -1,290 +1,374 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import React, { useCallback } from 'react';
+import { 
+    View, 
+    Text, 
+    FlatList, 
+    StyleSheet, 
+    TouchableOpacity, 
+    Image,
+    RefreshControl,
+    ActivityIndicator 
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useAuth } from '../services/AuthContext';
-import { firestore } from '../services/firebaseConfig';
-import {  collection, query, where, getDocs, doc, onSnapshot, serverTimestamp ,addDoc, deleteDoc , getDoc,orderBy, updateDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/native';
-import { followUser, unfollowUser } from '../services/followService';
+import { useNotifications } from '../hooks/useNotifications';
+import { formatDistanceToNow } from 'date-fns';
+// import createLogger from '../utils/logger';
 
+// const logger = createLogger('NotificationsScreen');
 
-const formatDate = (timestamp) => {
-    const date = new Date(timestamp.toDate());
-    const optionsDate = { weekday: 'short', month: 'short', day: 'numeric' };
-    const formattedDate = date.toLocaleDateString('en-US', optionsDate);
-    const optionsTime = { hour: 'numeric', minute: 'numeric', hour12: true };
-    const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
-    return `${formattedDate} • ${formattedTime}`;
-  };
+const NotificationItem = ({ notification, onPress, onUserPress }) => {
+    const mainActor = notification.actors[0];
+    const otherActorsCount = notification.count - 1;
 
-  const removeFollowNotification = async (userId, followedId) => {
-    try {
-   
+    const renderContent = () => {
+        switch (notification.type) {
+            case 'like':
+                return (
+                    <TouchableOpacity style={styles.notificationItem} onPress={onPress}>
+                        <View style={styles.avatarGroup}>
+                            <Image 
+                                source={{ uri: mainActor.profilePicture }} 
+                                style={styles.mainAvatar} 
+                            />
+                            {otherActorsCount > 0 && (
+                                <View style={styles.countBadge}>
+                                    <Text style={styles.countText}>+{otherActorsCount}</Text>
+                                </View>
+                            )}
+                        </View>
+                        <View style={styles.contentContainer}>
+                            <Text style={styles.notificationText}>
+                                <Text 
+                                    style={styles.username} 
+                                    onPress={(e) => {
+                                        e.stopPropagation();
+                                        onUserPress(mainActor.userId);
+                                    }}
+                                >
+                                    {mainActor.username}
+                                </Text>
+                                {otherActorsCount > 0 ? (
+                                    <Text> and {otherActorsCount} others liked your post</Text>
+                                ) : (
+                                    <Text> liked your post</Text>
+                                )}
+                            </Text>
+                            {notification.postPreview && (
+                                <Text style={styles.preview} numberOfLines={1}>
+                                    {notification.postPreview}
+                                </Text>
+                            )}
+                            <Text style={styles.timestamp}>
+                                {formatDistanceToNow(notification.timestamp.toDate(), { addSuffix: true })}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                );
 
-        const notificationsRef = collection(firestore, 'users', followedId, 'notifications');
-        console.log("Querying notifications for userId:", userId, "with followedId:", followedId);
-        const q = query(notificationsRef, where("notificationId", "==", userId + followedId));
+            case 'follow':
+                return (
+                    <TouchableOpacity 
+                        style={styles.notificationItem} 
+                        onPress={() => onUserPress(mainActor.userId)}
+                    >
+                        <View style={styles.avatarGroup}>
+                            <Image 
+                                source={{ uri: mainActor.profilePicture }} 
+                                style={styles.mainAvatar} 
+                            />
+                            {otherActorsCount > 0 && (
+                                <View style={styles.countBadge}>
+                                    <Text style={styles.countText}>+{otherActorsCount}</Text>
+                                </View>
+                            )}
+                        </View>
+                        <View style={styles.contentContainer}>
+                            <Text style={styles.notificationText}>
+                                <Text style={styles.username}>{mainActor.username}</Text>
+                                {otherActorsCount > 0 ? (
+                                    <Text> and {otherActorsCount} others followed you</Text>
+                                ) : (
+                                    <Text> followed you</Text>
+                                )}
+                            </Text>
+                            <Text style={styles.timestamp}>
+                                {formatDistanceToNow(notification.timestamp.toDate(), { addSuffix: true })}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                );
 
-        const querySnapshot = await getDocs(q);
-        console.log("Query executed, number of documents found:", querySnapshot.size);
-
-        if (!querySnapshot.empty) {
-            for (const doc of querySnapshot.docs) {
-                console.log("Removing follow notification with ID:", userId + followedId);
-                await deleteDoc(doc.ref);
-                console.log("Follow notification removed successfully");
-            }
-        } else {
-            console.log("No follow notification found with ID:", userId + followedId);
+            default:
+                return null;
         }
-    } catch (error) {
-        console.error("Failed to remove follow notification:", error.code, error.message);
-    }
-};
+    };
 
-const sendFollowNotification = async (userId, username, followedId) => {
-    console.log("here")
-    const notification = {
-        message: `${username} followed you!`,
-        timestamp: serverTimestamp(),
-        user: userId,
-        type: "follow",
-        notificationId: userId + followedId
-    }
-    console.log(notification)
-    await addDoc(collection(firestore, 'users', followedId, 'notifications'), notification);
-    console.log("notification sent")
-};
-
-const NotificationItem = ({ item, navigation, isFollowing, handleFollowPress }) => {
-    const handleNamePress = async () => {
-        if (item.user) {
-          try {
-            const userRef = doc(firestore, 'users', item.user);
-            const userDoc = await getDoc(userRef);
-            if (userDoc.exists()) {
-              const userData = userDoc.data();
-              navigation.navigate('UserScreen', { user: userData });
-            } else {
-              console.log('User data is not available.');
-            }
-          } catch (error) {
-            console.error('Error fetching user data:', error);
-          }
-        }
-      };
-
-
-  if (item.type === 'like') {
     return (
-      <TouchableOpacity
-        style={styles.notificationItem}
-        onPress={() => navigation.navigate('SinglePostScreen', { postId: item.postId })}
-      >
-        <Image source={{ uri: item.profilePicture }} style={styles.profilePicture} />
-        <View style={styles.notificationText}>
-          <Text style={[styles.title, { fontFamily: 'Montserrat-Medium' }]}>{item.message}</Text>
-          <Text style={[styles.timestamp, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(item.timestamp)}</Text>
+        <View style={[
+            styles.notificationContainer,
+            !notification.read && styles.unreadContainer
+        ]}>
+            {renderContent()}
         </View>
-      </TouchableOpacity>
     );
-  } else if (item.type === 'follow') {
-    return (
-      <View style={styles.notificationItem}>
-        <TouchableOpacity onPress={handleNamePress} style={{ flexDirection: 'row', flex: 1 }}>
-          <Image source={{ uri: item.profilePicture }} style={styles.profilePicture} />
-          <View style={styles.notificationText}>
-            <Text style={[styles.title, { fontFamily: 'Montserrat-Medium' }]}>{item.message}</Text>
-            <Text style={[styles.timestamp, { fontFamily: 'Montserrat-Medium' }]}>{formatDate(item.timestamp)}</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity  style={[styles.followButton, isFollowing && styles.followingButton]} onPress={handleFollowPress}>
-          <Text style={[styles.followButtonText, { fontFamily: 'Montserrat-Medium' }]}>{isFollowing ? 'Unfollow' : 'Follow'}</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-};
-
-const updateLastTimeNotificationsChecked = async (userId) => {
-  try {
-      const userRef = doc(firestore, 'users', userId);
-      const currTime =  serverTimestamp()
-      await updateDoc(userRef, {
-          lastTimeNotificationsChecked: currTime
-      });
-  } catch (error) {
-      console.error("Error updating lastTimeNotificationsChecked for user:", userId, error);
-  }
 };
 
 const NotificationsScreen = () => {
-  const { userData } = useAuth();
-  const [notifications, setNotifications] = useState([]);
-  const [followingState, setFollowingState] = useState({});
-  const navigation = useNavigation();
+    const navigation = useNavigation();
+    const { 
+        notifications, 
+        loading, 
+        refreshing, 
+        error, 
+        hasMore,
+        unreadCount,
+        refresh, 
+        loadMore, 
+        markAsRead 
+    } = useNotifications();
 
-  updateLastTimeNotificationsChecked(userData.uid);
+    const handleNotificationPress = useCallback(async (notification) => {
+        try {
+            if (!notification.read) {
+                await markAsRead([notification.id]);
+            }
 
-  useEffect(() => {
-    if (!userData) return;
-
-    const fetchNotifications = async () => {
-      const notificationsRef = collection(firestore, 'users', userData.uid, 'notifications');
-      const q = query(notificationsRef, orderBy('timestamp', 'desc'));
-
-      const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-        const notificationsList = await Promise.all(
-          querySnapshot.docs.map(async (docSnapshot) => {
-            const data = docSnapshot.data();
-            const userRef = doc(firestore, 'users', data.user);
-            const userDoc = await getDoc(userRef);
-            const userProfile = userDoc.exists() ? userDoc.data() : {};
-
-            return {
-              id: docSnapshot.id,
-              ...data,
-              profilePicture: userProfile.profilePicture || 'default_profile_picture_url', // Replace with default if needed
-            };
-          })
-        );
-        setNotifications(notificationsList);
-      });
-
-      return () => unsubscribe();
-    };
-
-    fetchNotifications();
-  }, [userData]);
-
-  useEffect(() => {
-    const checkFollowingStatus = async () => {
-      const followingStatus = {};
-      for (const notification of notifications) {
-        if (notification.type === 'follow') {
-          const followingRef = doc(firestore, 'users', userData.uid, 'following', notification.user);
-          const followingSnapshot = await getDoc(followingRef);
-          followingStatus[notification.user] = followingSnapshot.exists();
+            switch (notification.type) {
+                case 'like':
+                    navigation.navigate('SinglePostScreen', { 
+                        postId: notification.postId 
+                    });
+                    break;
+                case 'follow':
+                    navigation.navigate('UserScreen', { 
+                        userId: notification.actors[0].userId 
+                    });
+                    break;
+            }
+        } catch (error) {
+            console.error('Error handling notification press:', error);
         }
-      }
-      setFollowingState(followingStatus);
-    };
-    if (notifications.length > 0) {
-      checkFollowingStatus();
-    }
-  }, [notifications]);
+    }, [markAsRead, navigation]);
 
-  const handleFollowPress = async (userId) => {
-    const currentStatus = followingState[userId];
-    if (currentStatus) {
-      await unfollowUser(userData.uid, userId);
-      removeFollowNotification(userData.uid, userId)
-    } else {
-      await followUser(userData.uid, userId);
-      sendFollowNotification(userData.uid, userData.username, userId)
-    }
-    setFollowingState((prev) => ({ ...prev, [userId]: !currentStatus }));
-  };
+    const handleUserPress = useCallback((userId) => {
+        navigation.navigate('UserScreen', { userId });
+    }, [navigation]);
 
-  const renderItem = ({ item }) => {
-    return (
-      <NotificationItem
-        item={item}
-        navigation={navigation}
-        isFollowing={followingState[item.user] || false}
-        handleFollowPress={() => handleFollowPress(item.user)}
-      />
+    const handleMarkAllAsRead = useCallback(async () => {
+        try {
+            const unreadNotifications = notifications.filter(n => !n.read);
+            if (unreadNotifications.length > 0) {
+                const unreadIds = unreadNotifications.map(n => n.id);
+                await markAsRead(unreadIds);
+            }
+        } catch (error) {
+            console.error('Error marking all as read:', error);
+        }
+    }, [notifications, markAsRead]);
+
+    const renderItem = ({ item }) => (
+        <NotificationItem
+            notification={item}
+            onPress={() => handleNotificationPress(item)}
+            onUserPress={handleUserPress}
+        />
     );
-  };
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={30} color="#000" />
-        </TouchableOpacity>
-        <Text style={[styles.headerText, { fontFamily: 'Montserrat-Medium' }]}>Notifications</Text>
-      </View>
+    const renderFooter = () => {
+        if (!hasMore) return null;
+        return loading ? (
+            <View style={styles.loader}>
+                <ActivityIndicator size="small" color="#3FC032" />
+            </View>
+        ) : null;
+    };
 
-      <FlatList
-        data={notifications}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-      />
-    </View>
-  );
+    const renderEmpty = () => (
+        <View style={styles.emptyContainer}>
+            <Icon name="notifications-none" size={48} color="#666" />
+            <Text style={styles.emptyText}>No notifications yet</Text>
+        </View>
+    );
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity 
+                    onPress={() => navigation.goBack()} 
+                    style={styles.backButton}
+                >
+                    <Icon name="arrow-back" size={30} color="#000" />
+                </TouchableOpacity>
+                <Text style={styles.headerText}>
+                    Notifications
+                    {unreadCount > 0 && ` (${unreadCount})`}
+                </Text>
+            </View>
+
+            <FlatList
+                data={notifications}
+                renderItem={renderItem}
+                keyExtractor={item => item.id}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={refresh}
+                        tintColor="#3FC032"
+                        colors={['#3FC032']}
+                    />
+                }
+                onEndReached={loadMore}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={renderFooter}
+                ListEmptyComponent={renderEmpty}
+                contentContainerStyle={notifications.length === 0 && styles.emptyList}
+            />
+
+            {unreadCount > 0 && (
+                <TouchableOpacity 
+                    style={styles.markAllButton}
+                    onPress={handleMarkAllAsRead}
+                >
+                    <Text style={styles.markAllText}>
+                        Mark all as read
+                    </Text>
+                </TouchableOpacity>
+            )}
+
+            {error && (
+                <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>{error}</Text>
+                </View>
+            )}
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 60,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  backButton: {
-    marginRight: 16,
-  },
-  headerText: {
-    flex: 1,
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'right',
-  },
-  notificationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  profilePicture: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 16,
-  },
-  followButton: {
-    backgroundColor: '#3FC032',
-    borderRadius: 10,
-    paddingVertical: 5,
-    paddingHorizontal: 20,
-    width: '50%',
-    marginTop: 10,
-    alignSelf: 'center'
-},
-followingButton: {
-    backgroundColor: '#1C5AA3',
-},
-  notificationText: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  timestamp: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 4,
-  },
-  followButton: {
-    backgroundColor: '#3FC032',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-  },
-  followButtonText: {
-    color: '#fff',
-    fontSize: 14,
-  }
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingTop: 60,
+        paddingHorizontal: 16,
+        paddingBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+    },
+    backButton: {
+        marginRight: 16,
+    },
+    headerText: {
+        flex: 1,
+        fontSize: 24,
+        fontFamily: 'Montserrat-Medium',
+        textAlign: 'right',
+    },
+    notificationContainer: {
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+    },
+    unreadContainer: {
+        backgroundColor: '#f0f9ff',
+    },
+    notificationItem: {
+        flexDirection: 'row',
+        padding: 16,
+    },
+    avatarGroup: {
+        width: 40,
+        height: 40,
+        marginRight: 16,
+    },
+    mainAvatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+    },
+    countBadge: {
+        position: 'absolute',
+        bottom: -5,
+        right: -5,
+        backgroundColor: '#3FC032',
+        borderRadius: 10,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+    },
+    countText: {
+        color: '#fff',
+        fontSize: 12,
+        fontFamily: 'Montserrat-Medium',
+    },
+    contentContainer: {
+        flex: 1,
+    },
+    notificationText: {
+        fontSize: 14,
+        fontFamily: 'Montserrat-Regular',
+        color: '#000',
+    },
+    username: {
+        fontFamily: 'Montserrat-Medium',
+        color: '#1C5AA3',
+    },
+    preview: {
+        fontSize: 14,
+        fontFamily: 'Montserrat-Regular',
+        color: '#666',
+        marginTop: 4,
+    },
+    timestamp: {
+        fontSize: 12,
+        fontFamily: 'Montserrat-Regular',
+        color: '#999',
+        marginTop: 4,
+    },
+    emptyContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 40,
+    },
+    emptyText: {
+        marginTop: 16,
+        fontSize: 16,
+        fontFamily: 'Montserrat-Medium',
+        color: '#666',
+    },
+    emptyList: {
+        flexGrow: 1,
+    },
+    loader: {
+        paddingVertical: 20,
+        alignItems: 'center',
+    },
+    errorContainer: {
+        backgroundColor: '#fee',
+        padding: 16,
+        margin: 16,
+        borderRadius: 8,
+    },
+    errorText: {
+        color: '#c00',
+        fontFamily: 'Montserrat-Regular',
+        textAlign: 'center',
+    },
+    markAllButton: {
+      padding: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: '#ddd',
+      backgroundColor: '#f8f8f8',
+    },
+    markAllText: {
+        textAlign: 'center',
+        color: '#1C5AA3',
+        fontFamily: 'Montserrat-Medium',
+        fontSize: 14,
+    },
 });
 
 export default NotificationsScreen;

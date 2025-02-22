@@ -6,7 +6,12 @@ import {
 } from 'firebase/auth';
 import { auth, firestore } from './firebaseConfig';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { fcmService } from './notifications/fcmService';
+import { displayService } from './notifications/displayService';
+import { notificationState } from './notifications/notificationState';
+// import createLogger from '../../utils/logger';
 
+// const logger = createLogger('AuthContext');
 const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
@@ -17,14 +22,15 @@ export const AuthProvider = ({ children }) => {
 
     const fetchUserDataWithSubcollections = async (userId) => {
         try {
+            console.log("Starting to fetch user data for:", userId);
             const userDoc = await getDoc(doc(firestore, 'users', userId));
-            
             if (!userDoc.exists()) {
                 console.log("No user document found");
                 return null;
             }
 
             const userDataFromFirestore = userDoc.data();
+            console.log(`userdatafromfirestore ${JSON.stringify(userDataFromFirestore)}`)
 
             // Fetch 'following' subcollection
             const followingSnapshot = await getDocs(collection(firestore, 'users', userId, 'following'));
@@ -52,17 +58,29 @@ export const AuthProvider = ({ children }) => {
             console.log("Auth state changed. Current user: ", currentUser);
             if (currentUser) {
                 try {
+                    console.log("Current UID:", currentUser.uid);
                     const fullUserData = await fetchUserDataWithSubcollections(currentUser.uid);
+
+                    console.log("Fetched full user data:", fullUserData);
+                    setUser(currentUser);
                     setUserData(fullUserData);
+                    
+                    await Promise.all([
+                        fcmService.init(currentUser.uid),
+                        displayService.initialize(),
+                        notificationState.initialize(currentUser.uid)
+                    ]);
+
                     console.log("Fetched user data with subcollections: ", fullUserData);
                 } catch (error) {
                     console.error("Failed to fetch user data: ", error);
                     setUserData(null);
+                    fcmService.cleanup();
+                    notificationState.cleanup();
                 }
             } else {
                 setUserData(null);
             }
-            setUser(currentUser);
             if (!currentUser) {
                 setIsSigningUp(false);
             }
@@ -71,10 +89,16 @@ export const AuthProvider = ({ children }) => {
         return unsubscribe;
     }, []);
 
+    useEffect(() => {
+        console.log("userData updated:", userData);
+    }, [userData]);
+
     const signIn = async (email, password) => {
         setLoading(true);
         try {
-            await signInWithEmailAndPassword(auth, email, password);             
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            // Initialize FCM after successful sign in
+            // await fcmService.init(userCredential.user.uid);
         } catch (error) {
             console.error("Sign in failed", error); 
             throw error;
@@ -86,6 +110,12 @@ export const AuthProvider = ({ children }) => {
     const signOut = async () => {
         try {
             setLoading(true);
+
+            await Promise.all([
+                fcmService.cleanup(),
+                notificationState.cleanup()
+            ]);
+
             await firebaseSignOut(auth);
             setUser(null);
             setUserData(null);

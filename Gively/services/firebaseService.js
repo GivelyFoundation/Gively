@@ -97,28 +97,53 @@ export const firebaseService = {
     },
 
     // Like a post
-    likePost: async (postId, userId, username, postOwnerId) => {
-        const postRef = doc(firestore, 'posts', postId);
-        await updateDoc(postRef, {
-            likers: arrayUnion(userId)
-        });
-        const notification = {
-            message: `${username} liked your post!`,
-            timestamp: serverTimestamp(),
-            postId: postId,
-            user: userId,
-            type: "like",
-            notificationId: postId + userId
-        };
-        await addDoc(collection(firestore, 'users', postOwnerId, 'notifications'), notification);
+    // likePost: async (postId, userId, username, postOwnerId) => {
+    //     const postRef = doc(firestore, 'posts', postId);
+    //     await updateDoc(postRef, {
+    //         likers: arrayUnion(userId)
+    //     });
+    //     const notification = {
+    //         message: `${username} liked your post!`,
+    //         timestamp: serverTimestamp(),
+    //         postId: postId,
+    //         user: userId,
+    //         type: "like",
+    //         notificationId: postId + userId
+    //     };
+    //     await addDoc(collection(firestore, 'users', postOwnerId, 'notifications'), notification);
+    // },
+    likePost: async (postId, userId) => {
+        try {
+            const postRef = doc(firestore, 'posts', postId);
+            await updateDoc(postRef, {
+                likers: arrayUnion(userId)
+            });
+            console.log('Post liked successfully', { postId, userId });
+        } catch (error) {
+            console.error('Error liking post:', error);
+            throw error;
+        }
     },
 
+
     // Unlike a post
+    // unlikePost: async (postId, userId) => {
+    //     const postRef = doc(firestore, 'posts', postId);
+    //     await updateDoc(postRef, {
+    //         likers: arrayRemove(userId)
+    //     });
+    // },
     unlikePost: async (postId, userId) => {
-        const postRef = doc(firestore, 'posts', postId);
-        await updateDoc(postRef, {
-            likers: arrayRemove(userId)
-        });
+        try {
+            const postRef = doc(firestore, 'posts', postId);
+            await updateDoc(postRef, {
+                likers: arrayRemove(userId)
+            });
+            console.log('Post unliked successfully', { postId, userId });
+        } catch (error) {
+            console.error('Error unliking post:', error);
+            throw error;
+        }
     },
 
     // Check if a user has liked a post
@@ -137,16 +162,16 @@ export const firebaseService = {
     },
 
     // Remove a notification
-    removeNotification: async (postOwnerId, notificationId) => {
-        const notificationsRef = collection(firestore, 'users', postOwnerId, 'notifications');
-        const q = query(notificationsRef, where("notificationId", "==", notificationId));
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-            querySnapshot.forEach(async (doc) => {
-                await doc.ref.delete();
-            });
-        }
-    },
+    // removeNotification: async (postOwnerId, notificationId) => {
+    //     const notificationsRef = collection(firestore, 'users', postOwnerId, 'notifications');
+    //     const q = query(notificationsRef, where("notificationId", "==", notificationId));
+    //     const querySnapshot = await getDocs(q);
+    //     if (!querySnapshot.empty) {
+    //         querySnapshot.forEach(async (doc) => {
+    //             await doc.ref.delete();
+    //         });
+    //     }
+    // },
 
     createPost: async (postData) => {
         try {
