@@ -42,6 +42,7 @@ import FollowingList from './Screens/FollowingList';
 import CustomHeader from './Components/CustomHeader';
 import VolunteerScreen from './Screens/VolunteerScreen';
 import NotificationsScreen from './Screens/NotificationsScreen';
+import EditProfilePictureScreen from './Screens/EditProfilePictureScreen';
 
 // custom imports
 import { AuthProvider, useAuth } from './services/AuthContext';
@@ -220,6 +221,7 @@ function RootNavigator() {
           <Stack.Screen name="Petition" component={PetitionScreen} />
           <Stack.Screen name="GoFundMe" component={GoFundMeScreen} />
           <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          <Stack.Screen name="EditProfilePicture" component={EditProfilePictureScreen} />
           <Stack.Screen name="UserScreen" component={UserScreen} /> 
           <Stack.Screen name="CharityDetailedScreen" component={CharityDetailedScreen} /> 
           <Stack.Screen 

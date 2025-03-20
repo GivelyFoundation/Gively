@@ -155,6 +155,7 @@ export const AuthProvider = ({ children }) => {
             loading, 
             isSigningUp, 
             userData, 
+            setUserData,
             startSignUp, 
             endSignUp, 
             updateUserData, 

@@ -6,7 +6,8 @@ import { firestore } from '../services/firebaseConfig';
 import { doc, updateDoc } from 'firebase/firestore';
 
 export default EditProfileScreen = ({ navigation }) => {
-    const { user2, userData } = useAuth();
+    const { user2, userData, setUserData } = useAuth();
+
 
     const [displayName, setDisplayName] = useState(userData.displayName);
     const [bio, setBio] = useState(userData.bio);
@@ -31,6 +32,12 @@ export default EditProfileScreen = ({ navigation }) => {
                 profilePicture: profilePicture,
             });
             console.log('User profile updated successfully!');
+            setUserData(prevUserData => ({
+                ...prevUserData, 
+                displayName: displayName,
+                bio: bio,
+                profilePicture: profilePicture
+               }))
             navigation.navigate('Profile');
         } catch (error) {
             console.error('Error updating user profile: ', error);
@@ -46,10 +53,10 @@ export default EditProfileScreen = ({ navigation }) => {
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.profilePicContainer}>
                     <Image
-                        source={{ uri: profilePicture }}
+                        source={{ uri: userData.profilePicture }}
                         style={styles.profilePic}
                     />
-                    <TouchableOpacity style={styles.iconContainer}>
+                    <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('EditProfilePicture')}>
                         <Icon name="edit" size={24} color="#FFF" />
                     </TouchableOpacity>
                 </View>
