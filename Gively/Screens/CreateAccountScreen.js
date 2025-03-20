@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import StepIndicator from 'react-native-step-indicator';
-import SignUpForm from '../Components/SignUpForm';
+import SignUpForm from '../Components/Auth/SignUpForm';
 import ProfileDetailsForm from '../Components/ProfileDetailsForm';
 import PhotoUploadForm from '../Components/PhotoUploadForm';
 import InterestsSelectionForm from '../Components/InterestsSelectionForm';

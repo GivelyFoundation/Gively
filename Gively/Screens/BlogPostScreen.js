@@ -8,7 +8,7 @@ const BlogPostScreen = ({ route }) => {
   const navigation = useNavigation();
   return (
     <View style={styles.page}>
-        <TouchableOpacity onPress={() => navigation.navigate('Home')} style={styles.backButton}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                 <Icon name="arrow-back" size={30} color="#000" />
             </TouchableOpacity>
             <ScrollView style={styles.container}>

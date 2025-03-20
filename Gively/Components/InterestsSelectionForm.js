@@ -58,7 +58,7 @@ const InterestsSelectionForm = ({ userData, handleChange, navigation }) => {
         // Navigate to Home screen
         navigation.dispatch(CommonActions.reset({
           index: 0,
-          routes: [{ name: 'Home' }],
+          routes: [{ name: 'HomeScreen' }],
         }));
       } catch (error) {
         Alert.alert('Error', 'Failed to update interests. Please try again.');

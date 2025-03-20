@@ -23,7 +23,12 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.GivelyFoundation.Gively",
-      "googleServiceFile": "./GoogleService-Info.plist"
+      "googleServiceFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -31,7 +36,12 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.GivelyFoundation.Gively",
-      "googleServiceFile": "./google-services.json"
+      "googleServiceFile": "./google-services.json",
+      "permissions": [
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "WAKE_LOCK"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -49,7 +59,16 @@
             "useFrameworks": "static"
           }
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#ffffff"
+        }
       ]
     ]
   }
 }
+
+

@@ -27,6 +27,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
+          <string>Gively</string>
           <string>com.GivelyFoundation.Gively</string>
         </array>
       </dict>
@@ -41,11 +42,6 @@
     <string>1</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
-    <key>NSContactsUsageDescription</key>
-    <string>Allow us permission to access your contacts so we can't invite your friends.s</string>
-    <key>NSSMSUsageDescription</key>
-    <string>Allow us permission to access SMS so we can't invite your friends.</string>
-
     <key>NSAppTransportSecurity</key>
     <dict>
       <key>NSAllowsArbitraryLoads</key>
@@ -59,6 +55,10 @@
     <string>Allow $(PRODUCT_NAME) to access your microphone</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Allow $(PRODUCT_NAME) to access your photos</string>
+    <key>UIBackgroundModes</key>
+    <array>
+      <string>remote-notification</string>
+    </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>
     <key>UIRequiredDeviceCapabilities</key>

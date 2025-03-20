@@ -74,7 +74,7 @@ const VolunteerCard = memo(({ data = {} }) => {
     const handleLikeToggle = useCallback(async () => {
         try {
             if (!userData?.uid || !data?.id) {
-                console.log("Required data not available");
+                console.log(`Required data not available uid:${userData?.uid} dataid: ${data?.id}`);
                 return;
             }
 

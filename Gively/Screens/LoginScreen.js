@@ -1,22 +1,15 @@
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Pressable, Image, StyleSheet, Alert } from 'react-native';
-import { CommonActions } from '@react-navigation/native';
-import { auth } from '../services/firebaseConfig';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../services/AuthContext';
 import Spinner from '../Components/Spinner';
 import { getReadableErrorMessage } from '../utilities/firebaseAuthErrorHandler';
-
-//import { GOOGLE_CLIENT_ID } from '@env';
-
-
+import { KeyboardAwareAuthScroll } from '../Components/Auth/KeyboardAuthScroll';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
-
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { signIn, user, loading } = useAuth();
 
@@ -27,6 +20,11 @@ export default function LoginScreen({ navigation }) {
   }, [user, loading]);
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
     setIsLoggingIn(true);
     try {
       await signIn(email, password);
@@ -34,16 +32,25 @@ export default function LoginScreen({ navigation }) {
     } catch (error) {
       const errorMessage = getReadableErrorMessage(error);
       Alert.alert("Login Failed", errorMessage);
-      console.error('Login error:', error.code, error.message); // For debugging
+      console.error('Login error:', error.code, error.message);
       setIsLoggingIn(false);
     }
   };
 
+  if (isLoggingIn) {
+    return <Spinner />;
+  }
+
   return (
-    <View style={styles.container}>
-      <Pressable onPress={() => navigation.navigate('Splash')} style={styles.backButton}>
+    <KeyboardAwareAuthScroll>
+      <Pressable 
+        onPress={() => navigation.navigate('Splash')} 
+        style={styles.backButton}
+        hitSlop={10}
+      >
         <Icon name="arrow-back" size={24} color="#000" />
       </Pressable>
+
       <View style={styles.logoContainer}>
         <Image
           source={require('../assets/Images/logo-2.png')}
@@ -56,47 +63,49 @@ export default function LoginScreen({ navigation }) {
       <View style={styles.loginForm}>
         <Text style={styles.title}>Sign in</Text>
 
-        {isLoggingIn ? (
-          <View style={styles.spinnerContainer}>
-            <Spinner />
-          </View>
-        ) : (
-          <>
-            <View style={styles.inputContainer}>
-              <Icon name="email" size={20} color="#A9A9A9" />
-              <TextInput
-                style={styles.input}
-                placeholder="abc@email.com"
-                value={email}
-                onChangeText={setEmail}
-                textContentType="emailAddress"
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <Icon name="lock" size={20} color="#A9A9A9" />
-              <TextInput
-                style={styles.input}
-                placeholder="Your password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!passwordVisible}
-                textContentType="password"
-              />
-              <Pressable onPress={() => setPasswordVisible(!passwordVisible)}>
-                <Icon name={passwordVisible ? "visibility-off" : "visibility"} size={20} color="#A9A9A9" />
-              </Pressable>
-            </View>
-            <View style={styles.row}>
-              <Pressable onPress={() => Alert.alert('Forgot Password?', 'This functionality is not implemented yet.')}>
-                <Text style={styles.forgotPassword}>Forgot Password?</Text>
-              </Pressable>
-            </View>
-            <Pressable style={styles.signInButton} onPress={handleLogin}>
-              <Text style={styles.signInButtonText}>SIGN IN</Text>
-            </Pressable>
-          </>
-        )}
+        <View style={styles.inputContainer}>
+          <Icon name="email" size={20} color="#A9A9A9" />
+          <TextInput
+            style={styles.input}
+            placeholder="abc@email.com"
+            value={email}
+            onChangeText={setEmail}
+            textContentType="emailAddress"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            returnKeyType="next"
+          />
+        </View>
 
+        <View style={styles.inputContainer}>
+          <Icon name="lock" size={20} color="#A9A9A9" />
+          <TextInput
+            style={styles.input}
+            placeholder="Your password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!passwordVisible}
+            textContentType="password"
+            returnKeyType="done"
+            onSubmitEditing={handleLogin}
+          />
+          <Pressable onPress={() => setPasswordVisible(!passwordVisible)} hitSlop={10}>
+            <Icon name={passwordVisible ? "visibility-off" : "visibility"} size={20} color="#A9A9A9" />
+          </Pressable>
+        </View>
+
+        <View style={styles.forgotPasswordContainer}>
+          <Pressable 
+            onPress={() => Alert.alert('Forgot Password?', 'This functionality is not implemented yet.')}
+            hitSlop={10}
+          >
+            <Text style={styles.forgotPassword}>Forgot Password?</Text>
+          </Pressable>
+        </View>
+
+        <Pressable style={styles.signInButton} onPress={handleLogin}>
+          <Text style={styles.signInButtonText}>SIGN IN</Text>
+        </Pressable>
       </View>
 
       <Text style={styles.orText}>OR</Text>
@@ -112,27 +121,28 @@ export default function LoginScreen({ navigation }) {
         </Pressable>
       </View>
 
-      <Pressable onPress={() => navigation.navigate('CreateAccount')}>
+      <Pressable 
+        onPress={() => navigation.navigate('CreateAccount')}
+        style={styles.signUpContainer}
+      >
         <Text style={styles.signUpText}>
           DON'T HAVE AN ACCOUNT? <Text style={styles.signUpLink}>SIGN UP</Text>
         </Text>
       </Pressable>
-    </View>
+    </KeyboardAwareAuthScroll>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    paddingHorizontal: 30,
-    paddingVertical: 40,
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 10,
   },
   logoContainer: {
     alignItems: 'center',
-    marginTop: 20,
+    marginBottom: 20,
   },
   logo: {
     width: 150,
@@ -141,19 +151,18 @@ const styles = StyleSheet.create({
   },
   appName: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontFamily: 'Montserrat-Bold',
     color: '#000',
   },
   loginForm: {
     width: '100%',
-    alignItems: 'center',
-    paddingTop: 20,
+    marginBottom: 20,
   },
   title: {
     fontSize: 28,
     color: '#000',
     marginBottom: 20,
-    alignSelf: 'start',
+    fontFamily: 'Montserrat-Medium',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -164,22 +173,22 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#E0E0E0',
-    marginBottom: 10,
+    marginBottom: 15,
     backgroundColor: '#F8F8F8',
   },
   input: {
     flex: 1,
     marginLeft: 10,
+    fontSize: 16,
+    fontFamily: 'Montserrat-Regular',
   },
-  row: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+  forgotPasswordContainer: {
+    alignItems: 'flex-end',
     marginBottom: 20,
   },
   forgotPassword: {
     color: '#1C5AA3',
+    fontFamily: 'Montserrat-Medium',
   },
   signInButton: {
     width: '100%',
@@ -187,23 +196,25 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#3FC032',
     alignItems: 'center',
-    marginBottom: 20,
   },
   signInButtonText: {
     color: 'white',
     fontSize: 16,
+    fontFamily: 'Montserrat-Bold',
+  },
+  orText: {
+    color: '#A9A9A9',
+    marginVertical: 15,
+    textAlign: 'center',
+    fontFamily: 'Montserrat-Medium',
   },
   socialLoginContainer: {
     width: '100%',
     alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  orText: {
-    color: '#A9A9A9',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   socialButton: {
-    width: '90%',
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 15,
@@ -220,23 +231,18 @@ const styles = StyleSheet.create({
   },
   socialButtonText: {
     fontSize: 16,
-    marginLeft: 10,
+    fontFamily: 'Montserrat-Medium',
+  },
+  signUpContainer: {
+    paddingVertical: 10,
   },
   signUpText: {
     color: '#A9A9A9',
+    textAlign: 'center',
+    fontFamily: 'Montserrat-Medium',
   },
   signUpLink: {
     color: '#1C5AA3',
-  },
-  backButton: {
-    position: 'absolute',
-    top: '7%',
-    left: 20,
-    zIndex: 10,
-  },
-  spinnerContainer: {
-    height: 200, // Adjust this value to match the height of your form
-    justifyContent: 'center',
-    alignItems: 'center',
+    fontFamily: 'Montserrat-Bold',
   },
 });
